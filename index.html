@@ -743,8 +743,8 @@ select option{background:var(--dark4)}
     <button class="auth-close" onclick="closeOv('loginOv')">✕</button>
     <div class="auth-title">⬡ LOGIN</div>
     <div class="auth-sub">ไม่บังคับ — ผู้ใช้ทั่วไปข้ามได้ · Optional login<br/>Admin login unlocks editing tools</div>
-    <div class="form-group"><div class="form-label">USERNAME</div><input type="text" class="form-input" id="lusr" placeholder="username"/></div>
-    <div class="form-group"><div class="form-label">PASSWORD</div><input type="password" class="form-input" id="lpwd" placeholder="password"/></div>
+    <div class="form-group"><div class="form-label">USERNAME</div><input type="text" class="form-input" id="lusr" placeholder="username" onkeydown="if(event.key==='Enter')document.getElementById('lpwd').focus()"/></div>
+    <div class="form-group"><div class="form-label">PASSWORD</div><input type="password" class="form-input" id="lpwd" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
     <button class="btn-auth" onclick="doLogin()">เข้าสู่ระบบ · LOGIN</button>
     <button class="auth-skip" onclick="closeOv('loginOv')">ไม่ต้องเข้าสู่ระบบ · Continue without login</button>
   </div>
@@ -1083,6 +1083,7 @@ function addCurrent(){ if(curItem) quickCart(curItem.id, curItemMd); }
 // CART
 // ============================================================
 function quickCart(id, mode) {
+  id = Number(id); // ensure numeric comparison
   if (mode==='buy')  { if(!cartBuy.includes(id)){cartBuy.push(id); showToast('เพิ่มในตะกร้าซื้อแล้ว ✦','t-buy');}else showToast('อยู่ในตะกร้าแล้ว','t-gold'); }
   else               { if(!cartSell.includes(id)){cartSell.push(id); showToast('เพิ่มในรายการขายแล้ว ✦','t-sell');}else showToast('อยู่ในรายการแล้ว','t-gold'); }
   updateBadges(); renderCartItems();
@@ -1108,6 +1109,7 @@ function updateBadges() {
   const ts = document.getElementById('tbSell'); ts.textContent=cartSell.length; ts.classList.toggle('show',cartSell.length>0);
 }
 function renderCartItems() {
+  // Merge current items + sold for cart lookup
   const all = [...ITEMS,...SOLD];
   const render = (ids, elId) => {
     const el = document.getElementById(elId);
@@ -1121,7 +1123,15 @@ function renderCartItems() {
   render(cartBuy,'cpBuyItems'); render(cartSell,'cpSellItems');
 }
 function rmCart(id,mode){ if(mode==='buy')cartBuy=cartBuy.filter(i=>i!==id); else cartSell=cartSell.filter(i=>i!==id); renderCartItems(); updateBadges(); }
-function openCart(){ document.getElementById('cartOverlay').classList.add('open'); document.getElementById('cartPanel').classList.add('open'); document.body.style.overflow='hidden'; renderCartItems(); }
+function openCart(){
+  document.getElementById('cartOverlay').classList.add('open');
+  document.getElementById('cartPanel').classList.add('open');
+  document.body.style.overflow='hidden';
+  renderCartItems();
+  // Clear red dot on main cart icon when opened
+  const cb = document.getElementById('cartBadge');
+  if(cb){ cb.classList.remove('show'); }
+}
 function closeCart(){ document.getElementById('cartOverlay').classList.remove('open'); document.getElementById('cartPanel').classList.remove('open'); document.body.style.overflow=''; }
 function switchCart(tab){
   cartTab=tab;
@@ -1129,6 +1139,9 @@ function switchCart(tab){
   document.getElementById('cpSell').classList.toggle('active',tab==='sell');
   document.getElementById('ctBuy').className='cart-tab ct-buy'+(tab==='buy'?' active':'');
   document.getElementById('ctSell').className='cart-tab ct-sell'+(tab==='sell'?' active':'');
+  // Hide tab badge when you open that tab
+  const badge = document.getElementById(tab==='buy'?'tbBuy':'tbSell');
+  if(badge) badge.classList.remove('show');
 }
 
 // ============================================================
@@ -1349,43 +1362,50 @@ function importCSV(text){
 }
 function removePhoto(i){ editPhotos.splice(i,1); renderImgSlots(); }
 
-function saveItem(){
-  const th=document.getElementById('fi_th').value.trim();
-  const pv=document.getElementById('fi_price').value.trim();
+async function saveItem(){
+  const th  = document.getElementById('fi_th').value.trim();
+  const pv  = document.getElementById('fi_price').value.trim();
   if(!th||!pv){ showToast('กรุณากรอกชื่อพระและราคา','t-sell'); return; }
-  const priceNum=parseFloat(pv.replace(/[^0-9.]/g,''))||0;
-  const newIt={
-    nameTh:th, nameEn:document.getElementById('fi_en').value.trim(),
-    price:'฿ '+Number(priceNum).toLocaleString(), priceVal:priceNum,
-    cat:document.getElementById('fi_cat').value,
-    age:document.getElementById('fi_age').value,
-    ageVal:parseInt(document.getElementById('fi_age').value)||2500,
-    origin:document.getElementById('fi_origin').value,
-    material:document.getElementById('fi_mat').value,
-    size:document.getElementById('fi_size').value,
-    condition:document.getElementById('fi_cond').value,
-    desc:document.getElementById('fi_desc').value,
-    badge:document.getElementById('fi_badge').value,
-    photos:[...editPhotos],
-    imgs:[0,1,2],
+  const priceNum = parseFloat(pv.replace(/[^0-9.]/g,''))||0;
+  const badge = document.getElementById('fi_badge').value;
+  const newIt = {
+    id: parseInt(document.getElementById('aiEditId').value)||nextId++,
+    nameTh: th,
+    nameEn: document.getElementById('fi_en').value.trim(),
+    price: '฿ ' + Number(priceNum).toLocaleString(),
+    priceVal: priceNum,
+    cat: document.getElementById('fi_cat').value,
+    age: document.getElementById('fi_age').value,
+    ageVal: parseInt(document.getElementById('fi_age').value)||2500,
+    origin: document.getElementById('fi_origin').value,
+    material: document.getElementById('fi_mat').value,
+    size: document.getElementById('fi_size').value,
+    condition: document.getElementById('fi_cond').value,
+    desc: document.getElementById('fi_desc').value,
+    badge: badge,
+    photos: [...editPhotos],
+    imgs: [0,1,2],
   };
-  const editId=parseInt(document.getElementById('aiEditId').value)||0;
+
+  const editId = parseInt(document.getElementById('aiEditId').value)||0;
   if(editId){
-    newIt.id=editId;
-    let idx=ITEMS.findIndex(i=>i.id===editId);
-    if(idx>=0) ITEMS[idx]=newIt;
-    else { idx=SOLD.findIndex(i=>i.id===editId); if(idx>=0) SOLD[idx]=newIt; }
-    showToast('แก้ไขรายการแล้ว ✦','t-gold');
+    // Update existing
+    let idx2 = ITEMS.findIndex(i=>i.id===editId);
+    if(idx2>=0) ITEMS[idx2] = newIt;
+    else { idx2 = SOLD.findIndex(i=>i.id===editId); if(idx2>=0) SOLD[idx2] = newIt; }
   } else {
-    newIt.id=nextId++;
-    if(newIt.badge==='SOLD') SOLD.unshift(newIt); else ITEMS.unshift(newIt);
-    showToast('เพิ่มรายการใหม่แล้ว ✦','t-gold');
+    // Add new
+    newIt.id = nextId++;
+    if(badge==='SOLD') SOLD.unshift(newIt); else ITEMS.unshift(newIt);
   }
+
   closeOv('aiOv');
-  showToast('กำลังบันทึก...', 't-gold');
-  saveItemsToDB().then(ok => {
-    if(ok) { renderAll(); showToast('บันทึกแล้ว ✦', 't-gold'); }
-  });
+  showToast('กำลังบันทึก...','t-gold');
+  const ok = await saveItemsToDB();
+  if(ok){
+    renderAll();
+    showToast(editId ? 'แก้ไขแล้ว ✦' : 'เพิ่มรายการแล้ว ✦','t-gold');
+  }
 }
 
 function deleteItem(id,mode){
@@ -1470,24 +1490,22 @@ async function loadItemsFromDB() {
   showLoading(true);
   try {
     const res = await fetch(JB_URL + '/latest', {
-      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
+      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' },
     });
     if (res.ok) {
       const data = await res.json();
       ITEMS = (data.items || []).map(normalizeItem);
       SOLD  = (data.sold  || []).map(normalizeItem);
-      // cache locally
-      try {
-        localStorage.setItem('bantae_cache', JSON.stringify({items: ITEMS, sold: SOLD}));
-      } catch(e) {}
+      try { localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD})); } catch(e){}
+      console.log('Loaded from JSONBin:', ITEMS.length, 'items,', SOLD.length, 'sold');
     } else {
-      throw new Error('fetch failed ' + res.status);
+      throw new Error('HTTP ' + res.status);
     }
   } catch(e) {
-    console.warn('JSONBin load failed, using cache:', e.message);
+    console.warn('JSONBin load failed:', e.message, '— trying cache');
     try {
       const c = JSON.parse(localStorage.getItem('bantae_cache') || 'null');
-      if (c) { ITEMS = c.items || []; SOLD = c.sold || []; }
+      if (c) { ITEMS = (c.items||[]).map(normalizeItem); SOLD = (c.sold||[]).map(normalizeItem); }
     } catch(e2) {}
   }
   renderAll();
@@ -1497,20 +1515,27 @@ async function loadItemsFromDB() {
 // ── JSONBin: save items to cloud ─────────────────────────────────
 async function saveItemsToDB() {
   try {
+    const payload = JSON.stringify({ items: ITEMS, sold: SOLD });
     const res = await fetch(JB_URL, {
       method: 'PUT',
-      headers: { 'X-Master-Key': JB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: ITEMS, sold: SOLD })
+      headers: {
+        'X-Master-Key': JB_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: payload,
     });
-    if (!res.ok) throw new Error('save failed ' + res.status);
-    // update local cache
-    try {
-      localStorage.setItem('bantae_cache', JSON.stringify({items: ITEMS, sold: SOLD}));
-    } catch(e) {}
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error('JSONBin save error:', res.status, txt);
+      showToast('บันทึกไม่สำเร็จ: ' + res.status, 't-sell');
+      return false;
+    }
+    // Update local cache for offline fallback
+    try { localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD})); } catch(e){}
     return true;
   } catch(e) {
-    console.error('JSONBin save failed:', e.message);
-    showToast('บันทึกไม่สำเร็จ กรุณาลองใหม่', 't-sell');
+    console.error('JSONBin save exception:', e);
+    showToast('บันทึกไม่สำเร็จ: ' + e.message, 't-sell');
     return false;
   }
 }
