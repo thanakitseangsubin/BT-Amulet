@@ -1603,7 +1603,7 @@ function scrollToId(id){ const el=document.getElementById(id); if(el)el.scrollIn
 // ============================================================
 // ── JSONBin: load items from cloud ──────────────────────────────
 async function loadItemsFromDB() {
-  showLoading(true);
+  // Load silently in background — page already shows default items
   try {
     const res = await fetch(JB_URL + '/latest', {
       headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' },
@@ -1624,8 +1624,7 @@ async function loadItemsFromDB() {
       if (c) { ITEMS = (c.items||[]).map(normalizeItem); SOLD = (c.sold||[]).map(normalizeItem); }
     } catch(e2) {}
   }
-  renderAll();
-  showLoading(false);
+  renderAll();  // update with real data
 }
 
 // ── JSONBin: save items to cloud ─────────────────────────────────
@@ -1675,13 +1674,13 @@ function showLoading(show) {
 }
 
 function renderAll() {
+  // Always update the always-visible default grid
+  const defaultSec = document.getElementById('default-collection');
+  if (defaultSec) defaultSec.style.display = 'block'; // ensure visible if no mode chosen
   renderGrid('defaultGrid', ITEMS, 'buy');
-  if (curMode === 'buy')  renderBuyGrid();
+  if (curMode === 'buy')  { renderBuyGrid(); }
   if (curMode === 'sell') { /* sell panel has no grid now */ }
-  if (curMode === 'sold') renderGrid('soldPanelGrid', SOLD, 'sell');
-  // Always keep soldPanelGrid fresh if it's rendered
-  const spg = document.getElementById('soldPanelGrid');
-  if (spg && spg.innerHTML !== '') renderGrid('soldPanelGrid', SOLD, 'sell');
+  if (curMode === 'sold') { renderGrid('soldPanelGrid', SOLD, 'sell'); }
 }
 
 // Keep localStorage functions as aliases (cart still uses these)
@@ -1840,9 +1839,10 @@ function applyCrop(){
   showToast('ตัดรูปแล้ว ✦','t-gold');
 }
 
-// INIT — load from JSONBin cloud database
-loadItemsFromDB();
-updateBadges();
+// INIT — show items immediately, then update from JSONBin
+renderGrid('defaultGrid', ITEMS, 'buy');  // instant render with defaults
+updateBadges();                            // restore cart badge
+loadItemsFromDB();                         // then fetch real data from cloud
 </script>
 
 <!-- Page drop hint overlay -->
