@@ -106,6 +106,14 @@ section,div.sec{padding:2.75rem 1.5rem}
 .sec-title-en{font-family:'Cinzel',serif;font-size:clamp(0.68rem,1.5vw,0.88rem);letter-spacing:0.11em;color:var(--text-muted);margin-bottom:0.35rem}
 .sec-sub{font-size:0.85rem;color:var(--text-dim);font-style:italic;max-width:420px;margin:0 auto}
 .sec-line{width:40px;height:1px;background:var(--gold);margin:0.75rem auto 0}
+/* Skeleton loading cards */
+.skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
+.skeleton-card{background:var(--dark3);border:1px solid var(--border);overflow:hidden}
+.skeleton-img{aspect-ratio:1;background:linear-gradient(90deg,var(--dark4) 25%,var(--dark3) 50%,var(--dark4) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+.skeleton-line{height:0.75rem;border-radius:2px;margin:0.5rem 0.95rem;background:linear-gradient(90deg,var(--dark4) 25%,var(--dark3) 50%,var(--dark4) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+.skeleton-line.short{width:55%;height:0.6rem}
+.skeleton-line.price{width:40%;margin-top:0.65rem}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* === CATEGORIES === */
 .cats-bar{background:var(--dark2);padding:0}
@@ -927,19 +935,9 @@ const ph = i => PH[i % PH.length];
 // priceVal: numeric value for sorting (just the number)
 // ageVal: year BE for sorting (smaller = older)
 // ============================================================
-let ITEMS = [
-  {id:1,cat:'พระบูชา',badge:'FEATURED',nameTh:'พระสมเด็จ วัดระฆัง',nameEn:'Phra Somdej Wat Rakhang',age:'ยุค ร.4 — ประมาณ 160 ปี',origin:'วัดระฆังโฆสิตาราม กรุงเทพฯ',material:'ผงศักดิ์สิทธิ์ + รักน้ำเกลี้ยง',size:'3.2 × 2.0 ซม.',condition:'สภาพดีมาก',price:'฿ 45,000',priceVal:45000,ageVal:2411,imgs:[0,1,2],photos:[],desc:'หนึ่งในพระยอดนิยมที่ทรงพลังที่สุดของไทย สร้างโดยสมเด็จพระพุฒาจารย์โต วัดระฆัง มีรายละเอียดซุ้มห้าชั้นชัดเจน\n\nOne of Thailand\'s most revered amulets, blessed by Somdej Phra Phutthachan Toh.'},
-  {id:2,cat:'เหรียญ',badge:'RARE',nameTh:'เหรียญหลวงพ่อทวด วัดช้างให้',nameEn:'Luang Phor Tuad Coin',age:'พ.ศ. 2497 — ประมาณ 72 ปี',origin:'วัดช้างให้ จ.ปัตตานี',material:'โลหะอัลปากา',size:'3.0 ซม.',condition:'ดี — คราบอายุธรรมชาติ',price:'฿ 28,500',priceVal:28500,ageVal:2497,imgs:[1,3,4],photos:[],desc:'เหรียญหลวงพ่อทวดจากวัดช้างให้ รุ่น พ.ศ. 2497 เป็นที่แสวงหาของนักสะสม\n\nHighly sought for protective properties with beautiful natural alpaca patina.'},
-  {id:3,cat:'พระกรุ',badge:'NEW',nameTh:'พระนางพญา กำแพงเพชร',nameEn:'Phra Nang Phaya Kamphaeng Phet',age:'ยุคสุโขทัย — ~600 ปี',origin:'จ.กำแพงเพชร',material:'ดินศักดิ์สิทธิ์',size:'4.5 × 2.8 ซม.',condition:'ต้นฉบับ',price:'฿ 120,000',priceVal:120000,ageVal:1900,imgs:[2,0,5],photos:[],desc:'พระนางพญาจากกรุกำแพงเพชร อายุกว่า 600 ปี หนึ่งในพระเบญจภาคีของไทย\n\nSukhothai period, one of Thailand\'s Five Great Amulets.'},
-  {id:4,cat:'เครื่องราง',badge:'',nameTh:'เสือฟันเขี้ยวยันต์',nameEn:'Tiger Tooth Yantra Charm',age:'พ.ศ. 2530s — ~40 ปี',origin:'สายครูบาศรีวิชัย เชียงใหม่',material:'ฟันเสือแท้ + ด้ายศักดิ์สิทธิ์',size:'4 ซม.',condition:'สภาพดีมาก',price:'฿ 18,000',priceVal:18000,ageVal:2530,imgs:[3,1,2],photos:[],desc:'เครื่องรางฟันเสือแท้ถักด้วยด้ายศักดิ์สิทธิ์และทองเปลวยันต์\n\nGenuine tiger tooth wrapped with sacred thread and yantra gold leaf.'},
-  {id:5,cat:'รูปหล่อ',badge:'',nameTh:'รูปหล่อหลวงพ่อเงิน',nameEn:'Luang Phor Ngern Cast Figure',age:'พ.ศ. 2460s — ~100 ปี',origin:'วัดบางคลาน จ.พิจิตร',material:'นวะโลหะ',size:'3.5 ซม.',condition:'สวยงาม',price:'฿ 55,000',priceVal:55000,ageVal:2460,imgs:[4,5,0],photos:[],desc:'รูปหล่อหลวงพ่อเงิน วัดบางคลาน ผิวนวะโลหะแสดงคราบอายุสวยงาม\n\nFine cast figure with beautiful aged nuea samrit surface.'},
-  {id:6,cat:'เหรียญ',badge:'',nameTh:'จตุคามรามเทพ รุ่นแรก',nameEn:'Jatukham Ramathep First Issue',age:'พ.ศ. 2530 — ~39 ปี',origin:'วัดมหาธาตุ นครศรีธรรมราช',material:'ทองแดงศักดิ์สิทธิ์',size:'5.8 ซม.',condition:'สภาพดี',price:'฿ 8,500',priceVal:8500,ageVal:2530,imgs:[5,2,3],photos:[],desc:'จตุคามรามเทพจากวัดมหาธาตุ นครศรีธรรมราช เชื่อว่าเสริมดวงและโชคดี\n\nFamous Jatukham Ramathep believed to attract wealth and protection.'},
-];
-let SOLD = [
-  {id:101,cat:'พระบูชา',badge:'SOLD',nameTh:'พระลีลา สุโขทัย',nameEn:'Phra Leela Sukhothai',age:'ยุคสุโขทัย ~600 ปี',origin:'จ.สุโขทัย',material:'ดินศักดิ์สิทธิ์',size:'5.0 × 3.0 ซม.',condition:'สภาพดี',price:'฿ 85,000',priceVal:85000,ageVal:1900,imgs:[3,0,1],photos:[],desc:'ขายให้นักสะสมกรุงเทพฯ แล้ว\nSold to Bangkok collector.'},
-  {id:102,cat:'เหรียญ',badge:'SOLD',nameTh:'เหรียญหลวงพ่อปาน',nameEn:'LP Parn Coin B.E. 2460',age:'พ.ศ. 2460 — ~109 ปี',origin:'วัดบางนมโค อยุธยา',material:'โลหะผสม',size:'2.8 ซม.',condition:'สภาพดีมาก',price:'฿ 42,000',priceVal:42000,ageVal:2460,imgs:[4,2,5],photos:[],desc:'ขายไปต่างประเทศแล้ว\nSold internationally.'},
-  {id:103,cat:'รูปหล่อ',badge:'SOLD',nameTh:'รูปหล่อฤาษี เชียงราย',nameEn:'Lersi Hermit Figure',age:'พ.ศ. 2510s — ~60 ปี',origin:'จ.เชียงราย',material:'ทองสัมฤทธิ์',size:'4.0 ซม.',condition:'สภาพดีมาก',price:'฿ 22,000',priceVal:22000,ageVal:2510,imgs:[5,1,3],photos:[],desc:'ขายให้นักสะสมสิงคโปร์แล้ว\nSold to Singapore collector.'},
-];
+let ITEMS = [];
+let SOLD  = [];
+
 
 // ============================================================
 // STATE
@@ -994,7 +992,18 @@ function renderGrid(gridId, items, mode) {
   const g = document.getElementById(gridId);
   if (!g) return;
   if (!items.length) {
-    g.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.72rem;grid-column:1/-1">ไม่พบรายการ · No items found</div>';
+    // Show skeleton for main grid, empty message for filtered grids
+    if(gridId === 'defaultGrid' || gridId === 'buyGrid') {
+      g.innerHTML = Array.from({length:6}, () => `
+        <div class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line price"></div>
+        </div>`).join('');
+    } else {
+      g.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.72rem;grid-column:1/-1">ไม่พบรายการ · No items found</div>';
+    }
     return;
   }
   g.innerHTML = items.map(it => `
@@ -1928,8 +1937,8 @@ async function fixDatabaseStructure(){
   }
 }
 
-// INIT — restore state and show items immediately
-// 1. Restore admin session if was logged in before refresh
+// ── INIT ────────────────────────────────────────────────────────
+// 1. Restore admin session
 try{
   if(sessionStorage.getItem('bantae_admin')==='1'){
     isAdmin=true;
@@ -1940,21 +1949,24 @@ try{
   }
 }catch(e){}
 
-// 2. Show items instantly (default or cached)
+// 2. Try localStorage cache first — these are YOUR real items from last save
+let _cacheLoaded = false;
 try{
   const cached = localStorage.getItem('bantae_cache');
   if(cached){
     const c = JSON.parse(cached);
-    if(c.items && c.items.length) ITEMS = c.items.map(normalizeItem);
-    if(c.sold  && c.sold.length)  SOLD  = c.sold.map(normalizeItem);
+    if(c.items !== undefined) { ITEMS = (c.items||[]).map(normalizeItem); _cacheLoaded = true; }
+    if(c.sold  !== undefined)   SOLD  = (c.sold||[]).map(normalizeItem);
   }
 }catch(e){}
+
+// 3. Show immediately — either real cached items OR empty (no fake defaults)
 renderGrid('defaultGrid', ITEMS, 'buy');
 
-// 3. Restore cart badge
+// 4. Restore cart badge
 updateBadges();
 
-// 4. Silently fetch latest from JSONBin in background
+// 5. Always fetch latest from JSONBin (updates cache for next visit)
 loadItemsFromDB();
 </script>
 
