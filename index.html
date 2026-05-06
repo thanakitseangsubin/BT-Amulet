@@ -73,11 +73,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(13,11,7,0.97);border-botto
 .hero-tagline-en{font-size:0.82rem;font-style:italic;color:var(--text-muted);max-width:440px;margin:0 auto 0.4rem}
 .hero-belief{font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-muted);margin-bottom:2rem;font-style:italic}
 /* Big mode buttons */
-.mode-split{display:grid;grid-template-columns:1fr 1fr;max-width:600px;width:100%;margin:0 auto;border:1px solid var(--border-b)}
+.mode-split{display:grid;grid-template-columns:1fr 1fr 1fr;max-width:860px;width:100%;margin:0 auto;border:1px solid var(--border-b)}
 .mode-btn{padding:1.5rem 1.25rem;cursor:pointer;border:none;transition:all 0.3s;background:var(--dark3)}
-.mode-btn.buy-btn{border-right:1px solid var(--border)}
+.mode-btn.buy-btn{border-right:1px solid var(--border)}.mode-btn.sell-btn{border-right:1px solid var(--border)}
 .mode-btn.active-buy{background:rgba(26,58,42,0.6)}
-.mode-btn.active-sell{background:rgba(58,26,26,0.6)}
+.mode-btn.active-sell{background:rgba(58,26,26,0.6)}.mode-btn.active-sold{background:rgba(201,168,76,0.12)}
 .mode-icon{font-size:1.8rem;margin-bottom:0.4rem;display:block}
 .mode-th{font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:500;margin-bottom:0.1rem}
 .mode-btn.buy-btn .mode-th{color:var(--buy)}
@@ -358,7 +358,27 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:1.6rem
 
 ::placeholder{color:var(--text-muted)}
 select option{background:var(--dark4)}
-@media(max-width:680px){.modal-body,.sell-grid,.about-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+@media(max-width:680px){
+  .modal-body,.sell-grid,.about-grid{grid-template-columns:1fr}
+  .form-row,.buy-contact-grid{grid-template-columns:1fr}
+  .items-grid{grid-template-columns:1fr 1fr !important;gap:0.55rem}
+  .item-body{padding:0.6rem 0.65rem 0.4rem}
+  .item-footer{padding:0.5rem 0.65rem;gap:3px}
+  .item-name-th{font-size:0.8rem}
+  .item-name-en{font-size:0.6rem;display:none}
+  .item-era{font-size:0.6rem}
+  .item-price{font-size:0.82rem}
+  .item-btns{gap:3px}
+  .item-action{padding:4px 6px;font-size:0.52rem}
+  .item-cart-btn{width:22px;height:22px;font-size:0.7rem}
+  .mode-split{grid-template-columns:1fr 1fr 1fr;max-width:100%}
+  .mode-btn{padding:1rem 0.5rem}
+  .mode-icon{font-size:1.4rem}
+  .mode-th{font-size:0.85rem}
+  .mode-en{font-size:0.7rem}
+  .mode-sub{font-size:0.5rem}
+  .nav-center{display:none}
+}
 </style>
 </head>
 <body>
@@ -423,6 +443,12 @@ select option{background:var(--dark4)}
       <div class="mode-en">Want to Sell</div>
       <div class="mode-sub">SELL YOUR AMULET</div>
     </div>
+    <div class="mode-btn sold-btn" onclick="setMode('sold')" id="soldModeBtn">
+      <span class="mode-icon">🏆</span>
+      <div class="mode-th" style="color:var(--gold)">ขายแล้ว</div>
+      <div class="mode-en">Previously Sold</div>
+      <div class="mode-sub" style="color:rgba(201,168,76,0.45)">SEE SOLD ITEMS</div>
+    </div>
   </div>
 </section>
 
@@ -439,6 +465,26 @@ select option{background:var(--dark4)}
     <div class="items-grid" id="defaultGrid"></div>
   </div>
 </section>
+
+<!-- SOLD PANEL -->
+<div class="panel" id="sold-panel">
+  <div class="mode-banner" style="background:rgba(201,168,76,0.12);color:var(--gold);border-color:rgba(201,168,76,0.25)">
+    <span>🏆 ขายแล้ว — SOLD ITEMS</span>
+    <button class="mode-switch" onclick="setMode('buy')">BACK TO BUY ↗</button>
+  </div>
+  <section style="background:var(--dark)">
+    <div class="container">
+      <div class="section-header">
+        <div class="sec-eye">ขายแล้ว — SOLD</div>
+        <div class="sec-title-th">ที่ขายไปแล้ว</div>
+        <div class="sec-title-en">Previously Sold Amulets</div>
+        <div class="sec-sub">พระที่หาเจ้าของแล้ว · Reference for collectors</div>
+        <div class="sec-line"></div>
+      </div>
+      <div class="items-grid" id="soldPanelGrid"></div>
+    </div>
+  </section>
+</div>
 
 <!-- BUY PANEL -->
 <div class="panel" id="buy-panel">
@@ -497,18 +543,6 @@ select option{background:var(--dark4)}
   </section>
 </div>
 
-  <!-- SOLD items shown inside buy panel -->
-  <div style="background:var(--dark2);border-top:1px solid var(--border);padding:2.75rem 1.5rem">
-    <div class="container">
-      <div class="section-header">
-        <div class="sec-eye">ขายแล้ว — SOLD</div>
-        <div class="sec-title-th">ที่ขายไปแล้ว</div>
-        <div class="sec-title-en">Previously Sold Amulets</div>
-        <div class="sec-line"></div>
-      </div>
-      <div class="items-grid" id="soldInBuyGrid"></div>
-    </div>
-  </div>
 </div>
 
 <!-- SELL PANEL -->
@@ -1560,8 +1594,9 @@ function showLoading(show) {
 
 function renderAll() {
   renderGrid('defaultGrid', ITEMS, 'buy');
-  if (curMode === 'buy')  { renderBuyGrid(); renderGrid('soldInBuyGrid', SOLD, 'sell'); }
-  if (curMode === 'sell') { renderGrid('soldGrid', SOLD, 'sell'); }
+  if (curMode === 'buy')  renderBuyGrid();
+  if (curMode === 'sell') renderGrid('soldGrid', SOLD, 'sell');
+  if (curMode === 'sold') renderGrid('soldPanelGrid', SOLD, 'sell');
 }
 
 // Keep localStorage functions as aliases (cart still uses these)
