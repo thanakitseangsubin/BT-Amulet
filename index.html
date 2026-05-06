@@ -887,10 +887,62 @@ function itemToDB(it){
 }
 async function loadItemsFromDB(){
   showLoadingOverlay(true);
-  const rows = await sbFetch('items?order=created_at.desc&limit=1000');
-  if(!rows){ showLoadingOverlay(false); return; }
-  ITEMS = rows.filter(r=>!r.is_sold).map(dbToItem);
-  SOLD  = rows.filter(r=>r.is_sold).map(dbToItem);
+
+  // Try loading from Supabase with a 8 second timeout
+  let rows = null;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const url = SUPA_URL + '/rest/v1/items?order=created_at.desc&limit=1000';
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Accept': 'application/json',
+      }
+    });
+    clearTimeout(timer);
+    if (res.ok) rows = await res.json();
+    else {
+      const err = await res.text();
+      console.warn('Supabase error:', res.status, err);
+    }
+  } catch(e) {
+    console.warn('Supabase unreachable:', e.message);
+  }
+
+  if (rows) {
+    // Supabase worked — use database items
+    ITEMS = rows.filter(r=>!r.is_sold).map(dbToItem);
+    SOLD  = rows.filter(r=>r.is_sold).map(dbToItem);
+    // Also save to localStorage as cache
+    try {
+      localStorage.setItem('bantae_items_cache', JSON.stringify(rows));
+      localStorage.setItem('bantae_cache_time', Date.now().toString());
+    } catch(e) {}
+  } else {
+    // Supabase failed — try localStorage cache
+    console.warn('Using localStorage cache / defaults');
+    try {
+      const cached = localStorage.getItem('bantae_items_cache');
+      if (cached) {
+        const rows2 = JSON.parse(cached);
+        ITEMS = rows2.filter(r=>!r.is_sold).map(dbToItem);
+        SOLD  = rows2.filter(r=>r.is_sold).map(dbToItem);
+        showToast('แสดงข้อมูลจาก cache · Showing cached data', 't-info');
+      } else {
+        // No cache — use built-in defaults so page is not empty
+        ITEMS = DEFAULT_ITEMS;
+        SOLD  = DEFAULT_SOLD;
+        showToast('ไม่สามารถเชื่อมต่อ Supabase · Using default items', 't-info');
+      }
+    } catch(e) {
+      ITEMS = DEFAULT_ITEMS;
+      SOLD  = DEFAULT_SOLD;
+    }
+  }
+
   renderGrid('defaultGrid', ITEMS, 'buy');
   if(curMode==='buy'){ renderBuyGrid(); renderGrid('soldInBuyGrid', SOLD, 'sell'); }
   if(curMode==='sell') renderGrid('soldGrid', SOLD, 'sell');
@@ -934,6 +986,23 @@ const ph = i => PH[i % PH.length];
 // ============================================================
 let ITEMS = [];
 let SOLD  = [];
+
+// ============================================================
+// DEFAULT ITEMS — shown if database is unreachable
+// Add your real items here too so the site never looks empty
+// ============================================================
+const DEFAULT_ITEMS = [
+  {id:1,cat:'พระบูชา',badge:'FEATURED',nameTh:'พระสมเด็จ วัดระฆัง',nameEn:'Phra Somdej Wat Rakhang',age:'ยุค ร.4 — ประมาณ 160 ปี',origin:'วัดระฆังโฆสิตาราม กรุงเทพฯ',material:'ผงศักดิ์สิทธิ์ + รักน้ำเกลี้ยง',size:'3.2 × 2.0 ซม.',condition:'สภาพดีมาก',price:'฿ 45,000',priceVal:45000,ageVal:2411,imgs:[0,1,2],photos:[],desc:'หนึ่งในพระยอดนิยมที่ทรงพลังที่สุดของไทย สร้างโดยสมเด็จพระพุฒาจารย์โต วัดระฆัง\n\nOne of Thailand\'s most revered amulets.'},
+  {id:2,cat:'เหรียญ',badge:'RARE',nameTh:'เหรียญหลวงพ่อทวด วัดช้างให้',nameEn:'Luang Phor Tuad Coin',age:'พ.ศ. 2497 — ประมาณ 72 ปี',origin:'วัดช้างให้ จ.ปัตตานี',material:'โลหะอัลปากา',size:'3.0 ซม.',condition:'ดี — คราบอายุธรรมชาติ',price:'฿ 28,500',priceVal:28500,ageVal:2497,imgs:[1,3,4],photos:[],desc:'เหรียญหลวงพ่อทวด รุ่น พ.ศ. 2497\n\nHighly sought for protective properties.'},
+  {id:3,cat:'พระกรุ',badge:'NEW',nameTh:'พระนางพญา กำแพงเพชร',nameEn:'Phra Nang Phaya',age:'ยุคสุโขทัย — ~600 ปี',origin:'จ.กำแพงเพชร',material:'ดินศักดิ์สิทธิ์',size:'4.5 × 2.8 ซม.',condition:'ต้นฉบับ',price:'฿ 120,000',priceVal:120000,ageVal:1900,imgs:[2,0,5],photos:[],desc:'หนึ่งในพระเบญจภาคีของไทย\n\nOne of Thailand\'s Five Great Amulets.'},
+  {id:4,cat:'เครื่องราง',badge:'',nameTh:'เสือฟันเขี้ยวยันต์',nameEn:'Tiger Tooth Yantra Charm',age:'พ.ศ. 2530s — ~40 ปี',origin:'เชียงใหม่',material:'ฟันเสือแท้ + ด้ายศักดิ์สิทธิ์',size:'4 ซม.',condition:'สภาพดีมาก',price:'฿ 18,000',priceVal:18000,ageVal:2530,imgs:[3,1,2],photos:[],desc:'ฟันเสือแท้ถักด้วยด้ายศักดิ์สิทธิ์\n\nGenuine tiger tooth with sacred thread.'},
+  {id:5,cat:'รูปหล่อ',badge:'',nameTh:'รูปหล่อหลวงพ่อเงิน',nameEn:'Luang Phor Ngern Cast Figure',age:'พ.ศ. 2460s — ~100 ปี',origin:'วัดบางคลาน จ.พิจิตร',material:'นวะโลหะ',size:'3.5 ซม.',condition:'สวยงาม',price:'฿ 55,000',priceVal:55000,ageVal:2460,imgs:[4,5,0],photos:[],desc:'ผิวนวะโลหะแสดงคราบอายุสวยงาม\n\nFine cast figure with beautiful aged nuea samrit.'},
+  {id:6,cat:'เหรียญ',badge:'',nameTh:'จตุคามรามเทพ รุ่นแรก',nameEn:'Jatukham Ramathep First Issue',age:'พ.ศ. 2530 — ~39 ปี',origin:'วัดมหาธาตุ นครศรีธรรมราช',material:'ทองแดงศักดิ์สิทธิ์',size:'5.8 ซม.',condition:'สภาพดี',price:'฿ 8,500',priceVal:8500,ageVal:2530,imgs:[5,2,3],photos:[],desc:'เสริมดวงและโชคดี\n\nBelieved to attract wealth and protection.'},
+];
+const DEFAULT_SOLD = [
+  {id:101,cat:'พระบูชา',badge:'SOLD',nameTh:'พระลีลา สุโขทัย',nameEn:'Phra Leela Sukhothai',age:'ยุคสุโขทัย ~600 ปี',origin:'จ.สุโขทัย',material:'ดินศักดิ์สิทธิ์',size:'5.0 × 3.0 ซม.',condition:'สภาพดี',price:'฿ 85,000',priceVal:85000,ageVal:1900,imgs:[3,0,1],photos:[],desc:'ขายให้นักสะสมกรุงเทพฯ แล้ว\nSold to Bangkok collector.'},
+  {id:102,cat:'เหรียญ',badge:'SOLD',nameTh:'เหรียญหลวงพ่อปาน',nameEn:'LP Parn Coin B.E. 2460',age:'พ.ศ. 2460 — ~109 ปี',origin:'วัดบางนมโค อยุธยา',material:'โลหะผสม',size:'2.8 ซม.',condition:'สภาพดีมาก',price:'฿ 42,000',priceVal:42000,ageVal:2460,imgs:[4,2,5],photos:[],desc:'ขายไปต่างประเทศแล้ว\nSold internationally.'},
+];
 
 // ============================================================
 // STATE — cart persists via localStorage
