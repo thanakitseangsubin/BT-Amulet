@@ -152,7 +152,7 @@ section,div.sec{padding:2.75rem 1.5rem}
 .admin-ctrl.show{display:flex}
 .a-btn{background:rgba(13,11,7,0.88);border:1px solid var(--border);color:var(--text-dim);font-size:0.7rem;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
 .a-btn:hover{border-color:var(--gold);color:var(--gold)}
-.a-btn.del:hover{border-color:#E53E3E;color:#E53E3E}
+.a-btn.del:hover{border-color:#E53E3E;color:#E53E3E}.a-btn.sold-btn:hover{border-color:var(--gold);color:var(--gold)}
 .item-body{padding:0.85rem 0.95rem 0.6rem}
 .item-era{font-size:0.65rem;color:var(--text-muted);font-family:'Cinzel',serif;letter-spacing:0.05em;margin-bottom:0.15rem}
 .item-name-th{font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text);margin-bottom:0.1rem;line-height:1.3}
@@ -211,8 +211,8 @@ textarea.form-input{min-height:75px;resize:vertical}
 .opt-body.open{display:block}
 
 /* === ABOUT === */
-.about-strip{background:var(--dark);border-top:1px solid var(--border);padding:3.5rem 1.5rem}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;max-width:1020px;margin:0 auto}
+.about-strip{background:var(--dark);border-top:1px solid var(--border);padding:3.5rem 1.5rem;text-align:left}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;max-width:1020px;margin:0 auto;padding:0 1rem}
 .about-text h2{font-family:'Sarabun',sans-serif;font-size:1.6rem;color:var(--gold-light);margin-bottom:0.8rem;font-weight:500}
 .about-text p{color:var(--text-dim);line-height:1.9;margin-bottom:0.8rem;font-size:0.88rem}
 .thai-quote{font-family:'Sarabun',sans-serif;font-size:0.9rem;color:var(--text-dim);border-left:2px solid var(--gold-dim);padding-left:0.85rem;font-style:italic;margin:1rem 0;line-height:1.9}
@@ -223,7 +223,7 @@ textarea.form-input{min-height:75px;resize:vertical}
 .feature-desc{font-size:0.77rem;color:var(--text-muted);line-height:1.55}
 
 /* === CONTACT === */
-.contact-info-strip{background:var(--dark2);border-top:1px solid var(--border);padding:2.5rem 1.5rem}
+.contact-info-strip{background:var(--dark2);border-top:1px solid var(--border);padding:2.5rem 1.5rem;text-align:center}
 .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1.1rem;max-width:860px;margin:0 auto}
 .contact-card{background:var(--dark3);border:1px solid var(--border);padding:1.25rem;text-align:center}
 .contact-card-icon{font-size:1.4rem;margin-bottom:0.45rem;display:flex;align-items:center;justify-content:center}
@@ -378,6 +378,14 @@ select option{background:var(--dark4)}
   .mode-en{font-size:0.7rem}
   .mode-sub{font-size:0.5rem}
   .nav-center{display:none}
+  .about-strip{padding:2.5rem 1rem}
+  .about-grid{grid-template-columns:1fr;text-align:center;padding:0}
+  .about-text h2,.about-text p,.thai-quote{text-align:center}
+  .thai-quote{border-left:none;border-top:2px solid var(--gold-dim);padding-left:0;padding-top:0.85rem;margin:1rem auto}
+  .about-features{align-items:center}
+  .feature{flex-direction:column;align-items:center;text-align:center;gap:0.5rem}
+  .feature-icon{margin-top:0}
+  .contact-grid{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -551,18 +559,7 @@ select option{background:var(--dark4)}
     <span>💰 ต้องการขาย — SELLING MODE</span>
     <button class="mode-switch" onclick="setMode('buy')">SWITCH TO BUY ↗</button>
   </div>
-  <section style="background:var(--dark)">
-    <div class="container">
-      <div class="section-header">
-        <div class="sec-eye">ขายแล้ว — RECENTLY SOLD</div>
-        <div class="sec-title-th">ผลงานที่ผ่านมา</div>
-        <div class="sec-title-en">Real Results From Our Sellers</div>
-        <div class="sec-sub">พระของท่านอาจเป็นรายการต่อไป</div>
-        <div class="sec-line"></div>
-      </div>
-      <div class="items-grid" id="soldGrid"></div>
-    </div>
-  </section>
+
   <div style="background:var(--dark2);padding:3rem 1.5rem" id="sell-form-section">
     <div class="container">
       <div class="section-header">
@@ -970,6 +967,7 @@ function renderGrid(gridId, items, mode) {
         ${it.badge ? `<div class="item-badge ${it.badge==='SOLD'?'br':it.badge==='NEW'?'bn':'bg'}">${it.badge}</div>` : ''}
         <div class="admin-ctrl ${isAdmin?'show':''}">
           <button class="a-btn" onclick="event.stopPropagation();openAddItem(${it.id})" title="Edit">✏️</button>
+          ${mode==='buy'?`<button class="a-btn sold-btn" onclick="event.stopPropagation();markAsSold(${it.id})" title="Mark as Sold">🏆</button>`:`<button class="a-btn" onclick="event.stopPropagation();restoreItem(${it.id})" title="Restore to Available" style="font-size:0.6rem">↩️</button>`}
           <button class="a-btn del" onclick="event.stopPropagation();deleteItem(${it.id},'${mode}')" title="Delete">🗑</button>
         </div>
       </div>
@@ -1595,8 +1593,11 @@ function showLoading(show) {
 function renderAll() {
   renderGrid('defaultGrid', ITEMS, 'buy');
   if (curMode === 'buy')  renderBuyGrid();
-  if (curMode === 'sell') renderGrid('soldGrid', SOLD, 'sell');
+  if (curMode === 'sell') { /* sell panel has no grid now */ }
   if (curMode === 'sold') renderGrid('soldPanelGrid', SOLD, 'sell');
+  // Always keep soldPanelGrid fresh if it's rendered
+  const spg = document.getElementById('soldPanelGrid');
+  if (spg && spg.innerHTML !== '') renderGrid('soldPanelGrid', SOLD, 'sell');
 }
 
 // Keep localStorage functions as aliases (cart still uses these)
