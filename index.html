@@ -838,6 +838,60 @@ const ADMIN_USER  = 'admin';
 const ADMIN_PASS  = 'bantae2026';  // admin login password
 const PEN_PASS    = '242456';      // pen edit password
 const PAGE_SIZE   = 100;           // items per page
+const SUPA_URL    = 'https://dgvuahhbsozqxtcryhuh.supabase.co';
+const SUPA_KEY    = 'sb_publishable_Y0-qDi084ws25g1iU1FGpg_0Kgj7WOX';
+
+async function sbFetch(path, opts={}
+
+function dbToItem(r){
+  return {
+    id:r.id, cat:r.cat||'', badge:r.badge||'',
+    nameTh:r.name_th||'', nameEn:r.name_en||'',
+    age:r.age||'', origin:r.origin||'', material:r.material||'',
+    size:r.size||'', condition:r.condition||'',
+    price:r.price||'', priceVal:r.price_val||0, ageVal:r.age_val||2500,
+    desc:r.description||'', photos:r.photos||[], imgs:[0,1,2], is_sold:r.is_sold||false,
+  };
+}
+function itemToDB(it){
+  return {
+    cat:it.cat, badge:it.badge||'', name_th:it.nameTh, name_en:it.nameEn||'',
+    age:it.age||'', origin:it.origin||'', material:it.material||'',
+    size:it.size||'', condition:it.condition||'',
+    price:it.price||'', price_val:it.priceVal||0, age_val:it.ageVal||2500,
+    description:it.desc||'', photos:it.photos||[], is_sold:it.badge==='SOLD',
+  };
+}
+async function loadItemsFromDB(){
+  showLoadingOverlay(true);
+  const rows = await sbFetch('items?order=created_at.desc&limit=1000');
+  if(!rows){ showLoadingOverlay(false); return; }
+  ITEMS = rows.filter(r=>!r.is_sold).map(dbToItem);
+  SOLD  = rows.filter(r=>r.is_sold).map(dbToItem);
+  renderGrid('defaultGrid', ITEMS, 'buy');
+  if(curMode==='buy'){ renderBuyGrid(); renderGrid('soldInBuyGrid', SOLD, 'sell'); }
+  if(curMode==='sell') renderGrid('soldGrid', SOLD, 'sell');
+  showLoadingOverlay(false);
+}
+function showLoadingOverlay(show){
+  const el=document.getElementById('loadingOverlay');
+  if(el) el.style.display=show?'flex':'none';
+}) {
+  const url = SUPA_URL + '/rest/v1/' + path;
+  const res = await fetch(url, {
+    method: opts.method || 'GET',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) { console.error('Supabase error', res.status, await res.text()); return null; }
+  if (res.status === 204) return true;
+  return res.json();
+}
 
 // ============================================================
 // PLACEHOLDER images (used until real photos uploaded)
@@ -853,41 +907,34 @@ const PH = [
 const ph = i => PH[i % PH.length];
 
 // ============================================================
-// ITEM DATA — add real items here, or use admin panel
-// priceVal: numeric value for sorting (just the number)
-// ageVal: year BE for sorting (smaller = older)
+// ITEM DATA — loaded from Supabase database
 // ============================================================
-let ITEMS = [
-  {id:1,cat:'พระบูชา',badge:'FEATURED',nameTh:'พระสมเด็จ วัดระฆัง',nameEn:'Phra Somdej Wat Rakhang',age:'ยุค ร.4 — ประมาณ 160 ปี',origin:'วัดระฆังโฆสิตาราม กรุงเทพฯ',material:'ผงศักดิ์สิทธิ์ + รักน้ำเกลี้ยง',size:'3.2 × 2.0 ซม.',condition:'สภาพดีมาก',price:'฿ 45,000',priceVal:45000,ageVal:2411,imgs:[0,1,2],photos:[],desc:'หนึ่งในพระยอดนิยมที่ทรงพลังที่สุดของไทย สร้างโดยสมเด็จพระพุฒาจารย์โต วัดระฆัง มีรายละเอียดซุ้มห้าชั้นชัดเจน\n\nOne of Thailand\'s most revered amulets, blessed by Somdej Phra Phutthachan Toh.'},
-  {id:2,cat:'เหรียญ',badge:'RARE',nameTh:'เหรียญหลวงพ่อทวด วัดช้างให้',nameEn:'Luang Phor Tuad Coin',age:'พ.ศ. 2497 — ประมาณ 72 ปี',origin:'วัดช้างให้ จ.ปัตตานี',material:'โลหะอัลปากา',size:'3.0 ซม.',condition:'ดี — คราบอายุธรรมชาติ',price:'฿ 28,500',priceVal:28500,ageVal:2497,imgs:[1,3,4],photos:[],desc:'เหรียญหลวงพ่อทวดจากวัดช้างให้ รุ่น พ.ศ. 2497 เป็นที่แสวงหาของนักสะสม\n\nHighly sought for protective properties with beautiful natural alpaca patina.'},
-  {id:3,cat:'พระกรุ',badge:'NEW',nameTh:'พระนางพญา กำแพงเพชร',nameEn:'Phra Nang Phaya Kamphaeng Phet',age:'ยุคสุโขทัย — ~600 ปี',origin:'จ.กำแพงเพชร',material:'ดินศักดิ์สิทธิ์',size:'4.5 × 2.8 ซม.',condition:'ต้นฉบับ',price:'฿ 120,000',priceVal:120000,ageVal:1900,imgs:[2,0,5],photos:[],desc:'พระนางพญาจากกรุกำแพงเพชร อายุกว่า 600 ปี หนึ่งในพระเบญจภาคีของไทย\n\nSukhothai period, one of Thailand\'s Five Great Amulets.'},
-  {id:4,cat:'เครื่องราง',badge:'',nameTh:'เสือฟันเขี้ยวยันต์',nameEn:'Tiger Tooth Yantra Charm',age:'พ.ศ. 2530s — ~40 ปี',origin:'สายครูบาศรีวิชัย เชียงใหม่',material:'ฟันเสือแท้ + ด้ายศักดิ์สิทธิ์',size:'4 ซม.',condition:'สภาพดีมาก',price:'฿ 18,000',priceVal:18000,ageVal:2530,imgs:[3,1,2],photos:[],desc:'เครื่องรางฟันเสือแท้ถักด้วยด้ายศักดิ์สิทธิ์และทองเปลวยันต์\n\nGenuine tiger tooth wrapped with sacred thread and yantra gold leaf.'},
-  {id:5,cat:'รูปหล่อ',badge:'',nameTh:'รูปหล่อหลวงพ่อเงิน',nameEn:'Luang Phor Ngern Cast Figure',age:'พ.ศ. 2460s — ~100 ปี',origin:'วัดบางคลาน จ.พิจิตร',material:'นวะโลหะ',size:'3.5 ซม.',condition:'สวยงาม',price:'฿ 55,000',priceVal:55000,ageVal:2460,imgs:[4,5,0],photos:[],desc:'รูปหล่อหลวงพ่อเงิน วัดบางคลาน ผิวนวะโลหะแสดงคราบอายุสวยงาม\n\nFine cast figure with beautiful aged nuea samrit surface.'},
-  {id:6,cat:'เหรียญ',badge:'',nameTh:'จตุคามรามเทพ รุ่นแรก',nameEn:'Jatukham Ramathep First Issue',age:'พ.ศ. 2530 — ~39 ปี',origin:'วัดมหาธาตุ นครศรีธรรมราช',material:'ทองแดงศักดิ์สิทธิ์',size:'5.8 ซม.',condition:'สภาพดี',price:'฿ 8,500',priceVal:8500,ageVal:2530,imgs:[5,2,3],photos:[],desc:'จตุคามรามเทพจากวัดมหาธาตุ นครศรีธรรมราช เชื่อว่าเสริมดวงและโชคดี\n\nFamous Jatukham Ramathep believed to attract wealth and protection.'},
-];
-let SOLD = [
-  {id:101,cat:'พระบูชา',badge:'SOLD',nameTh:'พระลีลา สุโขทัย',nameEn:'Phra Leela Sukhothai',age:'ยุคสุโขทัย ~600 ปี',origin:'จ.สุโขทัย',material:'ดินศักดิ์สิทธิ์',size:'5.0 × 3.0 ซม.',condition:'สภาพดี',price:'฿ 85,000',priceVal:85000,ageVal:1900,imgs:[3,0,1],photos:[],desc:'ขายให้นักสะสมกรุงเทพฯ แล้ว\nSold to Bangkok collector.'},
-  {id:102,cat:'เหรียญ',badge:'SOLD',nameTh:'เหรียญหลวงพ่อปาน',nameEn:'LP Parn Coin B.E. 2460',age:'พ.ศ. 2460 — ~109 ปี',origin:'วัดบางนมโค อยุธยา',material:'โลหะผสม',size:'2.8 ซม.',condition:'สภาพดีมาก',price:'฿ 42,000',priceVal:42000,ageVal:2460,imgs:[4,2,5],photos:[],desc:'ขายไปต่างประเทศแล้ว\nSold internationally.'},
-  {id:103,cat:'รูปหล่อ',badge:'SOLD',nameTh:'รูปหล่อฤาษี เชียงราย',nameEn:'Lersi Hermit Figure',age:'พ.ศ. 2510s — ~60 ปี',origin:'จ.เชียงราย',material:'ทองสัมฤทธิ์',size:'4.0 ซม.',condition:'สภาพดีมาก',price:'฿ 22,000',priceVal:22000,ageVal:2510,imgs:[5,1,3],photos:[],desc:'ขายให้นักสะสมสิงคโปร์แล้ว\nSold to Singapore collector.'},
-];
+let ITEMS = [];
+let SOLD  = [];
 
 // ============================================================
-// STATE
+// STATE — cart persists via localStorage
+
 // ============================================================
 let isAdmin    = false;
 let penMode    = false;
 let curMode    = null;
 let curItem    = null;
 let curItemMd  = 'buy';
-let cartBuy    = [];
-let cartSell   = [];
+let cartBuy    = JSON.parse(localStorage.getItem('bantae_cart_buy')  || '[]');
+let cartSell   = JSON.parse(localStorage.getItem('bantae_cart_sell') || '[]');
 let cartTab    = 'buy';
 let curPage    = 1;
 let curCat     = 'all';
 let curSort    = 'default';
 let nextId     = 200;
-let curSlot    = 0;       // which image slot is being filled
-let editPhotos = [];      // working array of photo data URLs for add/edit
+let curSlot    = 0;
+let editPhotos = [];
+let reports    = [];
+function saveCartToStorage(){
+  localStorage.setItem('bantae_cart_buy',  JSON.stringify(cartBuy));
+  localStorage.setItem('bantae_cart_sell', JSON.stringify(cartSell));
+}
 
 // ============================================================
 // MODE
@@ -1098,6 +1145,7 @@ function deleteSelected(mode){
   renderCartItems(); updateBadges(); showToast('ลบ '+sel.length+' รายการแล้ว','t-gold');
 }
 function updateBadges() {
+  saveCartToStorage();
   const tot = cartBuy.length+cartSell.length;
   const cb  = document.getElementById('cartBadge');
   cb.textContent = tot; cb.classList.toggle('show', tot>0);
@@ -1338,19 +1386,47 @@ function importCSV(text){
     if(it.badge==='SOLD') SOLD.unshift(it); else ITEMS.unshift(it);
     added++;
   }
-  closeOv('aiOv');
-  renderGrid('defaultGrid',ITEMS,'buy');
-  if(curMode==='buy') renderBuyGrid();
-  if(curMode==='sell') renderGrid('soldGrid',SOLD,'sell');
-  showToast('นำเข้า '+added+' รายการแล้ว ✦','t-buy');
+  // Save all imported items to Supabase
+  const dbItems = [];
+  for(let j=1;j<lines.length;j++){
+    const vals=lines[j].match(/("(?:[^"]|"")*"|[^,]*)/g)||[];
+    const nameTh2=getv(vals,ci('nameth'))||getv(vals,ci('ชื่อพระ'))||getv(vals,ci('name_th'));
+    const price2=getv(vals,ci('price'))||getv(vals,ci('ราคา'));
+    if(!nameTh2) continue;
+    const pv2=parseFloat(price2.replace(/[^0-9.]/g,''))||0;
+    const badge2=getv(vals,ci('badge'))||'';
+    dbItems.push({
+      cat:getv(vals,ci('cat'))||getv(vals,ci('category'))||getv(vals,ci('ประเภท'))||'พระบูชา',
+      badge:badge2, name_th:nameTh2,
+      name_en:getv(vals,ci('nameen'))||getv(vals,ci('name_en'))||'',
+      price:'฿ '+Number(pv2).toLocaleString(), price_val:pv2,
+      age:getv(vals,ci('age'))||getv(vals,ci('อายุ'))||'',
+      age_val:parseInt(getv(vals,ci('ageval')))||2500,
+      origin:getv(vals,ci('origin'))||getv(vals,ci('แหล่งกำเนิด'))||'',
+      material:getv(vals,ci('material'))||getv(vals,ci('วัสดุ'))||'',
+      size:getv(vals,ci('size'))||getv(vals,ci('ขนาด'))||'',
+      condition:getv(vals,ci('condition'))||getv(vals,ci('สภาพ'))||'',
+      description:getv(vals,ci('desc'))||getv(vals,ci('description'))||getv(vals,ci('รายละเอียด'))||'',
+      photos:[], is_sold: badge2==='SOLD',
+    });
+  }
+  if(dbItems.length){
+    showToast('กำลังบันทึก '+dbItems.length+' รายการ...','t-gold');
+    const ok = await sbFetch('items', {method:'POST', body:dbItems});
+    if(ok){ closeOv('aiOv'); await loadItemsFromDB(); showToast('นำเข้า '+dbItems.length+' รายการแล้ว ✦','t-buy'); }
+    else showToast('บันทึกไม่สำเร็จ','t-sell');
+  } else {
+    showToast('ไม่พบข้อมูลในไฟล์','t-sell');
+  }
 }
 function removePhoto(i){ editPhotos.splice(i,1); renderImgSlots(); }
 
-function saveItem(){
+async function saveItem(){
   const th=document.getElementById('fi_th').value.trim();
   const pv=document.getElementById('fi_price').value.trim();
-  if(!th||!pv){ showToast('กรุณากรอกชื่อพระและราคา','t-sell'); return; }
+  if(!th||!pv){showToast('กรุณากรอกชื่อพระและราคา','t-sell');return;}
   const priceNum=parseFloat(pv.replace(/[^0-9.]/g,''))||0;
+  const badge=document.getElementById('fi_badge').value;
   const newIt={
     nameTh:th, nameEn:document.getElementById('fi_en').value.trim(),
     price:'฿ '+Number(priceNum).toLocaleString(), priceVal:priceNum,
@@ -1362,34 +1438,32 @@ function saveItem(){
     size:document.getElementById('fi_size').value,
     condition:document.getElementById('fi_cond').value,
     desc:document.getElementById('fi_desc').value,
-    badge:document.getElementById('fi_badge').value,
-    photos:[...editPhotos],
-    imgs:[0,1,2],
+    badge, photos:[...editPhotos], imgs:[0,1,2],
   };
   const editId=parseInt(document.getElementById('aiEditId').value)||0;
+  showToast('กำลังบันทึก...','t-gold');
   if(editId){
-    newIt.id=editId;
-    let idx=ITEMS.findIndex(i=>i.id===editId);
-    if(idx>=0) ITEMS[idx]=newIt;
-    else { idx=SOLD.findIndex(i=>i.id===editId); if(idx>=0) SOLD[idx]=newIt; }
-    showToast('แก้ไขรายการแล้ว ✦','t-gold');
+    const ok=await sbFetch('items?id=eq.'+editId,{method:'PATCH',body:itemToDB(newIt),prefer:'return=minimal'});
+    if(ok!==null) showToast('แก้ไขรายการแล้ว ✦','t-gold');
+    else{showToast('บันทึกไม่สำเร็จ','t-sell');return;}
   } else {
-    newIt.id=nextId++;
-    if(newIt.badge==='SOLD') SOLD.unshift(newIt); else ITEMS.unshift(newIt);
-    showToast('เพิ่มรายการใหม่แล้ว ✦','t-gold');
+    const rows=await sbFetch('items',{method:'POST',body:itemToDB(newIt)});
+    if(rows) showToast('เพิ่มรายการใหม่แล้ว ✦','t-gold');
+    else{showToast('บันทึกไม่สำเร็จ','t-sell');return;}
   }
   closeOv('aiOv');
-  renderGrid('defaultGrid', ITEMS, 'buy');
-  if(curMode==='buy') renderBuyGrid();
-  if(curMode==='sell') renderGrid('soldGrid',SOLD,'sell');
+  await loadItemsFromDB();
 }
 
-function deleteItem(id,mode){
+async function deleteItem(id,mode){
   if(!confirm('ลบรายการนี้? / Delete this item?'))return;
-  ITEMS=ITEMS.filter(i=>i.id!==id); SOLD=SOLD.filter(i=>i.id!==id);
-  renderGrid('defaultGrid', ITEMS, 'buy');
-  if(mode==='buy') renderBuyGrid(); else renderGrid('soldGrid',SOLD,'sell');
-  showToast('ลบรายการแล้ว','t-sell');
+  const ok=await sbFetch('items?id=eq.'+id, {method:'DELETE', prefer:'return=minimal'});
+  if(ok!==null){
+    showToast('ลบรายการแล้ว','t-sell');
+    await loadItemsFromDB();
+  } else {
+    showToast('ลบไม่สำเร็จ','t-sell');
+  }
 }
 
 // ============================================================
@@ -1411,7 +1485,6 @@ function showToast(msg,cls='t-gold'){
 // ============================================================
 // REPORTS
 // ============================================================
-let reports=[];
 function openReportForm(){
   document.getElementById('rName').value='';
   document.getElementById('rMsg').value='';
@@ -1462,6 +1535,13 @@ renderGrid('defaultGrid', ITEMS, 'buy');
 </script>
 
 <!-- Page drop hint overlay -->
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="display:flex;position:fixed;inset:0;background:rgba(13,11,7,0.92);z-index:9990;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="font-size:2.5rem;animation:spin 1.5s linear infinite">📿</div>
+  <div style="font-family:Cinzel,serif;font-size:0.82rem;letter-spacing:0.12em;color:#C9A84C">กำลังโหลด · LOADING</div>
+</div>
+<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+
 <div id="pageDropHint" style="display:none;position:fixed;inset:0;background:rgba(201,168,76,0.1);border:4px dashed var(--gold);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;pointer-events:none">
   <div style="font-size:3rem">📷</div>
   <div style="font-family:Cinzel,serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--gold)">วางรูปภาพที่นี่ · Drop here</div>
