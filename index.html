@@ -839,9 +839,32 @@ const ADMIN_PASS  = 'bantae2026';  // admin login password
 const PEN_PASS    = '242456';      // pen edit password
 const PAGE_SIZE   = 100;           // items per page
 const SUPA_URL    = 'https://dgvuahhbsozqxtcryhuh.supabase.co';
-const SUPA_KEY    = 'sb_publishable_Y0-qDi084ws25g1iU1FGpg_0Kgj7WOX';
+const SUPA_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRndnVhaGhic296cXh0Y3J5aHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTY3MzksImV4cCI6MjA5MzYzMjczOX0.44SXixLQw5BIDK0xrtu6-rUj_lgZ-rnoy9ATTiywGYI'; // anon key (Legacy JWT)
 
-async function sbFetch(path, opts={}
+async function sbFetch(path, opts={}) {
+  const url = SUPA_URL + '/rest/v1/' + path;
+  const headers = {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': opts.prefer || 'return=representation',
+    'Accept': 'application/json',
+  };
+  try {
+    const res = await fetch(url, {
+      method: opts.method || 'GET',
+      headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+    if (res.status === 204) return true;
+    const text = await res.text();
+    if (!res.ok) { console.error('Supabase', res.status, text); return null; }
+    return text ? JSON.parse(text) : true;
+  } catch(e) {
+    console.error('sbFetch network error:', e);
+    return null;
+  }
+}
 
 function dbToItem(r){
   return {
