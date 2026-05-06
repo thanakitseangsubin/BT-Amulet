@@ -692,7 +692,7 @@ select option{background:var(--dark4)}
 </footer>
 
 <!-- ITEM DETAIL MODAL -->
-<div class="overlay" id="itemOverlay" onclick="bgClose(event,'itemOverlay')">
+<div class="overlay" id="itemOverlay">
   <div class="modal" id="itemModal">
     <div class="modal-topbar">
       <div class="modal-label" id="modalLabel">🔍 กำลังหา</div>
@@ -769,7 +769,7 @@ select option{background:var(--dark4)}
 </div>
 
 <!-- LOGIN MODAL -->
-<div class="auth-overlay" id="loginOv" onclick="bgClose(event,'loginOv')">
+<div class="auth-overlay" id="loginOv">
   <div class="auth-box">
     <button class="auth-close" onclick="closeOv('loginOv')">✕</button>
     <div class="auth-title">⬡ LOGIN</div>
@@ -782,7 +782,7 @@ select option{background:var(--dark4)}
 </div>
 
 <!-- ADD / EDIT ITEM MODAL -->
-<div class="ai-overlay" id="aiOv" onclick="bgClose(event,'aiOv')">
+<div class="ai-overlay" id="aiOv">
   <div class="ai-box">
     <div class="ai-header">
       <div class="ai-title" id="aiTitle">＋ ADD NEW ITEM</div>
@@ -848,7 +848,7 @@ select option{background:var(--dark4)}
 </div>
 
 <!-- PEN LOCK MODAL -->
-<div class="pen-lock-overlay" id="penLockOv" onclick="bgClose(event,'penLockOv')">
+<div class="pen-lock-overlay" id="penLockOv">
   <div class="pen-lock-box">
     <div class="pen-lock-title">✏️ PEN EDIT</div>
     <div class="pen-lock-sub">กรอกรหัสผ่านเพื่อปลดล็อก<br/>Enter password to unlock</div>
@@ -1280,14 +1280,70 @@ function openAddItem(id){
 }
 
 function renderImgSlots(){
-  const grid=document.getElementById('imgSlots');
-  const slots=6;
-  grid.innerHTML=Array.from({length:slots},(_,i)=>{
-    const src=editPhotos[i]||'';
-    return `<div class="img-slot" onclick="pickSlot(${i})">
-      ${src?`<img src="${src}" alt=""/><button class="rm-img" onclick="event.stopPropagation();removePhoto(${i})">✕</button>`:`<div class="img-slot-icon">📷</div><div class="img-slot-label">Photo ${i+1}</div>`}
-    </div>`;
+  const grid = document.getElementById('imgSlots');
+  grid.innerHTML = Array.from({length:6}, (_,i) => {
+    const src = editPhotos[i] || '';
+    if(src){
+      return `<div class="img-slot" draggable="true"
+        onclick="pickSlot(${i})"
+        ondblclick="event.stopPropagation();openCrop(${i})"
+        ondragstart="slotDragStart(event,${i})"
+        ondragover="slotDragOver(event,${i})"
+        ondragleave="slotDragLeave(event,${i})"
+        ondrop="slotDrop(event,${i})"
+        data-slot="${i}">
+        <img src="${src}" alt="Photo ${i+1}"/>
+        <button class="rm-img" onclick="event.stopPropagation();removePhoto(${i})">✕</button>
+        <div class="crop-hint">✂️ double-click to crop</div>
+      </div>`;
+    } else {
+      return `<div class="img-slot"
+        onclick="pickSlot(${i})"
+        ondragover="slotDragOver(event,${i})"
+        ondragleave="slotDragLeave(event,${i})"
+        ondrop="slotDrop(event,${i})"
+        data-slot="${i}">
+        <div class="img-slot-icon">📷</div>
+        <div class="img-slot-label">Photo ${i+1}</div>
+      </div>`;
+    }
   }).join('');
+}
+
+// ── Drag-to-reorder image slots ─────────────────────────────────
+let _dragSlot = -1;
+function slotDragStart(e, i){
+  _dragSlot = i;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(()=>{
+    const el = document.querySelector(`[data-slot="${i}"]`);
+    if(el) el.classList.add('dragging-slot');
+  }, 0);
+}
+function slotDragOver(e, i){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.img-slot').forEach(s=>s.classList.remove('drag-over-slot'));
+  const el = document.querySelector(`[data-slot="${i}"]`);
+  if(el && i !== _dragSlot) el.classList.add('drag-over-slot');
+}
+function slotDragLeave(e, i){
+  const el = document.querySelector(`[data-slot="${i}"]`);
+  if(el) el.classList.remove('drag-over-slot');
+}
+function slotDrop(e, i){
+  e.preventDefault();
+  document.querySelectorAll('.img-slot').forEach(s=>{
+    s.classList.remove('drag-over-slot');
+    s.classList.remove('dragging-slot');
+  });
+  if(_dragSlot === -1 || _dragSlot === i){ _dragSlot=-1; return; }
+  const tmp = editPhotos[_dragSlot] || '';
+  editPhotos[_dragSlot] = editPhotos[i] || '';
+  editPhotos[i] = tmp;
+  _dragSlot = -1;
+  renderImgSlots();
+  showToast('สลับรูปแล้ว ✦','t-gold');
 }
 function pickSlot(i){ curSlot=i; document.getElementById('fileInput').click(); }
 function handleImgUpload(e){
@@ -1453,7 +1509,35 @@ function deleteItem(id,mode){
 // OVERLAY HELPERS
 // ============================================================
 function closeOv(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
-function bgClose(e,id){ if(e.target===document.getElementById(id)) closeOv(id); }
+function bgClose(e,id){
+  // Only close if the click started AND ended on the background overlay
+  // Prevents accidental close when drag-selecting text inside the modal
+  if(e.target===document.getElementById(id) && e._startedOnBg) closeOv(id);
+}
+// Track where mousedown started so drag outside doesn't close modal
+document.addEventListener('mousedown', function(e){
+  // Mark overlays: did the press start on the overlay bg?
+  ['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && e.target===el) el._startedOnBg=true;
+    else if(el) el._startedOnBg=false;
+  });
+});
+// Proper overlay background close — only fires if drag started on bg
+(function(){
+  const OVS = ['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv'];
+  let _mdTarget = null;
+  document.addEventListener('mousedown', function(e){ _mdTarget = e.target; });
+  document.addEventListener('mouseup', function(e){
+    if(_mdTarget && e.target === _mdTarget) {
+      OVS.forEach(id=>{
+        const el = document.getElementById(id);
+        if(el && el.classList.contains('open') && e.target === el) closeOv(id);
+      });
+    }
+    _mdTarget = null;
+  });
+})();
 
 // ============================================================
 // TOAST
@@ -1612,6 +1696,150 @@ function saveCartToStorage(){
   }catch(e){}
 }
 
+// ============================================================
+// IMAGE CROP SYSTEM
+// ============================================================
+let _cropSlot   = -1;
+let _cropImg    = new Image();
+let _cropScale  = 1;
+let _cropAngle  = 0;
+let _cropFlipped = false;
+let _cropOffX   = 0;
+let _cropOffY   = 0;
+let _selX=0, _selY=0, _selW=0, _selH=0;
+let _dragging=false, _dragStartX=0, _dragStartY=0;
+let _panning=false, _panStartX=0, _panStartY=0, _panOffX=0, _panOffY=0;
+
+function openCrop(slot){
+  const src = editPhotos[slot];
+  if(!src) return;
+  _cropSlot  = slot;
+  _cropScale = 1;
+  _cropAngle = 0;
+  _cropFlipped = false;
+  _selW = 0; _selH = 0;
+  _cropImg = new Image();
+  _cropImg.onload = function(){
+    _cropOffX = 0; _cropOffY = 0;
+    drawCropCanvas();
+    document.getElementById('cropOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  _cropImg.src = src;
+}
+
+function closeCrop(){
+  document.getElementById('cropOverlay').classList.remove('open');
+  document.getElementById('cropSelection').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function drawCropCanvas(){
+  const container = document.getElementById('cropContainer');
+  const canvas    = document.getElementById('cropCanvas');
+  const size = Math.min(container.clientWidth || 500, container.clientHeight || 500, 560);
+  canvas.width  = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+  ctx.save();
+  ctx.translate(size/2 + _cropOffX, size/2 + _cropOffY);
+  ctx.rotate(_cropAngle * Math.PI/180);
+  if(_cropFlipped) ctx.scale(-1,1);
+  const scale = _cropScale * Math.min(size / _cropImg.width, size / _cropImg.height);
+  const w = _cropImg.width  * scale;
+  const h = _cropImg.height * scale;
+  ctx.drawImage(_cropImg, -w/2, -h/2, w, h);
+  ctx.restore();
+}
+
+function cropZoom(factor){
+  _cropScale = Math.max(0.2, Math.min(5, _cropScale * factor));
+  drawCropCanvas();
+}
+function cropRotate(deg){
+  _cropAngle = (_cropAngle + deg + 360) % 360;
+  drawCropCanvas();
+}
+function cropFlip(){
+  _cropFlipped = !_cropFlipped;
+  drawCropCanvas();
+}
+function resetCropSelection(){
+  _selW=0;_selH=0;
+  document.getElementById('cropSelection').style.display='none';
+}
+
+// Mouse events on crop container for drag-select and pan
+(function(){
+  let mode = null; // 'select' or 'pan'
+  document.addEventListener('DOMContentLoaded', setupCropEvents);
+  function setupCropEvents(){
+    const c = document.getElementById('cropContainer');
+    if(!c) return;
+    c.addEventListener('mousedown', function(e){
+      if(e.button===2){ mode='pan'; _panStartX=e.clientX; _panStartY=e.clientY; _panOffX=_cropOffX; _panOffY=_cropOffY; return; }
+      mode = 'select';
+      const r = c.getBoundingClientRect();
+      _selX = e.clientX - r.left;
+      _selY = e.clientY - r.top;
+      _selW = 0; _selH = 0;
+      _dragging = true;
+    });
+    c.addEventListener('mousemove', function(e){
+      if(mode==='pan' && e.buttons===2){
+        _cropOffX = _panOffX + (e.clientX - _panStartX);
+        _cropOffY = _panOffY + (e.clientY - _panStartY);
+        drawCropCanvas(); return;
+      }
+      if(!_dragging || mode!=='select') return;
+      const r = c.getBoundingClientRect();
+      _selW = (e.clientX - r.left) - _selX;
+      _selH = (e.clientY - r.top)  - _selY;
+      const sel = document.getElementById('cropSelection');
+      sel.style.display = 'block';
+      sel.style.left   = (Math.min(_selX, _selX+_selW)) + 'px';
+      sel.style.top    = (Math.min(_selY, _selY+_selH)) + 'px';
+      sel.style.width  = Math.abs(_selW) + 'px';
+      sel.style.height = Math.abs(_selH) + 'px';
+    });
+    c.addEventListener('mouseup', function(){ _dragging=false; mode=null; });
+    c.addEventListener('dblclick', function(){ resetCropSelection(); });
+    c.addEventListener('wheel', function(e){ e.preventDefault(); cropZoom(e.deltaY<0?1.1:0.9); });
+    c.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  }
+  // retry after modal is ready
+  setTimeout(setupCropEvents, 500);
+})();
+
+function applyCrop(){
+  const canvas  = document.getElementById('cropCanvas');
+  const outCanvas = document.createElement('canvas');
+  const ctx     = outCanvas.getContext('2d');
+  const hadSel  = Math.abs(_selW) > 10 && Math.abs(_selH) > 10;
+
+  if(hadSel){
+    // Crop the selected region
+    const x = Math.min(_selX, _selX+_selW);
+    const y = Math.min(_selY, _selY+_selH);
+    const w = Math.abs(_selW);
+    const h = Math.abs(_selH);
+    outCanvas.width  = w;
+    outCanvas.height = h;
+    ctx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+  } else {
+    // No selection — use full canvas (with rotation/flip applied)
+    outCanvas.width  = canvas.width;
+    outCanvas.height = canvas.height;
+    ctx.drawImage(canvas, 0, 0);
+  }
+
+  editPhotos[_cropSlot] = outCanvas.toDataURL('image/jpeg', 0.92);
+  renderImgSlots();
+  closeCrop();
+  showToast('ตัดรูปแล้ว ✦','t-gold');
+}
+
 // INIT — load from JSONBin cloud database
 loadItemsFromDB();
 updateBadges();
@@ -1625,7 +1853,7 @@ updateBadges();
 </div>
 
 <!-- REPORT FORM (customer) -->
-<div class="auth-overlay" id="reportFormOv" onclick="bgClose(event,'reportFormOv')">
+<div class="auth-overlay" id="reportFormOv">
   <div class="auth-box">
     <button class="auth-close" onclick="closeOv('reportFormOv')">✕</button>
     <div class="auth-title">📋 รายงานปัญหา</div>
@@ -1648,7 +1876,7 @@ updateBadges();
 </div>
 
 <!-- REPORTS INBOX (admin) -->
-<div class="auth-overlay" id="reportsOv" onclick="bgClose(event,'reportsOv')">
+<div class="auth-overlay" id="reportsOv">
   <div class="auth-box" style="max-width:500px">
     <button class="auth-close" onclick="closeOv('reportsOv')">✕</button>
     <div class="auth-title" style="margin-bottom:1rem">📋 Reports Inbox</div>
