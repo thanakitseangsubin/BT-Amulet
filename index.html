@@ -359,25 +359,50 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:1.6rem
 ::placeholder{color:var(--text-muted)}
 select option{background:var(--dark4)}
 @media(max-width:680px){
+  /* Layout */
   .modal-body,.sell-grid,.about-grid{grid-template-columns:1fr}
   .form-row,.buy-contact-grid{grid-template-columns:1fr}
+
+  /* Items grid — 2 per row */
   .items-grid{grid-template-columns:1fr 1fr !important;gap:0.55rem}
   .item-body{padding:0.6rem 0.65rem 0.4rem}
   .item-footer{padding:0.5rem 0.65rem;gap:3px}
-  .item-name-th{font-size:0.8rem}
-  .item-name-en{font-size:0.6rem;display:none}
+  .item-name-th{font-size:0.78rem}
+  .item-name-en{display:none}
   .item-era{font-size:0.6rem}
-  .item-price{font-size:0.82rem}
+  .item-price{font-size:0.8rem}
   .item-btns{gap:3px}
-  .item-action{padding:4px 6px;font-size:0.52rem}
+  .item-action{padding:4px 6px;font-size:0.5rem;letter-spacing:0}
   .item-cart-btn{width:22px;height:22px;font-size:0.7rem}
+
+  /* Filter bar — horizontal scroll so pills don't wrap and break layout */
+  .grid-toolbar{flex-direction:column;align-items:stretch;gap:0.5rem}
+  .filter-bar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-btn{flex-shrink:0;white-space:nowrap;font-size:0.6rem;padding:5px 10px}
+
+  /* Sort button — full width on mobile */
+  .toolbar-right{justify-content:flex-end;width:100%}
+  .sort-dropdown{right:0;left:auto;min-width:160px}
+  .admin-add-btn{font-size:0.6rem;padding:5px 10px}
+
+  /* Mode buttons */
   .mode-split{grid-template-columns:1fr 1fr 1fr;max-width:100%}
-  .mode-btn{padding:1rem 0.5rem}
-  .mode-icon{font-size:1.4rem}
-  .mode-th{font-size:0.85rem}
-  .mode-en{font-size:0.7rem}
-  .mode-sub{font-size:0.5rem}
+  .mode-btn{padding:0.9rem 0.4rem}
+  .mode-icon{font-size:1.3rem;margin-bottom:0.3rem}
+  .mode-th{font-size:0.78rem}
+  .mode-en{font-size:0.62rem}
+  .mode-sub{font-size:0.48rem;letter-spacing:0.04em}
+
+  /* Nav */
   .nav-center{display:none}
+  .nav-right{gap:4px}
+  .nav-messenger{padding:5px 8px;font-size:0.55rem}
+  .nav-btn{padding:5px 8px;font-size:0.58rem}
+  .nav-login-btn{padding:5px 7px;font-size:0.55rem}
+  .nav-report-btn{display:none}
+
+  /* About */
   .about-strip{padding:2.5rem 1rem}
   .about-grid{grid-template-columns:1fr;text-align:center;padding:0}
   .about-text h2,.about-text p,.thai-quote{text-align:center}
@@ -386,6 +411,17 @@ select option{background:var(--dark4)}
   .feature{flex-direction:column;align-items:center;text-align:center;gap:0.5rem}
   .feature-icon{margin-top:0}
   .contact-grid{grid-template-columns:1fr 1fr}
+
+  /* Category bar — scroll */
+  .cat-grid{grid-template-columns:repeat(6,minmax(80px,1fr));overflow-x:auto}
+  .cat-card{padding:0.9rem 0.3rem}
+  .cat-icon{font-size:1.2rem}
+  .cat-name-th{font-size:0.68rem}
+  .cat-name-en{font-size:0.58rem}
+
+  /* Section header tighter on mobile */
+  section,div.sec{padding:2rem 0.9rem}
+  .section-header{margin-bottom:1.5rem}
 }
 </style>
 </head>
@@ -398,6 +434,7 @@ select option{background:var(--dark4)}
     <button class="abar-btn" onclick="openAddItem(null)">＋ ADD ITEM</button>
     <button class="abar-btn" onclick="togglePenMode()" id="penModeBtn">✏️ PEN EDIT</button>
     <button class="abar-btn" onclick="openReports()">📋 REPORTS<span class="report-dot" id="reportDot">0</span></button>
+    <button class="abar-btn" onclick="fixDatabaseStructure()" style="border-color:rgba(127,255,192,0.4);color:var(--buy)">🔧 FIX DATA</button>
     <button class="abar-btn red" onclick="logoutAdmin()">LOGOUT</button>
   </div>
 </div>
@@ -1185,22 +1222,26 @@ function doLogin(){
   if(u===ADMIN_USER&&p===ADMIN_PASS){
     isAdmin=true;
     document.getElementById('adminBar').classList.add('show');
-    document.getElementById('loginNavBtn').textContent='⬡ ADMIN'; document.getElementById('loginNavBtn').classList.add('admin-on');
+    document.getElementById('loginNavBtn').textContent='⬡ ADMIN';
+    document.getElementById('loginNavBtn').classList.add('admin-on');
     document.getElementById('adminAddBtn').classList.add('show');
-    closeOv('loginOv'); showToast('เข้าสู่ระบบแอดมินแล้ว ✦','t-gold');
-    if(curMode==='buy') renderBuyGrid();
-    if(curMode==='sell') renderGrid('soldGrid',SOLD,'sell');
+    // Save session so admin stays logged in after refresh
+    try{ sessionStorage.setItem('bantae_admin','1'); }catch(e){}
+    closeOv('loginOv');
+    showToast('เข้าสู่ระบบแอดมินแล้ว ✦','t-gold');
+    renderAll();
   } else if(u||p){ showToast('รหัสผ่านไม่ถูกต้อง','t-sell'); }
   else closeOv('loginOv');
 }
 function logoutAdmin(){
   isAdmin=false; penMode=false;
+  try{ sessionStorage.removeItem('bantae_admin'); }catch(e){}
   document.getElementById('adminBar').classList.remove('show');
-  document.getElementById('loginNavBtn').textContent='LOGIN'; document.getElementById('loginNavBtn').classList.remove('admin-on');
+  document.getElementById('loginNavBtn').textContent='LOGIN';
+  document.getElementById('loginNavBtn').classList.remove('admin-on');
   document.getElementById('adminAddBtn').classList.remove('show');
   disablePen();
-  if(curMode==='buy') renderBuyGrid();
-  if(curMode==='sell') renderGrid('soldGrid',SOLD,'sell');
+  renderAll();
   showToast('ออกจากระบบแล้ว','t-gold');
 }
 
@@ -1612,19 +1653,31 @@ async function loadItemsFromDB() {
       const data = await res.json();
       ITEMS = (data.items || []).map(normalizeItem);
       SOLD  = (data.sold  || []).map(normalizeItem);
-      try { localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD})); } catch(e){}
-      console.log('Loaded from JSONBin:', ITEMS.length, 'items,', SOLD.length, 'sold');
+      // Always update cache so next page load is instant
+      try {
+        localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD}));
+        console.log('✅ JSONBin loaded:', ITEMS.length, 'items,', SOLD.length, 'sold');
+      } catch(e){}
     } else {
       throw new Error('HTTP ' + res.status);
     }
   } catch(e) {
-    console.warn('JSONBin load failed:', e.message, '— trying cache');
-    try {
-      const c = JSON.parse(localStorage.getItem('bantae_cache') || 'null');
-      if (c) { ITEMS = (c.items||[]).map(normalizeItem); SOLD = (c.sold||[]).map(normalizeItem); }
-    } catch(e2) {}
+    // JSONBin failed — keep whatever is currently in ITEMS (cache or defaults)
+    // Don't overwrite with empty arrays!
+    console.warn('JSONBin load failed:', e.message, '— keeping current items');
+    // Only try cache if ITEMS is still the built-in defaults (length <= 6)
+    if(ITEMS.length <= 6){
+      try {
+        const c = JSON.parse(localStorage.getItem('bantae_cache') || 'null');
+        if(c && c.items && c.items.length > 0){
+          ITEMS = c.items.map(normalizeItem);
+          SOLD  = (c.sold||[]).map(normalizeItem);
+          console.log('Using cache:', ITEMS.length, 'items');
+        }
+      } catch(e2) {}
+    }
   }
-  renderAll();  // update with real data
+  renderAll();
 }
 
 // ── JSONBin: save items to cloud ─────────────────────────────────
@@ -1645,8 +1698,11 @@ async function saveItemsToDB() {
       showToast('บันทึกไม่สำเร็จ: ' + res.status, 't-sell');
       return false;
     }
-    // Update local cache for offline fallback
-    try { localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD})); } catch(e){}
+    // Update local cache — this is what shows instantly on next page load
+    try {
+      localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD}));
+      console.log('Saved to JSONBin + cache:', ITEMS.length, 'items');
+    } catch(e){}
     return true;
   } catch(e) {
     console.error('JSONBin save exception:', e);
@@ -1657,7 +1713,7 @@ async function saveItemsToDB() {
 
 function normalizeItem(it) {
   return {
-    id: it.id || Math.floor(Math.random()*900000+100000),
+    id: Number(it.id) || Math.floor(Math.random()*900000+100000),
     cat: it.cat||'', badge: it.badge||'',
     nameTh: it.nameTh||'', nameEn: it.nameEn||'',
     age: it.age||'', origin: it.origin||'',
@@ -1839,10 +1895,67 @@ function applyCrop(){
   showToast('ตัดรูปแล้ว ✦','t-gold');
 }
 
-// INIT — show items immediately, then update from JSONBin
-renderGrid('defaultGrid', ITEMS, 'buy');  // instant render with defaults
-updateBadges();                            // restore cart badge
-loadItemsFromDB();                         // then fetch real data from cloud
+// ============================================================
+// FIX DATABASE — repairs wrong data structure in JSONBin
+// ============================================================
+async function fixDatabaseStructure(){
+  if(!confirm('ตรวจสอบและแก้ไขข้อมูลใน JSONBin?\nThis will move any non-sold items from sold[] back to items[]')) return;
+  showToast('กำลังตรวจสอบข้อมูล...','t-gold');
+
+  // Move items in SOLD that are NOT actually sold back to ITEMS
+  const trulySold  = SOLD.filter(it => it.badge === 'SOLD');
+  const wronglySold = SOLD.filter(it => it.badge !== 'SOLD');
+
+  if(wronglySold.length > 0){
+    wronglySold.forEach(it => ITEMS.push(it));
+    SOLD = trulySold;
+    showToast(`ย้าย ${wronglySold.length} รายการกลับมา items ✦`,'t-buy');
+  }
+
+  // If items[] is empty and sold[] has items, something is wrong - ask user
+  if(ITEMS.length === 0 && SOLD.length > 0){
+    if(confirm(`items ว่างเปล่า มี ${SOLD.length} รายการใน sold\nย้ายทั้งหมดกลับมาเป็น items?\nMove all back to available items?`)){
+      ITEMS = [...SOLD];
+      ITEMS.forEach(it => { it.badge = it.badge === 'SOLD' ? '' : it.badge; });
+      SOLD = [];
+    }
+  }
+
+  const ok = await saveItemsToDB();
+  if(ok){
+    renderAll();
+    showToast(`✅ แก้ไขแล้ว — items:${ITEMS.length} sold:${SOLD.length}`,'t-buy');
+  }
+}
+
+// INIT — restore state and show items immediately
+// 1. Restore admin session if was logged in before refresh
+try{
+  if(sessionStorage.getItem('bantae_admin')==='1'){
+    isAdmin=true;
+    document.getElementById('adminBar').classList.add('show');
+    document.getElementById('loginNavBtn').textContent='⬡ ADMIN';
+    document.getElementById('loginNavBtn').classList.add('admin-on');
+    document.getElementById('adminAddBtn').classList.add('show');
+  }
+}catch(e){}
+
+// 2. Show items instantly (default or cached)
+try{
+  const cached = localStorage.getItem('bantae_cache');
+  if(cached){
+    const c = JSON.parse(cached);
+    if(c.items && c.items.length) ITEMS = c.items.map(normalizeItem);
+    if(c.sold  && c.sold.length)  SOLD  = c.sold.map(normalizeItem);
+  }
+}catch(e){}
+renderGrid('defaultGrid', ITEMS, 'buy');
+
+// 3. Restore cart badge
+updateBadges();
+
+// 4. Silently fetch latest from JSONBin in background
+loadItemsFromDB();
 </script>
 
 <!-- Page drop hint overlay -->
