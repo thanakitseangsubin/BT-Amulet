@@ -862,32 +862,56 @@ select option{background:var(--dark4)}
       <div class="form-group"><div class="form-label">รายละเอียด / DESCRIPTION</div><textarea class="form-input" id="fi_desc" style="min-height:90px" placeholder="อธิบายรายละเอียดพระ..."></textarea></div>
       <!-- Excel/CSV import -->
       <div id="excelZone" onclick="document.getElementById('excelInput').click()"
-           ondragover="event.preventDefault();this.style.background='rgba(26,58,42,0.4)'" 
-           ondragleave="this.style.background=''" 
+           ondragover="event.preventDefault();this.style.background='rgba(26,58,42,0.4)'"
+           ondragleave="this.style.background=''"
            ondrop="event.preventDefault();this.style.background='';handleExcelDrop(event)"
            style="border:1px dashed rgba(127,255,192,0.35);background:rgba(26,58,42,0.12);padding:0.9rem;text-align:center;cursor:pointer;margin-bottom:10px;transition:background 0.2s">
         <div style="font-size:1.2rem;margin-bottom:0.25rem">📊</div>
         <div style="font-family:Cinzel,serif;font-size:0.63rem;letter-spacing:0.08em;color:var(--buy);margin-bottom:0.2rem">IMPORT FROM EXCEL / CSV</div>
-        <div style="font-size:0.67rem;color:var(--text-muted);line-height:1.55">บันทึก Excel เป็น CSV ก่อน แล้วลากมาที่นี่ หรือคลิกเลือกไฟล์<br/>Columns: nameTh, nameEn, price, cat, age, origin, material, size, condition, badge, desc</div>
+        <div style="font-size:0.67rem;color:var(--text-muted);line-height:1.55">บันทึก Excel เป็น CSV ก่อน · Columns: nameTh, nameEn, price, cat, age, origin, material, size, condition, badge, desc</div>
       </div>
       <input type="file" id="excelInput" accept=".csv" style="display:none" onchange="handleExcelFile(event)"/>
-      <!-- Drag-drop image zone -->
-      <div id="dragImgZone" onclick="document.getElementById('fileInput').click()"
-           ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.07)'"
-           ondragleave="this.style.borderColor='';this.style.background=''"
-           ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';dropImgsHandler(event)"
-           style="border:2px dashed var(--border-b);background:var(--dark4);padding:1.2rem;text-align:center;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
-        <div style="font-size:1.5rem;margin-bottom:0.3rem">📷</div>
-        <div style="font-family:Cinzel,serif;font-size:0.63rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.2rem">ลากรูปภาพมาที่นี่ · DRAG PHOTOS HERE</div>
-        <div style="font-size:0.68rem;color:var(--text-muted)">วางได้หลายรูปพร้อมกัน · Drop multiple images at once (up to 6)</div>
+
+      <!-- Photo URL inputs -->
+      <div style="background:rgba(0,132,255,0.07);border:1px solid rgba(0,132,255,0.2);padding:0.85rem;margin-bottom:8px;border-radius:2px">
+        <div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:#7BB8FF;margin-bottom:0.4rem">📷 วิธีใส่รูปภาพ · HOW TO ADD PHOTOS</div>
+        <div style="font-size:0.75rem;color:#9A8E6A;line-height:1.75;font-family:'Sarabun',sans-serif">
+          1. ไปที่ <a href="https://imgur.com" target="_blank" style="color:#7FFFC0;text-decoration:none">imgur.com</a> หรือ <a href="https://postimages.org" target="_blank" style="color:#7FFFC0;text-decoration:none">postimages.org</a> (ฟรี ไม่ต้อง login)<br/>
+          2. อัปโหลดรูป → คลิกขวาที่รูป → <strong style="color:#F0E8D0">Copy image address</strong><br/>
+          3. วาง URL ด้านล่าง — รูปจะขึ้นทันที ไม่กินพื้นที่ JSONBin
+        </div>
       </div>
-      <div class="form-label" style="margin-bottom:6px">รูปภาพ / PHOTOS (up to 6)</div>
-      <div class="img-upload-grid" id="imgSlots"></div>
+      <div class="form-label" style="margin-bottom:6px">URL รูปภาพ · PHOTO URLS (สูงสุด 6 รูป / up to 6)</div>
+      <div id="imgUrlInputs"></div>
+      <button onclick="addImgUrlSlot()" style="background:none;border:1px dashed var(--border-b);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.07em;padding:6px 14px;cursor:pointer;margin-top:4px;margin-bottom:8px;width:100%;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='';this.style.color=''">+ เพิ่ม URL รูปภาพ</button>
+
+      <!-- Fallback: drag & drop compressed -->
+      <details style="margin-bottom:6px">
+        <summary style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--text-muted);cursor:pointer;padding:4px 0">หรือลากรูปโดยตรง (บีบอัดอัตโนมัติ แต่กินพื้นที่ JSONBin) ▶</summary>
+        <div id="dragImgZone" onclick="document.getElementById('fileInput').click()"
+             ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.07)'"
+             ondragleave="this.style.borderColor='';this.style.background=''"
+             ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';dropImgsHandler(event)"
+             style="border:1px dashed var(--border);background:var(--dark4);padding:0.85rem;text-align:center;cursor:pointer;margin-top:6px;transition:all 0.2s">
+          <div style="font-size:1.1rem;margin-bottom:0.2rem">📁</div>
+          <div style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--text-muted)">ลากรูปมาที่นี่ · Drag & drop (auto-compressed)</div>
+        </div>
+        <div class="img-upload-grid" id="imgSlots" style="margin-top:6px"></div>
+      </details>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleImgUpload(event)"/>
     </div>
-    <div class="ai-foot">
-      <button class="btn-cancel" onclick="closeOv('aiOv')">CANCEL</button>
-      <button class="btn-save" onclick="saveItem()">💾 SAVE ITEM</button>
+    <div class="ai-foot" style="flex-direction:column;gap:8px">
+      <!-- KB usage bar -->
+      <div id="kbBar" style="width:100%;background:var(--dark4);border:1px solid var(--border);padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="flex:1;height:6px;background:var(--dark);border-radius:3px;overflow:hidden">
+          <div id="kbFill" style="height:100%;border-radius:3px;background:var(--gold);width:0%;transition:width 0.3s,background 0.3s"></div>
+        </div>
+        <div id="kbText" style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.06em;color:var(--text-muted);flex-shrink:0">0 / 100 KB</div>
+      </div>
+      <div style="display:flex;gap:8px;width:100%">
+        <button class="btn-cancel" onclick="closeOv('aiOv')">CANCEL</button>
+        <button class="btn-save" onclick="saveItem()">💾 SAVE ITEM &nbsp;(Enter)</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1325,8 +1349,61 @@ function openAddItem(id){
     }
   }
   renderImgSlots();
+  renderImgUrlInputs();
+  updateKBBar();
   document.getElementById('aiOv').classList.add('open');
   document.body.style.overflow='hidden';
+}
+
+// ── URL-based image input system ────────────────────────────────
+function renderImgUrlInputs(){
+  const container = document.getElementById('imgUrlInputs');
+  if(!container) return;
+  // editPhotos holds either base64 OR external URLs
+  const slots = editPhotos.length < 1 ? [''] : [...editPhotos, ''];
+  const display = slots.slice(0, 7); // max 6 filled + 1 empty add slot
+  container.innerHTML = display.map((url, i) => {
+    if(i >= 6) return '';
+    return `<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
+      ${url ? `<img src="${url}" style="width:40px;height:40px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);cursor:pointer" onclick="previewUrl('${url.replace(/'/g,"&#39;")}')" onerror="this.style.display='none'" title="Click to preview"/>` : `<div style="width:40px;height:40px;flex-shrink:0;background:var(--dark4);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--text-muted)">📷</div>`}
+      <input type="text" class="form-input" style="flex:1;font-size:0.82rem;padding:7px 10px"
+        placeholder="https://i.imgur.com/xxxxx.jpg"
+        value="${url || ''}"
+        onchange="updateImgUrl(${i}, this.value.trim())"
+        onpaste="setTimeout(()=>updateImgUrl(${i}, this.value.trim()), 50)"
+      />
+      ${url ? `<button onclick="removeImgUrl(${i})" style="background:none;border:none;color:#ff8080;font-size:1rem;cursor:pointer;flex-shrink:0;padding:0 4px">✕</button>` : ''}
+    </div>`;
+  }).join('');
+  updateKBBar();
+}
+
+function addImgUrlSlot(){
+  if(editPhotos.length >= 6){ showToast('สูงสุด 6 รูป','t-gold'); return; }
+  editPhotos.push('');
+  renderImgUrlInputs();
+  renderImgSlots();
+}
+
+function updateImgUrl(i, url){
+  if(!url){ editPhotos[i] = ''; }
+  else { editPhotos[i] = url; }
+  // Update thumbnail preview without re-rendering all inputs
+  const imgs = document.querySelectorAll('#imgUrlInputs img, #imgUrlInputs div.thumb-placeholder');
+  renderImgUrlInputs();
+  renderImgSlots();
+  updateKBBar();
+}
+
+function removeImgUrl(i){
+  editPhotos.splice(i, 1);
+  renderImgUrlInputs();
+  renderImgSlots();
+  updateKBBar();
+}
+
+function previewUrl(url){
+  window.open(url, '_blank');
 }
 
 function renderImgSlots(){
@@ -1358,9 +1435,36 @@ function renderImgSlots(){
       </div>`;
     }
   }).join('');
+  updateKBBar();
 }
 
 // ── Drag-to-reorder image slots ─────────────────────────────────
+// Update KB usage bar in add/edit modal
+function updateKBBar(){
+  // Calculate current total data size (items + sold + new item photos)
+  const existingPayload = JSON.stringify({ items: ITEMS, sold: SOLD });
+  const existingKB = Math.round(existingPayload.length / 1024);
+
+  // Photos: URLs are tiny (~50 chars), base64 is large
+  const photosBytes = editPhotos.filter(Boolean).reduce((sum, p) => sum + p.length, 0);
+  const photosKB = Math.round(photosBytes / 1024);
+  const totalKB = existingKB + photosKB;
+  const limitKB = 100;
+  const pct = Math.min(100, Math.round(totalKB / limitKB * 100));
+
+  const fill = document.getElementById('kbFill');
+  const text = document.getElementById('kbText');
+  if(!fill || !text) return;
+
+  fill.style.width = pct + '%';
+  text.textContent = totalKB + ' / ' + limitKB + ' KB';
+
+  // Color: green → yellow → red
+  if(pct < 60)       { fill.style.background = 'var(--gold)';   text.style.color = 'var(--text-muted)'; }
+  else if(pct < 85)  { fill.style.background = '#FFB347';       text.style.color = '#FFB347'; }
+  else               { fill.style.background = '#E53E3E';       text.style.color = '#ff8080'; }
+}
+
 let _dragSlot = -1;
 function slotDragStart(e, i){
   _dragSlot = i;
@@ -1401,9 +1505,11 @@ function handleImgUpload(e){
   files.forEach(file=>{
     const r=new FileReader();
     r.onload=ev=>{
-      let slot=editPhotos.findIndex(p=>!p);
-      if(slot<0) slot=editPhotos.length;
-      if(slot<6){editPhotos[slot]=ev.target.result; renderImgSlots();}
+      compressImage(ev.target.result, 500, 0.65).then(compressed=>{
+        let slot=editPhotos.findIndex(p=>!p);
+        if(slot<0) slot=editPhotos.length;
+        if(slot<6){ editPhotos[slot]=compressed; renderImgSlots(); }
+      });
     };
     r.readAsDataURL(file);
   });
@@ -1414,9 +1520,11 @@ function dropImgsHandler(e){
   files.forEach(file=>{
     const r=new FileReader();
     r.onload=ev=>{
-      let slot=editPhotos.findIndex(p=>!p);
-      if(slot<0) slot=editPhotos.length;
-      if(slot<6){editPhotos[slot]=ev.target.result; renderImgSlots();}
+      compressImage(ev.target.result, 500, 0.65).then(compressed=>{
+        let slot=editPhotos.findIndex(p=>!p);
+        if(slot<0) slot=editPhotos.length;
+        if(slot<6){ editPhotos[slot]=compressed; renderImgSlots(); }
+      });
     };
     r.readAsDataURL(file);
   });
@@ -1559,6 +1667,36 @@ function deleteItem(id,mode){
 // OVERLAY HELPERS
 // ============================================================
 function closeOv(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+
+// Enter key saves item when add/edit modal is open
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey) {
+    const aiOv = document.getElementById('aiOv');
+    // Only if add/edit modal is open AND not in a textarea
+    if(aiOv && aiOv.classList.contains('open') && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      saveItem();
+    }
+    // Enter on login form
+    const loginOv = document.getElementById('loginOv');
+    if(loginOv && loginOv.classList.contains('open') && e.target.tagName !== 'TEXTAREA') {
+      const u = document.getElementById('lusr');
+      const p = document.getElementById('lpwd');
+      if(e.target === u) { p.focus(); e.preventDefault(); }
+      else if(e.target === p) { doLogin(); e.preventDefault(); }
+    }
+  }
+  // Escape closes any open modal
+  if(e.key === 'Escape') {
+    ['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv','cropOverlay'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && (el.classList.contains('open') || el.style.display==='flex')) {
+        if(id === 'cropOverlay') closeCrop();
+        else closeOv(id);
+      }
+    });
+  }
+});
 function bgClose(e,id){
   // Only close if the click started AND ended on the background overlay
   // Prevents accidental close when drag-selecting text inside the modal
@@ -1693,6 +1831,14 @@ async function loadItemsFromDB() {
 async function saveItemsToDB() {
   try {
     const payload = JSON.stringify({ items: ITEMS, sold: SOLD });
+    // Warn if data is too large for JSONBin free tier (100KB)
+    const sizeKB = Math.round(payload.length / 1024);
+    if (sizeKB > 90) {
+      console.warn(`Data size: ${sizeKB}KB — approaching JSONBin 100KB limit`);
+      showToast(`ข้อมูล ${sizeKB}KB — ใกล้ถึงขีดจำกัด 100KB`, 't-sell');
+    } else {
+      console.log(`Saving ${sizeKB}KB to JSONBin...`);
+    }
     const res = await fetch(JB_URL, {
       method: 'PUT',
       headers: {
@@ -1718,6 +1864,30 @@ async function saveItemsToDB() {
     showToast('บันทึกไม่สำเร็จ: ' + e.message, 't-sell');
     return false;
   }
+}
+
+// Compress image to fit JSONBin 100KB limit
+// maxSize: max width/height in px, quality: 0-1 JPEG quality
+function compressImage(dataURL, maxSize=500, quality=0.65) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      // Scale down if larger than maxSize
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else       { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataURL); // fallback
+    img.src = dataURL;
+  });
 }
 
 function normalizeItem(it) {
@@ -1898,10 +2068,14 @@ function applyCrop(){
     ctx.drawImage(canvas, 0, 0);
   }
 
-  editPhotos[_cropSlot] = outCanvas.toDataURL('image/jpeg', 0.92);
-  renderImgSlots();
-  closeCrop();
-  showToast('ตัดรูปแล้ว ✦','t-gold');
+  // Compress after crop too
+  const cropData = outCanvas.toDataURL('image/jpeg', 0.92);
+  compressImage(cropData, 500, 0.65).then(compressed => {
+    editPhotos[_cropSlot] = compressed;
+    renderImgSlots();
+    closeCrop();
+    showToast('ตัดรูปแล้ว ✦','t-gold');
+  });
 }
 
 // ============================================================
