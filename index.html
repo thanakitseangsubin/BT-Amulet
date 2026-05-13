@@ -234,6 +234,8 @@ textarea.form-input{min-height:75px;resize:vertical}
 .contact-info-strip{background:var(--dark2);border-top:1px solid var(--border);padding:2.5rem 1.5rem;text-align:center}
 .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1.1rem;max-width:860px;margin:0 auto}
 .contact-card{background:var(--dark3);border:1px solid var(--border);padding:1.25rem;text-align:center}
+.contact-card-link{display:block;text-decoration:none;transition:border-color 0.2s,transform 0.2s,background 0.2s;cursor:pointer}
+.contact-card-link:hover{border-color:var(--border-b);transform:translateY(-3px);background:var(--dark4)}
 .contact-card-icon{font-size:1.4rem;margin-bottom:0.45rem;display:flex;align-items:center;justify-content:center}
 .contact-card-label{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.11em;color:var(--text-muted);margin-bottom:0.3rem}
 .contact-card-val{font-family:'Sarabun',sans-serif;font-size:0.92rem;color:var(--gold);font-weight:500}
@@ -471,6 +473,7 @@ select option{background:var(--dark4)}
     <button class="nav-btn" onclick="setMode('sell')">💰 ขาย</button>
     <button class="nav-report-btn" onclick="openReportForm()">รายงานปัญหา</button>
     <button class="nav-login-btn" id="loginNavBtn" onclick="openLogin()">LOGIN</button>
+    <button onclick="toggleLang()" id="langBtn" style="background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.07em;padding:5px 10px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="if(!window._isEng){this.style.borderColor='';this.style.color=''}">🌐 EN</button>
   </div>
 </nav>
 
@@ -486,21 +489,21 @@ select option{background:var(--dark4)}
   <div class="mode-split">
     <div class="mode-btn buy-btn" id="buyModeBtn" onclick="setMode('buy')">
       <span class="mode-icon">🔍</span>
-      <div class="mode-th">กำลังหา</div>
-      <div class="mode-en">Looking to Buy</div>
-      <div class="mode-sub">BROWSE COLLECTION</div>
+      <div class="mode-th" id="buyModeTh">กำลังหา</div>
+      <div class="mode-en" id="buyModeEn">Looking to Buy</div>
+      <div class="mode-sub" id="buyModeSub">BROWSE COLLECTION</div>
     </div>
     <div class="mode-btn sell-btn" id="sellModeBtn" onclick="setMode('sell')">
       <span class="mode-icon">💰</span>
-      <div class="mode-th">ต้องการขาย</div>
-      <div class="mode-en">Want to Sell</div>
-      <div class="mode-sub">SELL YOUR AMULET</div>
+      <div class="mode-th" id="sellModeTh">ต้องการขาย</div>
+      <div class="mode-en" id="sellModeEn">Want to Sell</div>
+      <div class="mode-sub" id="sellModeSub">SELL YOUR AMULET</div>
     </div>
     <div class="mode-btn sold-btn" onclick="setMode('sold')" id="soldModeBtn">
       <span class="mode-icon">🏆</span>
-      <div class="mode-th" style="color:var(--gold)">ขายแล้ว</div>
-      <div class="mode-en">Previously Sold</div>
-      <div class="mode-sub" style="color:rgba(201,168,76,0.45)">SEE SOLD ITEMS</div>
+      <div class="mode-th" id="soldModeTh" style="color:var(--gold)">ขายแล้ว</div>
+      <div class="mode-en" id="soldModeEn">Previously Sold</div>
+      <div class="mode-sub" id="soldModeSub" style="color:rgba(201,168,76,0.45)">SEE SOLD ITEMS</div>
     </div>
   </div>
 </section>
@@ -510,9 +513,9 @@ select option{background:var(--dark4)}
   <div class="container">
     <div class="section-header">
       <div class="sec-eye">คอลเลกชัน — COLLECTION</div>
-      <div class="sec-title-th">พระเครื่องทั้งหมด</div>
+      <div class="sec-title-th" id="collectionTitleEl">พระเครื่องทั้งหมด</div>
       <div class="sec-title-en">All Sacred Amulets</div>
-      <div class="sec-sub">คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy</div>
+      <div class="sec-sub" id="collectionSubEl">คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy</div>
       <div class="sec-line"></div>
     </div>
     <div class="items-grid" id="defaultGrid"></div>
@@ -655,7 +658,7 @@ select option{background:var(--dark4)}
               &nbsp; ติดต่อแอดมิน · CONTACT ADMIN ON MESSENGER
             </a>
           </div>
-          <button style="margin-top:7px" class="btn-outline-gold" onclick="showToast('ส่งแบบฟอร์มแล้ว! เราจะติดต่อใน 48 ชม.','t-sell')">ส่งแบบฟอร์ม · SUBMIT FORM</button>
+          <button style="margin-top:7px" class="btn-outline-gold" onclick="submitSellForm()">ส่งแบบฟอร์ม · SUBMIT FORM</button>
         </div>
       </div>
     </div>
@@ -689,40 +692,34 @@ select option{background:var(--dark4)}
       <div class="sec-line"></div>
     </div>
     <div class="contact-grid">
-      <div class="contact-card">
+      <a class="contact-card contact-card-link" href="tel:0839879659">
         <div class="contact-card-icon">📞</div>
         <div class="contact-card-label">PHONE / โทรศัพท์</div>
-        <div class="contact-card-val" id="contactPhone"><a href="tel:0839879659">083 987 9659</a></div>
+        <div class="contact-card-val" id="contactPhone">083 987 9659 →</div>
         <div class="contact-card-sub">โทร / LINE / WhatsApp</div>
-      </div>
-      <div class="contact-card">
+      </a>
+      <a class="contact-card contact-card-link" href="https://www.google.com/maps/search/Nakhon+Ratchasima" target="_blank">
         <div class="contact-card-icon">📍</div>
         <div class="contact-card-label">LOCATION / ที่ตั้ง</div>
-        <div class="contact-card-val"><a href="https://www.google.com/maps/search/Nakhon+Ratchasima" target="_blank">นครราชสีมา</a></div>
+        <div class="contact-card-val">นครราชสีมา →</div>
         <div class="contact-card-sub">Nakhon Ratchasima, Thailand<br/>ส่งไวทั้งในไทยและต่างประเทศ</div>
-      </div>
-      <div class="contact-card">
-        <!-- Real Messenger logo SVG -->
+      </a>
+      <a class="contact-card contact-card-link" href="https://m.me/100068843867509" target="_blank">
         <div class="contact-card-icon">
-          <svg class="logo-messenger" viewBox="0 0 24 24" fill="#0084FF" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/>
-          </svg>
+          <svg class="logo-messenger" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
         </div>
         <div class="contact-card-label">MESSENGER</div>
-        <div class="contact-card-val"><a href="https://m.me/100068843867509" target="_blank">คุยกับเราได้เลย</a></div>
+        <div class="contact-card-val" style="color:var(--buy)">คุยกับเราได้เลย →</div>
         <div class="contact-card-sub">Chat directly · ตอบไว</div>
-      </div>
-      <div class="contact-card">
-        <!-- Real Facebook logo SVG -->
+      </a>
+      <a class="contact-card contact-card-link" href="https://www.facebook.com/profile.php?id=100068843867509" target="_blank">
         <div class="contact-card-icon">
-          <svg class="logo-facebook" viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
-            <path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.883v2.27h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
-          </svg>
+          <svg class="logo-facebook" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.883v2.27h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
         </div>
         <div class="contact-card-label">FACEBOOK PAGE</div>
-        <div class="contact-card-val"><a href="https://www.facebook.com/profile.php?id=100068843867509" target="_blank">พระเครื่องบ้านแต้</a></div>
+        <div class="contact-card-val" style="color:#7EB8FF">พระเครื่องบ้านแต้ →</div>
         <div class="contact-card-sub">ติดตามคอลเลกชันใหม่</div>
-      </div>
+      </a>
     </div>
   </div>
 </div>
@@ -868,17 +865,28 @@ select option{background:var(--dark4)}
            style="border:1px dashed rgba(127,255,192,0.35);background:rgba(26,58,42,0.12);padding:0.9rem;text-align:center;cursor:pointer;margin-bottom:10px;transition:background 0.2s">
         <div style="font-size:1.2rem;margin-bottom:0.25rem">📊</div>
         <div style="font-family:Cinzel,serif;font-size:0.63rem;letter-spacing:0.08em;color:var(--buy);margin-bottom:0.2rem">IMPORT FROM EXCEL / CSV</div>
-        <div style="font-size:0.67rem;color:var(--text-muted);line-height:1.55">บันทึก Excel เป็น CSV ก่อน · Columns: nameTh, nameEn, price, cat, age, origin, material, size, condition, badge, desc</div>
+        <div style="font-size:0.67rem;color:var(--text-muted);line-height:1.55">บันทึก Excel เป็น CSV ก่อน · Columns: nameTh, nameEn, price, cat, age, origin, material, size, condition, badge, desc, img1, img2, img3 (Imgur/PostImage URLs)</div>
       </div>
       <input type="file" id="excelInput" accept=".csv" style="display:none" onchange="handleExcelFile(event)"/>
 
       <!-- Photo URL inputs -->
       <div style="background:rgba(0,132,255,0.07);border:1px solid rgba(0,132,255,0.2);padding:0.85rem;margin-bottom:8px;border-radius:2px">
-        <div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:#7BB8FF;margin-bottom:0.4rem">📷 วิธีใส่รูปภาพ · HOW TO ADD PHOTOS</div>
-        <div style="font-size:0.75rem;color:#9A8E6A;line-height:1.75;font-family:'Sarabun',sans-serif">
-          1. ไปที่ <a href="https://imgur.com" target="_blank" style="color:#7FFFC0;text-decoration:none">imgur.com</a> หรือ <a href="https://postimages.org" target="_blank" style="color:#7FFFC0;text-decoration:none">postimages.org</a> (ฟรี ไม่ต้อง login)<br/>
-          2. อัปโหลดรูป → คลิกขวาที่รูป → <strong style="color:#F0E8D0">Copy image address</strong><br/>
-          3. วาง URL ด้านล่าง — รูปจะขึ้นทันที ไม่กินพื้นที่ JSONBin
+        <div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:#7BB8FF;margin-bottom:0.5rem">📷 วิธีใส่รูปภาพ · HOW TO ADD PHOTOS</div>
+        <!-- ImgBB auto-upload -->
+        <div id="imgbbKeyBox">
+          <div style="font-size:0.75rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif;margin-bottom:6px">
+            ⭐ <strong style="color:#7FFFC0">วิธีง่ายที่สุด:</strong> ใส่ ImgBB API Key ด้านล่าง แล้วลากรูปมาวางเลย — เว็บจะ upload ให้อัตโนมัติ ไม่ต้องทำอะไรเพิ่ม
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+            <input type="text" id="imgbbKeyInput" class="form-input" style="flex:1;font-size:0.78rem;padding:6px 10px"
+              placeholder="วาง ImgBB API Key ที่นี่ (ขึ้นต้นด้วย a1b2c3...)"
+              oninput="saveImgbbKey(this.value)"/>
+            <a href="https://imgbb.com/api" target="_blank" style="background:var(--dark);border:1px solid var(--border-b);color:var(--gold);font-family:Cinzel,serif;font-size:0.58rem;letter-spacing:0.06em;padding:6px 10px;text-decoration:none;white-space:nowrap;flex-shrink:0">รับ KEY ฟรี →</a>
+          </div>
+          <div id="imgbbStatus" style="font-size:0.7rem;color:var(--text-muted);margin-bottom:6px;font-family:'Sarabun',sans-serif"></div>
+        </div>
+        <div style="font-size:0.72rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif;border-top:1px dashed var(--border);padding-top:6px;margin-top:2px">
+          หรือวาง URL จาก <a href="https://postimages.org" target="_blank" style="color:#7FFFC0;text-decoration:none">postimages.org</a> / <a href="https://imgur.com" target="_blank" style="color:#7FFFC0;text-decoration:none">imgur.com</a> ในช่องด้านล่างได้เช่นกัน
         </div>
       </div>
       <div class="form-label" style="margin-bottom:6px">URL รูปภาพ · PHOTO URLS (สูงสุด 6 รูป / up to 6)</div>
@@ -935,6 +943,9 @@ select option{background:var(--dark4)}
 // ============================================================
 const MESSENGER   = 'https://m.me/100068843867509';
 const JB_URL      = 'https://api.jsonbin.io/v3/b/69fb4a1036566621a830dc9b';        // JSONBin endpoint
+// ImgBB — free image hosting with API. Get key at imgbb.com/api → Account → API
+// Takes ~1 min to sign up, then paste your key here
+const IMGBB_KEY   = '';  // ← paste your ImgBB API key here e.g. 'a1b2c3d4e5f6....'
 const JB_KEY      = '$2a$10$biemqQ9HdFoUoooBQmWBXObKAoI4vYjirl0ynI.boL3FFyWxykOZi';  // JSONBin master key
 const ADMIN_USER  = 'admin';
 const ADMIN_PASS  = 'bantae2026';  // admin login password
@@ -1351,6 +1362,17 @@ function openAddItem(id){
   renderImgSlots();
   renderImgUrlInputs();
   updateKBBar();
+  // Restore ImgBB key if saved
+  try{
+    const saved = localStorage.getItem('bantae_imgbb_key') || '';
+    const inp = document.getElementById('imgbbKeyInput');
+    if(inp){ inp.value = saved; }
+    if(saved) {
+      // Update the global key
+      window._imgbbKey = saved;
+      updateImgbbStatus(saved);
+    }
+  }catch(e){}
   document.getElementById('aiOv').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -1500,34 +1522,30 @@ function slotDrop(e, i){
   showToast('สลับรูปแล้ว ✦','t-gold');
 }
 function pickSlot(i){ curSlot=i; document.getElementById('fileInput').click(); }
-function handleImgUpload(e){
+async function handleImgUpload(e){
   const files=[...e.target.files];
-  files.forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      compressImage(ev.target.result, 500, 0.65).then(compressed=>{
-        let slot=editPhotos.findIndex(p=>!p);
-        if(slot<0) slot=editPhotos.length;
-        if(slot<6){ editPhotos[slot]=compressed; renderImgSlots(); }
-      });
-    };
-    r.readAsDataURL(file);
-  });
+  for (const file of files) {
+    let slot = editPhotos.findIndex(p=>!p);
+    if(slot<0) slot = editPhotos.length;
+    if(slot >= 6) break;
+    editPhotos[slot] = '⏳'; renderImgSlots(); // placeholder
+    const result = await processImage(file);
+    editPhotos[slot] = result;
+    renderImgSlots();
+  }
   e.target.value='';
 }
-function dropImgsHandler(e){
+async function dropImgsHandler(e){
   const files=[...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
-  files.forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{
-      compressImage(ev.target.result, 500, 0.65).then(compressed=>{
-        let slot=editPhotos.findIndex(p=>!p);
-        if(slot<0) slot=editPhotos.length;
-        if(slot<6){ editPhotos[slot]=compressed; renderImgSlots(); }
-      });
-    };
-    r.readAsDataURL(file);
-  });
+  for (const file of files) {
+    let slot = editPhotos.findIndex(p=>!p);
+    if(slot<0) slot = editPhotos.length;
+    if(slot >= 6) break;
+    editPhotos[slot] = '⏳'; renderImgSlots();
+    const result = await processImage(file);
+    editPhotos[slot] = result;
+    renderImgSlots();
+  }
 }
 // Page-level drop when add/edit modal is open
 document.addEventListener('dragenter',e=>{
@@ -1570,41 +1588,119 @@ function processCSV(file){
   r.readAsText(file,'UTF-8');
 }
 function importCSV(text){
-  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-  if(lines.length<2){showToast('ไฟล์ว่าง หรือผิดรูปแบบ','t-sell');return;}
-  const hdrs=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
-  const ci=k=>hdrs.indexOf(k);
-  const getv=(vals,idx)=>idx>=0&&idx<vals.length?vals[idx].replace(/^"|"$/g,'').trim():'';
-  let added=0;
-  for(let i=1;i<lines.length;i++){
-    const vals=lines[i].match(/("(?:[^"]|"")*"|[^,]*)/g)||[];
-    const nameTh=getv(vals,ci('nameth'))||getv(vals,ci('ชื่อพระ'))||getv(vals,ci('name_th'));
-    const price=getv(vals,ci('price'))||getv(vals,ci('ราคา'));
-    if(!nameTh) continue;
-    const pv=parseFloat(price.replace(/[^0-9.]/g,''))||0;
-    const it={
-      id:nextId++,nameTh,
-      nameEn:getv(vals,ci('nameen'))||getv(vals,ci('name_en'))||'',
-      price:'฿ '+Number(pv).toLocaleString(),priceVal:pv,
-      cat:getv(vals,ci('cat'))||getv(vals,ci('category'))||getv(vals,ci('ประเภท'))||'พระบูชา',
-      age:getv(vals,ci('age'))||getv(vals,ci('อายุ'))||'',
-      ageVal:parseInt(getv(vals,ci('ageval')))||2500,
-      origin:getv(vals,ci('origin'))||getv(vals,ci('แหล่งกำเนิด'))||'',
-      material:getv(vals,ci('material'))||getv(vals,ci('วัสดุ'))||'',
-      size:getv(vals,ci('size'))||getv(vals,ci('ขนาด'))||'',
-      condition:getv(vals,ci('condition'))||getv(vals,ci('สภาพ'))||'',
-      badge:getv(vals,ci('badge'))||'',
-      desc:getv(vals,ci('desc'))||getv(vals,ci('description'))||getv(vals,ci('รายละเอียด'))||'',
-      photos:[],imgs:[0,1,2],
+  // Robust CSV parser - handles Google Sheets export properly
+  // Supports quoted fields, commas inside quotes, BOM, CRLF
+  text = text.replace(/^\uFEFF/, ''); // remove BOM
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  function parseCSVLine(line) {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; } // escaped quote
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        result.push(cur.trim()); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur.trim());
+    return result;
+  }
+
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) { showToast('ไฟล์ว่าง หรือผิดรูปแบบ', 't-sell'); return; }
+
+  // Parse headers - normalize to lowercase, strip BOM/quotes
+  const hdrs = parseCSVLine(lines[0]).map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+  console.log('CSV headers found:', hdrs);
+
+  // Header aliases - support Thai and English column names
+  function col(keys) {
+    for (const k of keys) {
+      const i = hdrs.indexOf(k.toLowerCase());
+      if (i !== -1) return i;
+    }
+    return -1;
+  }
+
+  const COL = {
+    nameTh:    col(['nameth','ชื่อพระ','name_th','ชื่อ','name']),
+    nameEn:    col(['nameen','name_en','english','ชื่ออังกฤษ']),
+    price:     col(['price','ราคา','priceVal','price_val']),
+    cat:       col(['cat','category','ประเภท','หมวด']),
+    age:       col(['age','อายุ','ยุค']),
+    ageVal:    col(['ageval','age_val']),
+    origin:    col(['origin','แหล่งกำเนิด','วัด','แหล่ง']),
+    material:  col(['material','วัสดุ','เนื้อ']),
+    size:      col(['size','ขนาด']),
+    condition: col(['condition','สภาพ']),
+    badge:     col(['badge']),
+    desc:      col(['desc','description','รายละเอียด','คำอธิบาย']),
+    // Image URL columns - support up to 6 images
+    img1: col(['img1','image1','รูป1','photo1','url1','img_1']),
+    img2: col(['img2','image2','รูป2','photo2','url2','img_2']),
+    img3: col(['img3','image3','รูป3','photo3','url3','img_3']),
+    img4: col(['img4','image4','รูป4','photo4','url4','img_4']),
+    img5: col(['img5','image5','รูป5','photo5','url5','img_5']),
+    img6: col(['img6','image6','รูป6','photo6','url6','img_6']),
+  };
+
+  console.log('Column mapping:', COL);
+
+  function getv(vals, idx) {
+    if (idx < 0 || idx >= vals.length) return '';
+    return vals[idx].replace(/^"|"$/g,'').trim();
+  }
+
+  let added = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const vals = parseCSVLine(lines[i]);
+    const nameTh = getv(vals, COL.nameTh);
+    if (!nameTh) continue; // skip empty rows
+
+    const priceStr = getv(vals, COL.price);
+    const pv = parseFloat(priceStr.replace(/[^0-9.]/g,'')) || 0;
+    const badge = getv(vals, COL.badge);
+
+    // Collect image URLs from img1-img6 columns
+    const photos = [COL.img1,COL.img2,COL.img3,COL.img4,COL.img5,COL.img6]
+      .map(c => getv(vals, c))
+      .filter(u => u && u.startsWith('http'));
+
+    const it = {
+      id: nextId++,
+      nameTh,
+      nameEn:    getv(vals, COL.nameEn),
+      price:     '฿ ' + Number(pv).toLocaleString(),
+      priceVal:  pv,
+      cat:       getv(vals, COL.cat) || 'พระบูชา',
+      age:       getv(vals, COL.age),
+      ageVal:    parseInt(getv(vals, COL.ageVal)) || 2500,
+      origin:    getv(vals, COL.origin),
+      material:  getv(vals, COL.material),
+      size:      getv(vals, COL.size),
+      condition: getv(vals, COL.condition),
+      desc:      getv(vals, COL.desc),
+      badge,
+      photos,
+      imgs:      [0,1,2],
     };
-    if(it.badge==='SOLD') SOLD.unshift(it); else ITEMS.unshift(it);
+
+    if (badge === 'SOLD') SOLD.unshift(it);
+    else ITEMS.unshift(it);
     added++;
   }
-  closeOv('aiOv');
-  renderGrid('defaultGrid',ITEMS,'buy');
-  if(curMode==='buy') renderBuyGrid();
-  if(curMode==='sell') renderGrid('soldGrid',SOLD,'sell');
-  showToast('นำเข้า '+added+' รายการแล้ว ✦','t-buy');
+
+  if (!added) { showToast('ไม่พบข้อมูล — ตรวจสอบชื่อ column', 't-sell'); return; }
+
+  showToast('กำลังบันทึก ' + added + ' รายการ...', 't-gold');
+  saveItemsToDB().then(ok => {
+    if (ok) { closeOv('aiOv'); renderAll(); showToast('นำเข้า ' + added + ' รายการแล้ว ✦', 't-buy'); }
+  });
 }
 function removePhoto(i){ editPhotos.splice(i,1); renderImgSlots(); }
 
@@ -1741,6 +1837,32 @@ function showToast(msg,cls='t-gold'){
 // REPORTS
 // ============================================================
 let reports=[];
+
+function submitSellForm(){
+  // Collect form data from sell form
+  const inputs = document.querySelectorAll('#sell-panel input.form-input, #sell-panel textarea.form-input, #sell-panel select.form-input');
+  const vals = [...inputs].map(i => i.value.trim());
+  const sub = {
+    name:    vals[0] || '',
+    contact: vals[1] || '',
+    amulet:  vals[2] || '',
+    price:   vals[3] || '',
+    details: vals[4] || '',
+    time:    new Date().toLocaleString('th-TH'),
+  };
+  if(!sub.name && !sub.amulet){ showToast('กรุณากรอกชื่อและรายการพระ','t-sell'); return; }
+  try{
+    const subs = JSON.parse(localStorage.getItem('bantae_sell_subs') || '[]');
+    subs.unshift(sub);
+    localStorage.setItem('bantae_sell_subs', JSON.stringify(subs));
+    // Update report dot
+    const dot = document.getElementById('reportDot');
+    if(dot){ dot.textContent = subs.length; dot.classList.add('show'); }
+  }catch(e){}
+  // Clear form
+  inputs.forEach(i => { if(i.tagName !== 'SELECT') i.value = ''; });
+  showToast('ส่งแบบฟอร์มแล้ว! เราจะติดต่อใน 48 ชม. ✦','t-sell');
+}
 function openReportForm(){
   document.getElementById('rName').value='';
   document.getElementById('rMsg').value='';
@@ -1761,25 +1883,65 @@ function submitReport(){
   showToast('ส่งรายงานแล้ว ขอบคุณ ✦','t-gold');
 }
 function openReports(){
-  if(!isAdmin){showToast('กรุณาเข้าสู่ระบบแอดมิน','t-sell');return;}
-  const list=document.getElementById('reportsList');
-  if(!reports.length){
-    list.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em">ไม่มีรายงาน · No reports yet</div>';
-  } else {
-    list.innerHTML=reports.map(r=>`
+  if(!isAdmin){ showToast('กรุณาเข้าสู่ระบบแอดมิน','t-sell'); return; }
+
+  // Load sell submissions from localStorage
+  let sellSubs = [];
+  try { sellSubs = JSON.parse(localStorage.getItem('bantae_sell_subs') || '[]'); } catch(e){}
+
+  const allReports = [...reports];
+  const list = document.getElementById('reportsList');
+  const hasSells = sellSubs.length > 0;
+  const hasReports = allReports.length > 0;
+
+  let html2 = '';
+
+  if(hasSells){
+    html2 += `<div style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em;color:var(--sell);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,176,144,0.2)">💰 ต้องการขาย — SELL SUBMISSIONS (${sellSubs.length})</div>`;
+    html2 += sellSubs.map((s,i) => `
+      <div style="background:rgba(58,26,26,0.4);border:1px solid rgba(255,176,144,0.2);padding:0.85rem;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem">
+          <span style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--sell)">ต้องการขาย</span>
+          <span style="font-size:0.63rem;color:var(--text-muted)">${s.time}</span>
+        </div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim);line-height:1.6">
+          <div>👤 ${s.name||'ไม่ระบุชื่อ'} &nbsp;|&nbsp; 📞 ${s.contact||'-'}</div>
+          <div>🏺 ${s.amulet||'-'} &nbsp;|&nbsp; 💰 ${s.price||'-'}</div>
+          ${s.details ? `<div style="margin-top:4px;color:var(--text-muted)">📝 ${s.details}</div>` : ''}
+        </div>
+        <button onclick="deleteSellSub(${i})" style="background:none;border:none;color:var(--text-muted);font-size:0.7rem;cursor:pointer;margin-top:6px;padding:0" onmouseover="this.style.color='#ff8080'" onmouseout="this.style.color=''">🗑 ลบ</button>
+      </div>`).join('');
+  }
+
+  if(hasReports){
+    html2 += `<div style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-top:${hasSells?'1rem':'0'}">📋 รายงานปัญหา — REPORTS (${allReports.length})</div>`;
+    html2 += allReports.map((r,i) => `
       <div style="background:var(--dark4);border:1px solid var(--border);padding:0.85rem;margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem">
           <span style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--gold)">${r.type}</span>
           <span style="font-size:0.63rem;color:var(--text-muted)">${r.time}</span>
         </div>
-        <div style="font-family:Sarabun,sans-serif;font-size:0.85rem;color:var(--text-dim);line-height:1.6">${r.msg}</div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim);line-height:1.6">${r.msg}</div>
         <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px">จาก: ${r.name}</div>
       </div>`).join('');
   }
+
+  if(!hasSells && !hasReports){
+    html2 = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em">ไม่มีรายการ · No messages yet</div>';
+  }
+
+  list.innerHTML = html2;
   document.getElementById('reportsOv').classList.add('open');
-  document.body.style.overflow='hidden';
-  const dot=document.getElementById('reportDot');
-  if(dot) dot.classList.remove('show');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('reportDot').classList.remove('show');
+}
+
+function deleteSellSub(i){
+  let subs = [];
+  try { subs = JSON.parse(localStorage.getItem('bantae_sell_subs') || '[]'); } catch(e){}
+  subs.splice(i, 1);
+  localStorage.setItem('bantae_sell_subs', JSON.stringify(subs));
+  openReports(); // re-render
 }
 
 // ============================================================
@@ -1887,6 +2049,65 @@ function compressImage(dataURL, maxSize=500, quality=0.65) {
     };
     img.onerror = () => resolve(dataURL); // fallback
     img.src = dataURL;
+  });
+}
+
+// ── ImgBB auto-upload ────────────────────────────────────────────
+// Uploads a base64 image to ImgBB, returns the direct URL
+function saveImgbbKey(key){
+  key = key.trim();
+  try{ localStorage.setItem('bantae_imgbb_key', key); }catch(e){}
+  window._imgbbKey = key;
+  updateImgbbStatus(key);
+}
+function updateImgbbStatus(key){
+  const el = document.getElementById('imgbbStatus');
+  if(!el) return;
+  if(key && key.length > 10){
+    el.textContent = '✅ ImgBB key ตั้งค่าแล้ว — ลากรูปมาวางเพื่อ upload อัตโนมัติ';
+    el.style.color = '#7FFFC0';
+  } else {
+    el.textContent = 'ยังไม่มี key — กด "รับ KEY ฟรี" ด้านขวา สมัครฟรี ~1 นาที';
+    el.style.color = 'var(--text-muted)';
+  }
+}
+
+async function uploadToImgBB(base64Data) {
+  const key = window._imgbbKey || IMGBB_KEY;
+  if (!key) return null; // no key set, skip
+  try {
+    // Strip data:image/...;base64, prefix
+    const b64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+    const form = new FormData();
+    form.append('key', key);
+    form.append('image', b64);
+    const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form });
+    if (!res.ok) throw new Error('ImgBB HTTP ' + res.status);
+    const data = await res.json();
+    if (data.success) return data.data.url; // direct image URL
+    throw new Error(data.error?.message || 'upload failed');
+  } catch(e) {
+    console.warn('ImgBB upload failed:', e.message);
+    return null;
+  }
+}
+
+// Process image: compress first, then try ImgBB upload
+// Returns URL string (ImgBB URL if key set, else base64 fallback)
+async function processImage(file) {
+  return new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = async ev => {
+      const compressed = await compressImage(ev.target.result, 500, 0.75);
+      if (IMGBB_KEY) {
+        showToast('กำลัง upload รูปไปยัง ImgBB...', 't-info');
+        const url = await uploadToImgBB(compressed);
+        if (url) { resolve(url); return; }
+        showToast('ImgBB upload ล้มเหลว ใช้ base64 แทน', 't-sell');
+      }
+      resolve(compressed); // fallback to compressed base64
+    };
+    r.readAsDataURL(file);
   });
 }
 
@@ -2110,6 +2331,75 @@ async function fixDatabaseStructure(){
     showToast(`✅ แก้ไขแล้ว — items:${ITEMS.length} sold:${SOLD.length}`,'t-buy');
   }
 }
+
+// ============================================================
+// BILINGUAL — Thai / English toggle
+// ============================================================
+const LANG = {
+  th: {
+    heroNameTh: 'พระเครื่องบ้านแต้',
+    heroTaglineTh: 'ความชำนาญเฉพาะทาง · ปรัชญา ความเชื่อ ศิลปกรรม สะสม พุทธศิลป<br/>กรุเก่า สาย สะสมความเก่า ตามแบบแผนของเรา',
+    heroBelief: 'เชื่อว่าถ้าท่านเข้ามาในนี้แล้วสิ่งที่เราชอบคงไม่ต่างกัน',
+    buyModeTh: 'กำลังหา', buyModeEn: 'Looking to Buy', buyModeSub: 'BROWSE COLLECTION',
+    sellModeTh: 'ต้องการขาย', sellModeEn: 'Want to Sell', sellModeSub: 'SELL YOUR AMULET',
+    soldModeTh: 'ขายแล้ว', soldModeEn: 'Previously Sold', soldModeSub: 'SEE SOLD ITEMS',
+    collectionTitle: 'พระเครื่องทั้งหมด', collectionSub: 'คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy',
+    navFind: '🔍 หา', navSell: '💰 ขาย',
+    langBtn: '🌐 EN',
+    buyNow: 'ซื้อเลย · BUY NOW', addCart: '+ เพิ่มในตะกร้า · ADD TO CART',
+    contactGuide: '🙏 กดปุ่มด้านล่างเพื่อติดต่อแอดมินโดยตรง<br/><span style="font-size:0.73rem;color:var(--text-muted)">Press a button below — our admin will assist you personally</span>',
+    contactInfoTitle: 'ข้อมูลติดต่อ · Contact',
+    certText: 'ผ่านการตรวจสอบ · Authenticity verified by our expert.',
+  },
+  en: {
+    heroNameTh: 'Bantae Amulet',
+    heroTaglineTh: 'Specialist in philosophy, sacred belief, Buddhist art & antique collection<br/>Ancient kru · Lineage collecting — in our own tradition',
+    heroBelief: 'If you are here, we likely share the same passion.',
+    buyModeTh: 'Looking to Buy', buyModeEn: 'Browse Collection', buyModeSub: 'BROWSE COLLECTION',
+    sellModeTh: 'Want to Sell', sellModeEn: 'Sell Your Amulet', sellModeSub: 'SELL YOUR AMULET',
+    soldModeTh: 'Sold Items', soldModeEn: 'Previously Sold', soldModeSub: 'SEE SOLD ITEMS',
+    collectionTitle: 'All Sacred Amulets', collectionSub: 'Click any amulet to see details and price',
+    navFind: '🔍 Find', navSell: '💰 Sell',
+    langBtn: '🌐 TH',
+    buyNow: 'BUY NOW', addCart: '+ Add to Cart',
+    contactGuide: '🙏 Press a button below to contact our admin directly.',
+    contactInfoTitle: 'Contact Information',
+    certText: 'Authenticity verified by our expert.',
+  }
+};
+window._isEng = false;
+
+function toggleLang(){
+  window._isEng = !window._isEng;
+  const L = window._isEng ? LANG.en : LANG.th;
+  const btn = document.getElementById('langBtn');
+  if(btn){ btn.textContent = L.langBtn; btn.style.borderColor = window._isEng ? 'var(--gold)' : ''; btn.style.color = window._isEng ? 'var(--gold)' : ''; }
+  // Hero
+  setInner('heroNameTh', L.heroNameTh);
+  setInner('heroTaglineTh', L.heroTaglineTh);
+  setInner('heroBelief', L.heroBelief);
+  // Mode buttons
+  setInner('buyModeTh', L.buyModeTh);
+  setInner('buyModeEn', L.buyModeEn);
+  setInner('buyModeSub', L.buyModeSub);
+  setInner('sellModeTh', L.sellModeTh);
+  setInner('sellModeEn', L.sellModeEn);
+  setInner('sellModeSub', L.sellModeSub);
+  setInner('soldModeTh', L.soldModeTh);
+  setInner('soldModeEn', L.soldModeEn);
+  setInner('soldModeSub', L.soldModeSub);
+  // Collection
+  setInner('collectionTitleEl', L.collectionTitle);
+  setInner('collectionSubEl', L.collectionSub);
+  // Nav buttons
+  const nb1 = document.querySelector('.nav-btn:nth-of-type(1)'); if(nb1) nb1.textContent = L.navFind;
+  const nb2 = document.querySelector('.nav-btn:nth-of-type(2)'); if(nb2) nb2.textContent = L.navSell;
+  // Re-render to update item card buttons
+  renderAll();
+  showToast(window._isEng ? 'Switched to English' : 'เปลี่ยนเป็นภาษาไทย', 't-gold');
+}
+function setInner(id, val){ const el = document.getElementById(id); if(el) el.innerHTML = val; }
+function getLang(){ return window._isEng ? LANG.en : LANG.th; }
 
 // ── INIT ────────────────────────────────────────────────────────
 // 1. Restore admin session
