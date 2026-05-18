@@ -872,40 +872,39 @@ select option{background:var(--dark4)}
       <!-- Photo URL inputs -->
       <div style="background:rgba(0,132,255,0.07);border:1px solid rgba(0,132,255,0.2);padding:0.85rem;margin-bottom:8px;border-radius:2px">
         <div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:#7BB8FF;margin-bottom:0.5rem">📷 วิธีใส่รูปภาพ · HOW TO ADD PHOTOS</div>
-        <!-- ImgBB auto-upload -->
-        <div id="imgbbKeyBox">
-          <div style="font-size:0.75rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif;margin-bottom:6px">
-            ⭐ <strong style="color:#7FFFC0">วิธีง่ายที่สุด:</strong> ใส่ ImgBB API Key ด้านล่าง แล้วลากรูปมาวางเลย — เว็บจะ upload ให้อัตโนมัติ ไม่ต้องทำอะไรเพิ่ม
+        <!-- ImgBB auto-upload key -->
+        <div id="imgbbKeyBox" style="margin-bottom:8px">
+          <div style="font-size:0.75rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif;margin-bottom:5px">
+            ⭐ <strong style="color:#7FFFC0">วิธีที่ง่ายที่สุด:</strong> ใส่ ImgBB API Key ด้านล่าง แล้วลากรูปมาวางในกล่องสีเทาด้านล่าง — เว็บ upload ให้อัตโนมัติ
           </div>
-          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <div style="display:flex;gap:6px;align-items:center">
             <input type="text" id="imgbbKeyInput" class="form-input" style="flex:1;font-size:0.78rem;padding:6px 10px"
-              placeholder="วาง ImgBB API Key ที่นี่ (ขึ้นต้นด้วย a1b2c3...)"
+              placeholder="ImgBB API Key (a1b2c3d4e5...)"
               oninput="saveImgbbKey(this.value)"/>
             <a href="https://imgbb.com/api" target="_blank" style="background:var(--dark);border:1px solid var(--border-b);color:var(--gold);font-family:Cinzel,serif;font-size:0.58rem;letter-spacing:0.06em;padding:6px 10px;text-decoration:none;white-space:nowrap;flex-shrink:0">รับ KEY ฟรี →</a>
           </div>
-          <div id="imgbbStatus" style="font-size:0.7rem;color:var(--text-muted);margin-bottom:6px;font-family:'Sarabun',sans-serif"></div>
+          <div id="imgbbStatus" style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:'Sarabun',sans-serif"></div>
         </div>
-        <div style="font-size:0.72rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif;border-top:1px dashed var(--border);padding-top:6px;margin-top:2px">
-          หรือวาง URL จาก <a href="https://postimages.org" target="_blank" style="color:#7FFFC0;text-decoration:none">postimages.org</a> / <a href="https://imgur.com" target="_blank" style="color:#7FFFC0;text-decoration:none">imgur.com</a> ในช่องด้านล่างได้เช่นกัน
-        </div>
-      </div>
-      <div class="form-label" style="margin-bottom:6px">URL รูปภาพ · PHOTO URLS (สูงสุด 6 รูป / up to 6)</div>
-      <div id="imgUrlInputs"></div>
-      <button onclick="addImgUrlSlot()" style="background:none;border:1px dashed var(--border-b);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.07em;padding:6px 14px;cursor:pointer;margin-top:4px;margin-bottom:8px;width:100%;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='';this.style.color=''">+ เพิ่ม URL รูปภาพ</button>
-
-      <!-- Fallback: drag & drop compressed -->
-      <details style="margin-bottom:6px">
-        <summary style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--text-muted);cursor:pointer;padding:4px 0">หรือลากรูปโดยตรง (บีบอัดอัตโนมัติ แต่กินพื้นที่ JSONBin) ▶</summary>
-        <div id="dragImgZone" onclick="document.getElementById('fileInput').click()"
-             ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.07)'"
+        <!-- Drag zone — only shown when ImgBB key exists -->
+        <div id="imgbbDropZone"
+             ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.08)'"
              ondragleave="this.style.borderColor='';this.style.background=''"
              ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';dropImgsHandler(event)"
-             style="border:1px dashed var(--border);background:var(--dark4);padding:0.85rem;text-align:center;cursor:pointer;margin-top:6px;transition:all 0.2s">
-          <div style="font-size:1.1rem;margin-bottom:0.2rem">📁</div>
-          <div style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--text-muted)">ลากรูปมาที่นี่ · Drag & drop (auto-compressed)</div>
+             onclick="document.getElementById('fileInput').click()"
+             style="border:2px dashed var(--border-b);background:var(--dark4);padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;border-radius:2px">
+          <div style="font-size:1.5rem;margin-bottom:0.25rem">📁</div>
+          <div style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--gold);margin-bottom:0.2rem">ลากรูปมาที่นี่ · DRAG FILES HERE</div>
+          <div style="font-size:0.68rem;color:var(--text-muted)">รูปจะถูก upload ไปที่ ImgBB อัตโนมัติ (ต้องใส่ API Key ก่อน)</div>
         </div>
-        <div class="img-upload-grid" id="imgSlots" style="margin-top:6px"></div>
-      </details>
+        <div style="border-top:1px dashed var(--border);padding-top:7px;margin-top:8px;font-size:0.72rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif">
+          หรือวาง URL จาก <a href="https://postimages.org" target="_blank" style="color:#7FFFC0;text-decoration:none">postimages.org</a> ในช่องด้านล่าง
+        </div>
+      </div>
+      <div class="form-label" style="margin-bottom:6px">URL รูปภาพ · PHOTO URLS (สูงสุด 6 รูป)</div>
+      <div id="imgUrlInputs"></div>
+      <button onclick="addImgUrlSlot()" style="background:none;border:1px dashed var(--border-b);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.07em;padding:6px 14px;cursor:pointer;margin-top:4px;margin-bottom:6px;width:100%;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='';this.style.color=''">+ เพิ่ม URL รูปภาพ</button>
+      <!-- Hidden imgSlots for drag-drop results -->
+      <div class="img-upload-grid" id="imgSlots" style="margin-top:4px"></div>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleImgUpload(event)"/>
     </div>
     <div class="ai-foot" style="flex-direction:column;gap:8px">
@@ -1151,10 +1150,22 @@ function openModal(id, mode) {
   ).join('');
   document.getElementById('mDesc').textContent = it.desc;
   if (mode==='buy') {
+    // Pre-filled message — copies to clipboard then opens Messenger
+    const itemUrl = window.location.href;
+    const autoMsg = `สวัสดีครับ สนใจพระชิ้นนี้ครับ 🙏\n📿 ${it.nameTh}${it.nameEn?' ('+it.nameEn+')':''}\n💰 ${it.price}\n🔗 ${itemUrl}`;
+    const messengerBuyLink = `https://m.me/100068843867509`;
+
     document.getElementById('mBtns').innerHTML = `
       <div style="background:rgba(201,168,76,0.05);border:1px solid var(--border);padding:9px 11px;font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim);line-height:1.7;margin-bottom:4px">
-        🙏 กดปุ่มด้านล่างเพื่อติดต่อแอดมินโดยตรง<br/>
-        <span style="font-size:0.73rem;color:var(--text-muted)">Press a button below — our admin will assist you personally</span>
+        🙏 กดปุ่ม Messenger ด้านล่าง — ระบบจะคัดลอกข้อมูลพระไปให้อัตโนมัติ<br/>
+        <span style="font-size:0.73rem;color:var(--text-muted)">Click BUY NOW → message is copied → paste it in Messenger</span>
+      </div>
+      <div style="background:var(--dark4);border:1px solid var(--border);padding:7px 10px;margin-bottom:5px;font-family:'Courier New',monospace;font-size:0.72rem;color:var(--text-muted);line-height:1.6;border-radius:2px">
+        📋 ข้อความที่จะถูกคัดลอก:<br/>
+        <span style="color:var(--text-dim)">\${autoMsg.replace(/\n/g,'<br/>')}</span>
+      </div>
+      <div id="msgCopyHint" style="font-size:0.73rem;color:var(--text-muted);margin-bottom:5px;font-family:'Sarabun',sans-serif">
+        👆 กด BUY NOW → เปิด Messenger → วางข้อความ (Ctrl+V หรือกดค้างแล้ว Paste)
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:5px">
         <a class="btn-messenger" href="${MESSENGER}" target="_blank" style="padding:10px 8px;font-size:0.65rem">
@@ -1185,6 +1196,21 @@ function openModal(id, mode) {
   document.getElementById('itemOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
+function copyAutoMsg(e, msg){
+  // Copy item info to clipboard before opening Messenger
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(msg).catch(()=>{});
+  }
+  // Show a small toast
+  showToast('📋 คัดลอกข้อมูลแล้ว — วางใน Messenger ได้เลย!', 't-buy');
+  // Update the hint text in modal
+  const hint = document.getElementById('msgCopyHint');
+  if(hint){
+    hint.innerHTML = '✅ คัดลอกข้อความแล้ว! เมื่อ Messenger เปิด ให้วาง (paste) ข้อความได้เลยครับ';
+    hint.style.color = 'var(--buy)';
+  }
+}
+
 function toggleContactBox(){
   const b=document.getElementById('contactInfoBox');
   if(b) b.style.display=b.style.display==='none'?'block':'none';
@@ -1381,20 +1407,36 @@ function openAddItem(id){
 function renderImgUrlInputs(){
   const container = document.getElementById('imgUrlInputs');
   if(!container) return;
-  // editPhotos holds either base64 OR external URLs
   const slots = editPhotos.length < 1 ? [''] : [...editPhotos, ''];
-  const display = slots.slice(0, 7); // max 6 filled + 1 empty add slot
+  const display = slots.slice(0, 7);
   container.innerHTML = display.map((url, i) => {
     if(i >= 6) return '';
+    const hasImg = url && url.length > 0 && url !== '⏳';
+    const isLoading = url === '⏳';
     return `<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-      ${url ? `<img src="${url}" style="width:40px;height:40px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);cursor:pointer" onclick="previewUrl('${url.replace(/'/g,"&#39;")}')" onerror="this.style.display='none'" title="Click to preview"/>` : `<div style="width:40px;height:40px;flex-shrink:0;background:var(--dark4);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--text-muted)">📷</div>`}
+      ${hasImg
+        ? `<div style="position:relative;flex-shrink:0">
+             <img src="${url}" style="width:44px;height:44px;object-fit:cover;border:1px solid var(--border);display:block;cursor:pointer" onclick="previewUrl('${url.replace(/'/g,"&#39;")}')" onerror="this.style.opacity=0.3" title="Click to preview"/>
+             <button onclick="event.stopPropagation();openCropFromUrl(${i})"
+               style="position:absolute;inset:0;width:100%;height:100%;background:rgba(0,0,0,0.55);border:none;color:var(--gold);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s"
+               onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0"
+               title="Edit image">✏️</button>
+           </div>`
+        : isLoading
+          ? `<div style="width:44px;height:44px;background:var(--dark4);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">⏳</div>`
+          : `<div style="width:44px;height:44px;background:var(--dark4);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text-muted);flex-shrink:0">📷</div>`
+      }
       <input type="text" class="form-input" style="flex:1;font-size:0.82rem;padding:7px 10px"
-        placeholder="https://i.imgur.com/xxxxx.jpg"
-        value="${url || ''}"
+        placeholder="https://i.ibb.co/xxxxx.jpg  หรือ https://i.postimg.cc/..."
+        value="${hasImg || isLoading ? url : ''}"
         onchange="updateImgUrl(${i}, this.value.trim())"
-        onpaste="setTimeout(()=>updateImgUrl(${i}, this.value.trim()), 50)"
+        onpaste="setTimeout(()=>updateImgUrl(${i}, this.value.trim()), 80)"
       />
-      ${url ? `<button onclick="removeImgUrl(${i})" style="background:none;border:none;color:#ff8080;font-size:1rem;cursor:pointer;flex-shrink:0;padding:0 4px">✕</button>` : ''}
+      ${hasImg ? `<button onclick="openCropFromUrl(${i})" title="Edit / crop this image"
+        style="background:none;border:1px solid var(--border-b);color:var(--gold);font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.05em;padding:6px 10px;cursor:pointer;flex-shrink:0;white-space:nowrap;transition:all 0.2s"
+        onmouseover="this.style.background='var(--gold)';this.style.color='var(--dark)'"
+        onmouseout="this.style.background='none';this.style.color='var(--gold)'">✏️ Edit</button>` : ''}
+      ${hasImg ? `<button onclick="removeImgUrl(${i})" style="background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;flex-shrink:0;padding:0 2px" onmouseover="this.style.color='#ff8080'" onmouseout="this.style.color=''">✕</button>` : ''}
     </div>`;
   }).join('');
   updateKBBar();
@@ -1417,6 +1459,71 @@ function updateImgUrl(i, url){
   updateKBBar();
 }
 
+async function openCropFromUrl(i){
+  const url = editPhotos[i];
+  if(!url || url === '⏳') { showToast('ไม่มีรูปในช่องนี้','t-sell'); return; }
+
+  // Reset editor state
+  _cropSlot=i; _cropScale=1; _cropAngle=0; _cropFlipH=false; _cropFlipV=false;
+  _selW=0; _selH=0; _cropOffX=0; _cropOffY=0;
+  _editorVals={bright:0,contrast:0,sat:0,warm:0};
+  ['slBright','slContrast','slSat','slWarm'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value=0;
+  });
+  ['vBright','vContrast','vSat','vWarm'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent='0';
+  });
+
+  showToast('กำลังโหลดรูป...','t-gold');
+
+  // Try loading directly first (works if same-origin or CORS allowed)
+  async function tryLoad(src){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = ()=>resolve(img);
+      img.onerror = ()=>reject();
+      img.src = src;
+    });
+  }
+
+  // CORS proxy list — try each until one works
+  const proxies = [
+    url, // direct first
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  ];
+
+  let loaded = false;
+  for(const src of proxies){
+    try{
+      _cropImg = await tryLoad(src);
+      loaded = true;
+      break;
+    }catch(e){
+      console.warn('Proxy failed:', src);
+    }
+  }
+
+  if(!loaded){
+    // Last resort: fetch as blob
+    try{
+      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+      const blob = await r.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      _cropImg = await tryLoad(blobUrl);
+      loaded = true;
+    }catch(e){
+      showToast('โหลดรูปไม่ได้ — ลองลากรูปไฟล์มาใหม่','t-sell');
+      return;
+    }
+  }
+
+  drawCropCanvas();
+  document.getElementById('cropOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
 function removeImgUrl(i){
   editPhotos.splice(i, 1);
   renderImgUrlInputs();
@@ -1432,18 +1539,23 @@ function renderImgSlots(){
   const grid = document.getElementById('imgSlots');
   grid.innerHTML = Array.from({length:6}, (_,i) => {
     const src = editPhotos[i] || '';
-    if(src){
+    if(src && src !== '⏳'){
       return `<div class="img-slot" draggable="true"
-        onclick="pickSlot(${i})"
-        ondblclick="event.stopPropagation();openCrop(${i})"
         ondragstart="slotDragStart(event,${i})"
         ondragover="slotDragOver(event,${i})"
         ondragleave="slotDragLeave(event,${i})"
         ondrop="slotDrop(event,${i})"
         data-slot="${i}">
-        <img src="${src}" alt="Photo ${i+1}"/>
-        <button class="rm-img" onclick="event.stopPropagation();removePhoto(${i})">✕</button>
-        <div class="crop-hint">✂️ double-click to crop</div>
+        <img src="${src}" alt="Photo ${i+1}" onerror="this.style.opacity=0.3"/>
+        <button class="rm-img" onclick="event.stopPropagation();removePhoto(${i})" title="Remove">✕</button>
+        <button onclick="event.stopPropagation();openCrop(${i})" title="Edit image"
+          style="position:absolute;bottom:3px;left:3px;background:rgba(13,11,7,0.88);border:1px solid var(--border-b);color:var(--gold);font-size:0.65rem;padding:2px 6px;cursor:pointer;border-radius:2px;font-family:Cinzel,serif;letter-spacing:0.04em;z-index:2">✏️</button>
+        <div class="crop-hint">drag to reorder</div>
+      </div>`;
+    } else if(src === '⏳'){
+      return `<div class="img-slot" data-slot="${i}" style="opacity:0.6">
+        <div class="img-slot-icon" style="animation:spin 1s linear infinite">⏳</div>
+        <div class="img-slot-label">Uploading...</div>
       </div>`;
     } else {
       return `<div class="img-slot"
@@ -1992,33 +2104,43 @@ async function loadItemsFromDB() {
 // ── JSONBin: save items to cloud ─────────────────────────────────
 async function saveItemsToDB() {
   try {
-    const payload = JSON.stringify({ items: ITEMS, sold: SOLD });
-    // Warn if data is too large for JSONBin free tier (100KB)
-    const sizeKB = Math.round(payload.length / 1024);
-    if (sizeKB > 90) {
-      console.warn(`Data size: ${sizeKB}KB — approaching JSONBin 100KB limit`);
-      showToast(`ข้อมูล ${sizeKB}KB — ใกล้ถึงขีดจำกัด 100KB`, 't-sell');
-    } else {
-      console.log(`Saving ${sizeKB}KB to JSONBin...`);
+    // Strip any base64 images (data:image/...) before saving to JSONBin
+    // Only keep external URLs (http...) — base64 is too large
+    function cleanPhotos(arr) {
+      return (arr||[]).map(it => ({
+        ...it,
+        photos: (it.photos||[]).filter(p => p && p.startsWith('http')),
+      }));
     }
+    const saveData = { items: cleanPhotos(ITEMS), sold: cleanPhotos(SOLD) };
+    const payload = JSON.stringify(saveData);
+    const sizeKB = Math.round(payload.length / 1024);
+    console.log(`Saving ${sizeKB}KB to JSONBin...`);
+
+    if (sizeKB > 95) {
+      showToast(`ข้อมูลใหญ่เกิน 95KB (${sizeKB}KB) — ลด desc หรือจำนวนพระ`, 't-sell');
+      // Still try to save — JSONBin limit is 100KB
+    }
+
     const res = await fetch(JB_URL, {
       method: 'PUT',
-      headers: {
-        'X-Master-Key': JB_KEY,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'X-Master-Key': JB_KEY, 'Content-Type': 'application/json' },
       body: payload,
     });
     if (!res.ok) {
       const txt = await res.text();
       console.error('JSONBin save error:', res.status, txt);
-      showToast('บันทึกไม่สำเร็จ: ' + res.status, 't-sell');
+      showToast(`บันทึกไม่สำเร็จ (${res.status}) — ลองอีกครั้ง`, 't-sell');
       return false;
     }
-    // Update local cache — this is what shows instantly on next page load
+
+    // Save ORIGINAL items (with base64 if any) to localStorage cache
     try {
       localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD}));
-      console.log('Saved to JSONBin + cache:', ITEMS.length, 'items');
+      // Also sync cleanPhotos to ITEMS so display uses URLs
+      ITEMS = saveData.items;
+      SOLD  = saveData.sold;
+      console.log('✅ Saved to JSONBin:', sizeKB+'KB,', ITEMS.length,'items');
     } catch(e){}
     return true;
   } catch(e) {
@@ -2152,254 +2274,172 @@ function saveCartToStorage(){
 }
 
 // ============================================================
-// IMAGE CROP SYSTEM
+// IMAGE EDITOR (crop + brightness + contrast + saturation + warmth)
 // ============================================================
-let _cropSlot   = -1;
-let _cropImg    = new Image();
-let _cropScale  = 1;
-let _cropAngle  = 0;
-let _cropFlipped = false;
-let _cropOffX   = 0;
-let _cropOffY   = 0;
-let _selX=0, _selY=0, _selW=0, _selH=0;
-let _dragging=false, _dragStartX=0, _dragStartY=0;
-let _panning=false, _panStartX=0, _panStartY=0, _panOffX=0, _panOffY=0;
+let _cropSlot=-1, _cropImg=new Image(), _cropScale=1, _cropAngle=0;
+let _cropFlipH=false, _cropFlipV=false;
+let _cropOffX=0, _cropOffY=0;
+let _selX=0,_selY=0,_selW=0,_selH=0,_dragging=false;
+let _editorVals={bright:0,contrast:0,sat:0,warm:0};
 
-function openCrop(slot){
-  const src = editPhotos[slot];
-  if(!src) return;
-  _cropSlot  = slot;
-  _cropScale = 1;
-  _cropAngle = 0;
-  _cropFlipped = false;
-  _selW = 0; _selH = 0;
-  _cropImg = new Image();
-  _cropImg.onload = function(){
-    _cropOffX = 0; _cropOffY = 0;
-    drawCropCanvas();
-    document.getElementById('cropOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  };
-  _cropImg.src = src;
+function updateEditorVal(key,val){
+  _editorVals[key]=parseInt(val);
+  const ids={bright:'vBright',contrast:'vContrast',sat:'vSat',warm:'vWarm'};
+  const el=document.getElementById(ids[key]);
+  if(el) el.textContent=val;
+}
+function resetAllEdits(){
+  _cropScale=1;_cropAngle=0;_cropFlipH=false;_cropFlipV=false;
+  _cropOffX=0;_cropOffY=0;_selW=0;_selH=0;
+  _editorVals={bright:0,contrast:0,sat:0,warm:0};
+  ['slBright','slContrast','slSat','slWarm'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value=0;
+  });
+  ['vBright','vContrast','vSat','vWarm'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.textContent='0';
+  });
+  document.getElementById('cropSelection').style.display='none';
+  drawCropCanvas();
+}
+
+async function openCrop(slot){
+  const src=editPhotos[slot];
+  if(!src||src==='⏳') return;
+  // Delegate to openCropFromUrl which handles CORS proxies
+  editPhotos[slot]=src; // ensure slot is set
+  await openCropFromUrl(slot);
 }
 
 function closeCrop(){
   document.getElementById('cropOverlay').classList.remove('open');
-  document.getElementById('cropSelection').style.display = 'none';
-  document.body.style.overflow = '';
+  document.getElementById('cropSelection').style.display='none';
+  document.body.style.overflow='';
+}
+
+function fitImageToSquare(){
+  _cropOffX=0;_cropOffY=0;
+  const canvas=document.getElementById('cropCanvas');
+  const s=Math.min(canvas.width/(_cropImg.width||1),canvas.height/(_cropImg.height||1));
+  _cropScale=s;
+  drawCropCanvas();
 }
 
 function drawCropCanvas(){
-  const container = document.getElementById('cropContainer');
-  const canvas    = document.getElementById('cropCanvas');
-  const size = Math.min(container.clientWidth || 500, container.clientHeight || 500, 560);
-  canvas.width  = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,size,size);
+  const container=document.getElementById('cropContainer');
+  const canvas=document.getElementById('cropCanvas');
+  const W=container.clientWidth||520;
+  const H=container.clientHeight||520;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
   ctx.save();
-  ctx.translate(size/2 + _cropOffX, size/2 + _cropOffY);
-  ctx.rotate(_cropAngle * Math.PI/180);
-  if(_cropFlipped) ctx.scale(-1,1);
-  const scale = _cropScale * Math.min(size / _cropImg.width, size / _cropImg.height);
-  const w = _cropImg.width  * scale;
-  const h = _cropImg.height * scale;
-  ctx.drawImage(_cropImg, -w/2, -h/2, w, h);
+  ctx.translate(W/2+_cropOffX,H/2+_cropOffY);
+  ctx.rotate(_cropAngle*Math.PI/180);
+  ctx.scale(_cropFlipH?-1:1,_cropFlipV?-1:1);
+  const sc=_cropScale*Math.min(W/_cropImg.width,H/_cropImg.height)*0.85;
+  const w=_cropImg.width*sc, h=_cropImg.height*sc;
+
+  // Apply adjustments via filter
+  const b=_editorVals.bright, c=_editorVals.contrast, sat=_editorVals.sat, warm=_editorVals.warm;
+  ctx.filter=[
+    `brightness(${1+(b/100)})`,
+    `contrast(${1+(c/100)})`,
+    `saturate(${1+(sat/100)})`,
+    warm>0?`sepia(${warm/100})`:`hue-rotate(${warm*1.2}deg)`,
+  ].join(' ');
+  ctx.drawImage(_cropImg,-w/2,-h/2,w,h);
   ctx.restore();
 }
 
-function cropZoom(factor){
-  _cropScale = Math.max(0.2, Math.min(5, _cropScale * factor));
-  drawCropCanvas();
-}
-function cropRotate(deg){
-  _cropAngle = (_cropAngle + deg + 360) % 360;
-  drawCropCanvas();
-}
-function cropFlip(){
-  _cropFlipped = !_cropFlipped;
-  drawCropCanvas();
-}
-function resetCropSelection(){
-  _selW=0;_selH=0;
-  document.getElementById('cropSelection').style.display='none';
-}
+function cropZoom(f){_cropScale=Math.max(0.1,Math.min(8,_cropScale*f));drawCropCanvas();}
+function cropRotate(deg){_cropAngle=(_cropAngle+deg+360)%360;drawCropCanvas();}
+function cropFlip(dir){if(dir==='h')_cropFlipH=!_cropFlipH;else _cropFlipV=!_cropFlipV;drawCropCanvas();}
+function resetCropSelection(){_selW=0;_selH=0;document.getElementById('cropSelection').style.display='none';}
 
-// Mouse events on crop container for drag-select and pan
+// Mouse events on canvas
 (function(){
-  let mode = null; // 'select' or 'pan'
-  document.addEventListener('DOMContentLoaded', setupCropEvents);
-  function setupCropEvents(){
-    const c = document.getElementById('cropContainer');
-    if(!c) return;
-    c.addEventListener('mousedown', function(e){
-      if(e.button===2){ mode='pan'; _panStartX=e.clientX; _panStartY=e.clientY; _panOffX=_cropOffX; _panOffY=_cropOffY; return; }
-      mode = 'select';
-      const r = c.getBoundingClientRect();
-      _selX = e.clientX - r.left;
-      _selY = e.clientY - r.top;
-      _selW = 0; _selH = 0;
-      _dragging = true;
+  let mode=null,_panSX=0,_panSY=0,_panOX=0,_panOY=0;
+  function setup(){
+    const c=document.getElementById('cropContainer');
+    if(!c){setTimeout(setup,600);return;}
+    c.addEventListener('mousedown',e=>{
+      if(e.button===2){mode='pan';_panSX=e.clientX;_panSY=e.clientY;_panOX=_cropOffX;_panOY=_cropOffY;return;}
+      mode='sel';
+      const r=c.getBoundingClientRect();
+      _selX=e.clientX-r.left;_selY=e.clientY-r.top;_selW=0;_selH=0;_dragging=true;
     });
-    c.addEventListener('mousemove', function(e){
-      if(mode==='pan' && e.buttons===2){
-        _cropOffX = _panOffX + (e.clientX - _panStartX);
-        _cropOffY = _panOffY + (e.clientY - _panStartY);
-        drawCropCanvas(); return;
+    c.addEventListener('mousemove',e=>{
+      if(mode==='pan'&&e.buttons===2){_cropOffX=_panOX+(e.clientX-_panSX);_cropOffY=_panOY+(e.clientY-_panSY);drawCropCanvas();return;}
+      if(!_dragging||mode!=='sel')return;
+      const r=c.getBoundingClientRect();
+      _selW=(e.clientX-r.left)-_selX;_selH=(e.clientY-r.top)-_selY;
+      const sel=document.getElementById('cropSelection');
+      sel.style.display='block';
+      sel.style.left=Math.min(_selX,_selX+_selW)+'px';sel.style.top=Math.min(_selY,_selY+_selH)+'px';
+      sel.style.width=Math.abs(_selW)+'px';sel.style.height=Math.abs(_selH)+'px';
+    });
+    c.addEventListener('mouseup',()=>{_dragging=false;mode=null;});
+    c.addEventListener('dblclick',()=>resetCropSelection());
+    c.addEventListener('wheel',e=>{e.preventDefault();cropZoom(e.deltaY<0?1.1:0.9);});
+    c.addEventListener('contextmenu',e=>e.preventDefault());
+
+    // Touch support for mobile
+    let _lastTouchDist=0;
+    c.addEventListener('touchstart',e=>{
+      if(e.touches.length===2){
+        _lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
       }
-      if(!_dragging || mode!=='select') return;
-      const r = c.getBoundingClientRect();
-      _selW = (e.clientX - r.left) - _selX;
-      _selH = (e.clientY - r.top)  - _selY;
-      const sel = document.getElementById('cropSelection');
-      sel.style.display = 'block';
-      sel.style.left   = (Math.min(_selX, _selX+_selW)) + 'px';
-      sel.style.top    = (Math.min(_selY, _selY+_selH)) + 'px';
-      sel.style.width  = Math.abs(_selW) + 'px';
-      sel.style.height = Math.abs(_selH) + 'px';
     });
-    c.addEventListener('mouseup', function(){ _dragging=false; mode=null; });
-    c.addEventListener('dblclick', function(){ resetCropSelection(); });
-    c.addEventListener('wheel', function(e){ e.preventDefault(); cropZoom(e.deltaY<0?1.1:0.9); });
-    c.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    c.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      if(e.touches.length===2){
+        const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        if(_lastTouchDist>0) cropZoom(d/_lastTouchDist);
+        _lastTouchDist=d;
+      } else if(e.touches.length===1){
+        const t=e.touches[0];
+        _cropOffX+=t.clientX-(_lastTX||t.clientX);
+        _cropOffY+=t.clientY-(_lastTY||t.clientY);
+        _lastTX=t.clientX;_lastTY=t.clientY;
+        drawCropCanvas();
+      }
+    },{passive:false});
+    c.addEventListener('touchend',()=>{_lastTouchDist=0;window._lastTX=0;window._lastTY=0;});
   }
-  // retry after modal is ready
-  setTimeout(setupCropEvents, 500);
+  setup();
+  window._lastTX=0;window._lastTY=0;
 })();
 
 function applyCrop(){
-  const canvas  = document.getElementById('cropCanvas');
-  const outCanvas = document.createElement('canvas');
-  const ctx     = outCanvas.getContext('2d');
-  const hadSel  = Math.abs(_selW) > 10 && Math.abs(_selH) > 10;
-
+  const canvas=document.getElementById('cropCanvas');
+  const outCanvas=document.createElement('canvas');
+  const ctx=outCanvas.getContext('2d');
+  const hadSel=Math.abs(_selW)>10&&Math.abs(_selH)>10;
   if(hadSel){
-    // Crop the selected region
-    const x = Math.min(_selX, _selX+_selW);
-    const y = Math.min(_selY, _selY+_selH);
-    const w = Math.abs(_selW);
-    const h = Math.abs(_selH);
-    outCanvas.width  = w;
-    outCanvas.height = h;
-    ctx.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+    const x=Math.min(_selX,_selX+_selW),y=Math.min(_selY,_selY+_selH);
+    const w=Math.abs(_selW),h=Math.abs(_selH);
+    outCanvas.width=w;outCanvas.height=h;
+    ctx.drawImage(canvas,x,y,w,h,0,0,w,h);
   } else {
-    // No selection — use full canvas (with rotation/flip applied)
-    outCanvas.width  = canvas.width;
-    outCanvas.height = canvas.height;
-    ctx.drawImage(canvas, 0, 0);
+    outCanvas.width=canvas.width;outCanvas.height=canvas.height;
+    ctx.drawImage(canvas,0,0);
   }
-
-  // Compress after crop too
-  const cropData = outCanvas.toDataURL('image/jpeg', 0.92);
-  compressImage(cropData, 500, 0.65).then(compressed => {
-    editPhotos[_cropSlot] = compressed;
-    renderImgSlots();
-    closeCrop();
-    showToast('ตัดรูปแล้ว ✦','t-gold');
-  });
-}
-
-// ============================================================
-// FIX DATABASE — repairs wrong data structure in JSONBin
-// ============================================================
-async function fixDatabaseStructure(){
-  if(!confirm('ตรวจสอบและแก้ไขข้อมูลใน JSONBin?\nThis will move any non-sold items from sold[] back to items[]')) return;
-  showToast('กำลังตรวจสอบข้อมูล...','t-gold');
-
-  // Move items in SOLD that are NOT actually sold back to ITEMS
-  const trulySold  = SOLD.filter(it => it.badge === 'SOLD');
-  const wronglySold = SOLD.filter(it => it.badge !== 'SOLD');
-
-  if(wronglySold.length > 0){
-    wronglySold.forEach(it => ITEMS.push(it));
-    SOLD = trulySold;
-    showToast(`ย้าย ${wronglySold.length} รายการกลับมา items ✦`,'t-buy');
-  }
-
-  // If items[] is empty and sold[] has items, something is wrong - ask user
-  if(ITEMS.length === 0 && SOLD.length > 0){
-    if(confirm(`items ว่างเปล่า มี ${SOLD.length} รายการใน sold\nย้ายทั้งหมดกลับมาเป็น items?\nMove all back to available items?`)){
-      ITEMS = [...SOLD];
-      ITEMS.forEach(it => { it.badge = it.badge === 'SOLD' ? '' : it.badge; });
-      SOLD = [];
-    }
-  }
-
-  const ok = await saveItemsToDB();
-  if(ok){
-    renderAll();
-    showToast(`✅ แก้ไขแล้ว — items:${ITEMS.length} sold:${SOLD.length}`,'t-buy');
+  const resultData=outCanvas.toDataURL('image/jpeg',0.9);
+  // Try to upload to ImgBB, else keep as base64
+  const key=window._imgbbKey||IMGBB_KEY;
+  if(key){
+    showToast('Uploading edited image to ImgBB...','t-info');
+    uploadToImgBB(resultData).then(url=>{
+      editPhotos[_cropSlot]=url||resultData;
+      renderImgSlots();renderImgUrlInputs();closeCrop();
+      showToast(url?'แก้ไขและ upload แล้ว ✦':'แก้ไขแล้ว (base64)','t-gold');
+    });
+  } else {
+    editPhotos[_cropSlot]=resultData;
+    renderImgSlots();renderImgUrlInputs();closeCrop();
+    showToast('แก้ไขรูปแล้ว ✦','t-gold');
   }
 }
-
-// ============================================================
-// BILINGUAL — Thai / English toggle
-// ============================================================
-const LANG = {
-  th: {
-    heroNameTh: 'พระเครื่องบ้านแต้',
-    heroTaglineTh: 'ความชำนาญเฉพาะทาง · ปรัชญา ความเชื่อ ศิลปกรรม สะสม พุทธศิลป<br/>กรุเก่า สาย สะสมความเก่า ตามแบบแผนของเรา',
-    heroBelief: 'เชื่อว่าถ้าท่านเข้ามาในนี้แล้วสิ่งที่เราชอบคงไม่ต่างกัน',
-    buyModeTh: 'กำลังหา', buyModeEn: 'Looking to Buy', buyModeSub: 'BROWSE COLLECTION',
-    sellModeTh: 'ต้องการขาย', sellModeEn: 'Want to Sell', sellModeSub: 'SELL YOUR AMULET',
-    soldModeTh: 'ขายแล้ว', soldModeEn: 'Previously Sold', soldModeSub: 'SEE SOLD ITEMS',
-    collectionTitle: 'พระเครื่องทั้งหมด', collectionSub: 'คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy',
-    navFind: '🔍 หา', navSell: '💰 ขาย',
-    langBtn: '🌐 EN',
-    buyNow: 'ซื้อเลย · BUY NOW', addCart: '+ เพิ่มในตะกร้า · ADD TO CART',
-    contactGuide: '🙏 กดปุ่มด้านล่างเพื่อติดต่อแอดมินโดยตรง<br/><span style="font-size:0.73rem;color:var(--text-muted)">Press a button below — our admin will assist you personally</span>',
-    contactInfoTitle: 'ข้อมูลติดต่อ · Contact',
-    certText: 'ผ่านการตรวจสอบ · Authenticity verified by our expert.',
-  },
-  en: {
-    heroNameTh: 'Bantae Amulet',
-    heroTaglineTh: 'Specialist in philosophy, sacred belief, Buddhist art & antique collection<br/>Ancient kru · Lineage collecting — in our own tradition',
-    heroBelief: 'If you are here, we likely share the same passion.',
-    buyModeTh: 'Looking to Buy', buyModeEn: 'Browse Collection', buyModeSub: 'BROWSE COLLECTION',
-    sellModeTh: 'Want to Sell', sellModeEn: 'Sell Your Amulet', sellModeSub: 'SELL YOUR AMULET',
-    soldModeTh: 'Sold Items', soldModeEn: 'Previously Sold', soldModeSub: 'SEE SOLD ITEMS',
-    collectionTitle: 'All Sacred Amulets', collectionSub: 'Click any amulet to see details and price',
-    navFind: '🔍 Find', navSell: '💰 Sell',
-    langBtn: '🌐 TH',
-    buyNow: 'BUY NOW', addCart: '+ Add to Cart',
-    contactGuide: '🙏 Press a button below to contact our admin directly.',
-    contactInfoTitle: 'Contact Information',
-    certText: 'Authenticity verified by our expert.',
-  }
-};
-window._isEng = false;
-
-function toggleLang(){
-  window._isEng = !window._isEng;
-  const L = window._isEng ? LANG.en : LANG.th;
-  const btn = document.getElementById('langBtn');
-  if(btn){ btn.textContent = L.langBtn; btn.style.borderColor = window._isEng ? 'var(--gold)' : ''; btn.style.color = window._isEng ? 'var(--gold)' : ''; }
-  // Hero
-  setInner('heroNameTh', L.heroNameTh);
-  setInner('heroTaglineTh', L.heroTaglineTh);
-  setInner('heroBelief', L.heroBelief);
-  // Mode buttons
-  setInner('buyModeTh', L.buyModeTh);
-  setInner('buyModeEn', L.buyModeEn);
-  setInner('buyModeSub', L.buyModeSub);
-  setInner('sellModeTh', L.sellModeTh);
-  setInner('sellModeEn', L.sellModeEn);
-  setInner('sellModeSub', L.sellModeSub);
-  setInner('soldModeTh', L.soldModeTh);
-  setInner('soldModeEn', L.soldModeEn);
-  setInner('soldModeSub', L.soldModeSub);
-  // Collection
-  setInner('collectionTitleEl', L.collectionTitle);
-  setInner('collectionSubEl', L.collectionSub);
-  // Nav buttons
-  const nb1 = document.querySelector('.nav-btn:nth-of-type(1)'); if(nb1) nb1.textContent = L.navFind;
-  const nb2 = document.querySelector('.nav-btn:nth-of-type(2)'); if(nb2) nb2.textContent = L.navSell;
-  // Re-render to update item card buttons
-  renderAll();
-  showToast(window._isEng ? 'Switched to English' : 'เปลี่ยนเป็นภาษาไทย', 't-gold');
-}
-function setInner(id, val){ const el = document.getElementById(id); if(el) el.innerHTML = val; }
-function getLang(){ return window._isEng ? LANG.en : LANG.th; }
 
 // ── INIT ────────────────────────────────────────────────────────
 // 1. Restore admin session
