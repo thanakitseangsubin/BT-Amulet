@@ -366,6 +366,28 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:1.6rem
 .t-info{background:rgba(0,100,200,0.7);color:#90C8FF;border:1px solid rgba(0,132,255,0.3)}
 .toast.show{opacity:1;transform:translateY(0)}
 
+/* ── Image Editor Modal ── */
+.crop-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:900;display:none;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;padding:1rem}
+.crop-overlay.open{display:flex}
+.crop-container{position:relative;overflow:hidden;background:#0a0a0a;width:min(500px,90vw);height:min(500px,48vh)}
+.crop-canvas{display:block;width:100%;height:100%}
+.crop-selection{position:absolute;border:2px solid var(--gold);background:rgba(201,168,76,0.08);pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,0.5)}
+.crop-toolbar{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:520px}
+.crop-btn{background:var(--dark3);border:1px solid var(--border-b);color:var(--gold);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:7px 11px;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.crop-btn:hover,.crop-btn.primary{background:var(--gold);color:var(--dark)}
+.crop-btn.danger{border-color:rgba(229,62,62,0.4);color:#ff8080}
+.crop-btn.danger:hover{background:#E53E3E;color:#fff;border-color:#E53E3E}
+.editor-sliders{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:520px}
+.slider-group{display:flex;align-items:center;gap:5px;font-family:'Cinzel',serif;font-size:0.56rem;color:var(--text-muted);letter-spacing:0.04em}
+.slider-group input[type=range]{width:80px;accent-color:var(--gold);cursor:pointer}
+.slider-group span{color:var(--gold);min-width:26px;text-align:right;font-size:0.58rem}
+/* Skeleton shimmer */
+.skeleton-card{background:var(--dark3);border:1px solid var(--border);overflow:hidden}
+.skeleton-img{aspect-ratio:1;background:linear-gradient(90deg,var(--dark4) 25%,var(--dark3) 50%,var(--dark4) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+.skeleton-line{height:0.75rem;border-radius:2px;margin:0.5rem 0.95rem;background:linear-gradient(90deg,var(--dark4) 25%,var(--dark3) 50%,var(--dark4) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+.skeleton-line.short{width:55%}.skeleton-line.price{width:40%;margin-top:0.65rem}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 ::placeholder{color:var(--text-muted)}
 select option{background:var(--dark4)}
 @media(max-width:680px){
@@ -887,14 +909,14 @@ select option{background:var(--dark4)}
         </div>
         <!-- Drag zone — only shown when ImgBB key exists -->
         <div id="imgbbDropZone"
-             ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.08)'"
-             ondragleave="this.style.borderColor='';this.style.background=''"
-             ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';dropImgsHandler(event)"
+             ondragover="event.preventDefault();event.stopPropagation();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.08)'"
+             ondragleave="event.stopPropagation();this.style.borderColor='';this.style.background=''"
+             ondrop="event.preventDefault();event.stopPropagation();this.style.borderColor='';this.style.background='';handleDropZone(event)"
              onclick="document.getElementById('fileInput').click()"
-             style="border:2px dashed var(--border-b);background:var(--dark4);padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;border-radius:2px">
-          <div style="font-size:1.5rem;margin-bottom:0.25rem">📁</div>
+             style="border:2px dashed var(--border-b);background:var(--dark4);padding:1.1rem;text-align:center;cursor:pointer;transition:all 0.2s;border-radius:2px">
+          <div style="font-size:1.5rem;margin-bottom:0.3rem">📁</div>
           <div style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--gold);margin-bottom:0.2rem">ลากรูปมาที่นี่ · DRAG FILES HERE</div>
-          <div style="font-size:0.68rem;color:var(--text-muted)">รูปจะถูก upload ไปที่ ImgBB อัตโนมัติ (ต้องใส่ API Key ก่อน)</div>
+          <div style="font-size:0.68rem;color:var(--text-muted)">upload ไปที่ ImgBB อัตโนมัติ · ลากหลายรูปพร้อมกันได้</div>
         </div>
         <div style="border-top:1px dashed var(--border);padding-top:7px;margin-top:8px;font-size:0.72rem;color:#9A8E6A;line-height:1.7;font-family:'Sarabun',sans-serif">
           หรือวาง URL จาก <a href="https://postimages.org" target="_blank" style="color:#7FFFC0;text-decoration:none">postimages.org</a> ในช่องด้านล่าง
@@ -907,18 +929,9 @@ select option{background:var(--dark4)}
       <div class="img-upload-grid" id="imgSlots" style="margin-top:4px"></div>
       <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="handleImgUpload(event)"/>
     </div>
-    <div class="ai-foot" style="flex-direction:column;gap:8px">
-      <!-- KB usage bar -->
-      <div id="kbBar" style="width:100%;background:var(--dark4);border:1px solid var(--border);padding:7px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <div style="flex:1;height:6px;background:var(--dark);border-radius:3px;overflow:hidden">
-          <div id="kbFill" style="height:100%;border-radius:3px;background:var(--gold);width:0%;transition:width 0.3s,background 0.3s"></div>
-        </div>
-        <div id="kbText" style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.06em;color:var(--text-muted);flex-shrink:0">0 / 100 KB</div>
-      </div>
-      <div style="display:flex;gap:8px;width:100%">
-        <button class="btn-cancel" onclick="closeOv('aiOv')">CANCEL</button>
-        <button class="btn-save" onclick="saveItem()">💾 SAVE ITEM &nbsp;(Enter)</button>
-      </div>
+    <div class="ai-foot">
+      <button class="btn-cancel" onclick="closeOv('aiOv')">CANCEL</button>
+      <button class="btn-save" onclick="saveItem()">💾 SAVE ITEM &nbsp;(Enter)</button>
     </div>
   </div>
 </div>
@@ -1015,7 +1028,11 @@ function setMode(m) {
 // RENDER GRID
 // ============================================================
 function getItemImg(it) {
-  return (it.photos && it.photos[0]) ? it.photos[0] : ph(it.imgs[0]);
+  if (it.photos && it.photos.length) {
+    const first = it.photos.find(p => p && p.length > 4);
+    if (first) return first;
+  }
+  return ph(it.imgs ? it.imgs[0] : 0);
 }
 function getItemImgs(it) {
   if (it.photos && it.photos.length) return it.photos;
@@ -1574,30 +1591,7 @@ function renderImgSlots(){
 
 // ── Drag-to-reorder image slots ─────────────────────────────────
 // Update KB usage bar in add/edit modal
-function updateKBBar(){
-  // Calculate current total data size (items + sold + new item photos)
-  const existingPayload = JSON.stringify({ items: ITEMS, sold: SOLD });
-  const existingKB = Math.round(existingPayload.length / 1024);
-
-  // Photos: URLs are tiny (~50 chars), base64 is large
-  const photosBytes = editPhotos.filter(Boolean).reduce((sum, p) => sum + p.length, 0);
-  const photosKB = Math.round(photosBytes / 1024);
-  const totalKB = existingKB + photosKB;
-  const limitKB = 100;
-  const pct = Math.min(100, Math.round(totalKB / limitKB * 100));
-
-  const fill = document.getElementById('kbFill');
-  const text = document.getElementById('kbText');
-  if(!fill || !text) return;
-
-  fill.style.width = pct + '%';
-  text.textContent = totalKB + ' / ' + limitKB + ' KB';
-
-  // Color: green → yellow → red
-  if(pct < 60)       { fill.style.background = 'var(--gold)';   text.style.color = 'var(--text-muted)'; }
-  else if(pct < 85)  { fill.style.background = '#FFB347';       text.style.color = '#FFB347'; }
-  else               { fill.style.background = '#E53E3E';       text.style.color = '#ff8080'; }
-}
+function updateKBBar(){}
 
 let _dragSlot = -1;
 function slotDragStart(e, i){
@@ -1637,26 +1631,61 @@ function pickSlot(i){ curSlot=i; document.getElementById('fileInput').click(); }
 async function handleImgUpload(e){
   const files=[...e.target.files];
   for (const file of files) {
-    let slot = editPhotos.findIndex(p=>!p);
+    let slot = editPhotos.findIndex(p=>!p||p===''||p==='⏳');
     if(slot<0) slot = editPhotos.length;
     if(slot >= 6) break;
-    editPhotos[slot] = '⏳'; renderImgSlots(); // placeholder
+    editPhotos[slot] = '⏳';
+    renderImgSlots(); renderImgUrlInputs();
     const result = await processImage(file);
-    editPhotos[slot] = result;
-    renderImgSlots();
+    editPhotos[slot] = result || '';
+    renderImgSlots(); renderImgUrlInputs();
   }
   e.target.value='';
 }
+async function handleDropZone(e){
+  // Called from the imgbbDropZone only
+  const key = window._imgbbKey || IMGBB_KEY;
+  if(!key){
+    showToast('ใส่ ImgBB API Key ก่อน ด้านบน','t-sell');
+    return;
+  }
+  const files = [...(e.dataTransfer?.files || [])].filter(f=>f.type.startsWith('image/'));
+  if(!files.length){ showToast('ไม่พบไฟล์รูป','t-sell'); return; }
+  showToast(`กำลัง upload ${files.length} รูป...`,'t-info');
+  for(const file of files){
+    let slot = editPhotos.findIndex(p=>!p||p===''||p==='⏳');
+    if(slot<0) slot = editPhotos.length;
+    if(slot >= 6){ showToast('เต็มแล้ว (สูงสุด 6 รูป)','t-gold'); break; }
+    editPhotos[slot] = '⏳';
+    renderImgSlots(); renderImgUrlInputs();
+    const result = await processImage(file);
+    editPhotos[slot] = result || '';
+    renderImgSlots(); renderImgUrlInputs();
+    if(result && result.startsWith('http')){
+      showToast(`✅ รูป ${slot+1} upload สำเร็จ`,'t-buy');
+    }
+  }
+}
+
 async function dropImgsHandler(e){
+  const key = window._imgbbKey || IMGBB_KEY;
+  if(!key){
+    showToast('กรุณาใส่ ImgBB API Key ก่อน','t-sell');
+    return;
+  }
   const files=[...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
   for (const file of files) {
-    let slot = editPhotos.findIndex(p=>!p);
+    let slot = editPhotos.findIndex(p=>!p||p===''||p==='⏳');
     if(slot<0) slot = editPhotos.length;
     if(slot >= 6) break;
-    editPhotos[slot] = '⏳'; renderImgSlots();
+    editPhotos[slot] = '⏳';
+    renderImgSlots(); renderImgUrlInputs();
     const result = await processImage(file);
-    editPhotos[slot] = result;
-    renderImgSlots();
+    editPhotos[slot] = result || '';
+    renderImgSlots(); renderImgUrlInputs();
+    if(result && result.startsWith('http')){
+      showToast('Upload สำเร็จ ✦','t-buy');
+    }
   }
 }
 // Page-level drop when add/edit modal is open
@@ -2099,6 +2128,7 @@ async function loadItemsFromDB() {
     }
   }
   renderAll();
+  showLoading(false);
 }
 
 // ── JSONBin: save items to cloud ─────────────────────────────────
@@ -2196,7 +2226,7 @@ function updateImgbbStatus(key){
 
 async function uploadToImgBB(base64Data) {
   const key = window._imgbbKey || IMGBB_KEY;
-  if (!key) return null; // no key set, skip
+  if (!key){ console.warn('No ImgBB key set'); return null; }
   try {
     // Strip data:image/...;base64, prefix
     const b64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
@@ -2221,11 +2251,12 @@ async function processImage(file) {
     const r = new FileReader();
     r.onload = async ev => {
       const compressed = await compressImage(ev.target.result, 500, 0.75);
-      if (IMGBB_KEY) {
+      const _key = window._imgbbKey || IMGBB_KEY;
+      if (_key) {
         showToast('กำลัง upload รูปไปยัง ImgBB...', 't-info');
         const url = await uploadToImgBB(compressed);
         if (url) { resolve(url); return; }
-        showToast('ImgBB upload ล้มเหลว ใช้ base64 แทน', 't-sell');
+        showToast('ImgBB upload ล้มเหลว — ตรวจสอบ API Key','t-sell');
       }
       resolve(compressed); // fallback to compressed base64
     };
@@ -2316,6 +2347,50 @@ function closeCrop(){
   document.body.style.overflow='';
 }
 
+// ── Remove Background using remove.bg API ───────────────────────
+// Get free API key at remove.bg (50 free images/month)
+const REMOVEBG_KEY = ''; // ← paste remove.bg API key here (optional)
+
+async function removeBackground(){
+  const canvas = document.getElementById('cropCanvas');
+  // Convert current canvas to blob
+  canvas.toBlob(async blob => {
+    showToast('🪄 Removing background...', 't-info');
+    const key = REMOVEBG_KEY || window._removebgKey || '';
+    if(!key){
+      // Use free photoscissors/remove.bg demo proxy — limited but works
+      // Fallback: open remove.bg in new tab with instructions
+      showToast('ต้องการ remove.bg API Key — เปิดในแท็บใหม่...', 't-sell');
+      setTimeout(()=> window.open('https://www.remove.bg/upload', '_blank'), 1000);
+      return;
+    }
+    try {
+      const form = new FormData();
+      form.append('image_file', blob, 'image.jpg');
+      form.append('size', 'auto');
+      const res = await fetch('https://api.remove.bg/v1.0/removebg', {
+        method: 'POST',
+        headers: { 'X-Api-Key': key },
+        body: form,
+      });
+      if(!res.ok){ const e=await res.text(); throw new Error(e); }
+      const resultBlob = await res.blob();
+      const blobUrl = URL.createObjectURL(resultBlob);
+      // Load result back into editor
+      const img = new Image();
+      img.onload = ()=>{
+        _cropImg = img;
+        _cropOffX=0; _cropOffY=0;
+        drawCropCanvas();
+        showToast('ลบพื้นหลังแล้ว ✦ — กด Apply & Save', 't-buy');
+      };
+      img.src = blobUrl;
+    } catch(e){
+      showToast('Remove BG ล้มเหลว: ' + e.message, 't-sell');
+    }
+  }, 'image/jpeg', 0.9);
+}
+
 function fitImageToSquare(){
   _cropOffX=0;_cropOffY=0;
   const canvas=document.getElementById('cropCanvas');
@@ -2363,13 +2438,22 @@ function resetCropSelection(){_selW=0;_selH=0;document.getElementById('cropSelec
     const c=document.getElementById('cropContainer');
     if(!c){setTimeout(setup,600);return;}
     c.addEventListener('mousedown',e=>{
-      if(e.button===2){mode='pan';_panSX=e.clientX;_panSY=e.clientY;_panOX=_cropOffX;_panOY=_cropOffY;return;}
-      mode='sel';
-      const r=c.getBoundingClientRect();
-      _selX=e.clientX-r.left;_selY=e.clientY-r.top;_selW=0;_selH=0;_dragging=true;
+      e.preventDefault();
+      if(e.shiftKey){
+        // Shift+drag = crop selection
+        mode='sel';
+        const r=c.getBoundingClientRect();
+        _selX=e.clientX-r.left;_selY=e.clientY-r.top;_selW=0;_selH=0;_dragging=true;
+      } else {
+        // Normal drag = pan/move image
+        mode='pan';_panSX=e.clientX;_panSY=e.clientY;_panOX=_cropOffX;_panOY=_cropOffY;
+      }
     });
     c.addEventListener('mousemove',e=>{
-      if(mode==='pan'&&e.buttons===2){_cropOffX=_panOX+(e.clientX-_panSX);_cropOffY=_panOY+(e.clientY-_panSY);drawCropCanvas();return;}
+      if(mode==='pan'&&e.buttons){
+        _cropOffX=_panOX+(e.clientX-_panSX);_cropOffY=_panOY+(e.clientY-_panSY);
+        drawCropCanvas();return;
+      }
       if(!_dragging||mode!=='sel')return;
       const r=c.getBoundingClientRect();
       _selW=(e.clientX-r.left)-_selX;_selH=(e.clientY-r.top)-_selY;
@@ -2475,11 +2559,7 @@ loadItemsFromDB();
 </script>
 
 <!-- Page drop hint overlay -->
-<div id="pageDropHint" style="display:none;position:fixed;inset:0;background:rgba(201,168,76,0.1);border:4px dashed var(--gold);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;pointer-events:none">
-  <div style="font-size:3rem">📷</div>
-  <div style="font-family:Cinzel,serif;font-size:1.1rem;letter-spacing:0.1em;color:var(--gold)">วางรูปภาพที่นี่ · Drop here</div>
-  <div style="font-size:0.82rem;color:var(--text-dim);font-family:Sarabun,sans-serif">ภาพจะถูกเพิ่มเข้ารายการที่กำลังแก้ไข</div>
-</div>
+
 
 <!-- REPORT FORM (customer) -->
 <div class="auth-overlay" id="reportFormOv">
@@ -2512,6 +2592,42 @@ loadItemsFromDB();
     <div id="reportsList" style="max-height:55vh;overflow-y:auto"></div>
     <button class="auth-skip" onclick="closeOv('reportsOv')" style="margin-top:0.75rem">Close</button>
   </div>
+</div>
+
+<!-- IMAGE EDITOR MODAL -->
+<div class="crop-overlay" id="cropOverlay">
+  <div style="font-family:'Sarabun',sans-serif;font-size:0.75rem;color:var(--text-muted);text-align:center;padding:0 1rem">
+    🖱️ ลากเพื่อเลื่อนรูป · Shift+ลาก = crop · Scroll = zoom · Double-click = reset crop
+  </div>
+  <div class="crop-container" id="cropContainer">
+    <canvas id="cropCanvas"></canvas>
+    <div class="crop-selection" id="cropSelection" style="display:none"></div>
+  </div>
+  <div class="editor-sliders">
+    <div class="slider-group">☀️<input type="range" id="slBright" min="-100" max="100" value="0" oninput="updateEditorVal('bright',this.value);drawCropCanvas()"/><span id="vBright">0</span></div>
+    <div class="slider-group">◑<input type="range" id="slContrast" min="-100" max="100" value="0" oninput="updateEditorVal('contrast',this.value);drawCropCanvas()"/><span id="vContrast">0</span></div>
+    <div class="slider-group">🎨<input type="range" id="slSat" min="-100" max="100" value="0" oninput="updateEditorVal('sat',this.value);drawCropCanvas()"/><span id="vSat">0</span></div>
+    <div class="slider-group">🌡️<input type="range" id="slWarm" min="-50" max="50" value="0" oninput="updateEditorVal('warm',this.value);drawCropCanvas()"/><span id="vWarm">0</span></div>
+  </div>
+  <div class="crop-toolbar">
+    <button class="crop-btn" onclick="cropZoom(0.85)">− Zoom</button>
+    <button class="crop-btn" onclick="cropZoom(1.15)">+ Zoom</button>
+    <button class="crop-btn" onclick="cropRotate(-90)">↺ −90°</button>
+    <button class="crop-btn" onclick="cropRotate(90)">↻ +90°</button>
+    <button class="crop-btn" onclick="cropFlip('h')">↔ Flip H</button>
+    <button class="crop-btn" onclick="cropFlip('v')">↕ Flip V</button>
+    <button class="crop-btn" onclick="fitImageToSquare()">⬛ Fit Box</button>
+    <button class="crop-btn" onclick="resetAllEdits()">↺ Reset All</button>
+    <button class="crop-btn" onclick="removeBackground()" style="border-color:rgba(127,255,192,0.4);color:var(--buy)">🪄 Remove BG</button>
+    <button class="crop-btn primary" onclick="applyCrop()">✂️ Apply &amp; Save</button>
+    <button class="crop-btn danger" onclick="closeCrop()">✕ Cancel</button>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="display:none;position:fixed;inset:0;background:rgba(13,11,7,0.93);z-index:9990;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="font-size:2.5rem;animation:spin 1.5s linear infinite">📿</div>
+  <div style="font-family:Cinzel,serif;font-size:0.82rem;letter-spacing:0.12em;color:#C9A84C">กำลังโหลด · LOADING</div>
 </div>
 
 </body>
