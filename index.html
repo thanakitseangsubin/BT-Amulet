@@ -153,7 +153,7 @@ section,div.sec{padding:2.75rem 1.5rem}
 .item-card:hover .item-img-wrap img{transform:scale(1.05)}
 .item-badge{position:absolute;top:8px;left:8px;font-family:'Cinzel',serif;font-size:0.52rem;letter-spacing:0.07em;padding:3px 8px;font-weight:700}
 .bg{background:var(--gold);color:var(--dark)}
-.bn{background:#1A5C35;color:#7FFFC0}
+.bn{background:#1A5C35;color:#7FFFC0}.bid-badge{background:#5C2E1A;color:#FFB347;border:1px solid rgba(255,179,71,0.4)}
 .br{background:#5C1A1A;color:#FFB090}
 /* Admin controls on card */
 .admin-ctrl{position:absolute;top:8px;right:8px;display:none;gap:4px}
@@ -479,10 +479,16 @@ select option{background:var(--dark4)}
   </div>
   <ul class="nav-links">
     <li><a onclick="scrollToId('default-collection')">COLLECTION</a></li>
+    <li><a onclick="openBidPanel()">🔨 BID</a></li>
+    <li><a onclick="openTrackPanel()">📦 TRACK</a></li>
+    <li><a onclick="scrollToId('comment-section')">💬 BOARD</a></li>
     <li><a onclick="scrollToId('about')">ABOUT</a></li>
     <li><a onclick="scrollToId('contact-info')">CONTACT</a></li>
   </ul>
   <div class="nav-right">
+    <!-- BID + TRACK always visible buttons -->
+    <button onclick="openBidPanel()" style="background:none;border:1px solid rgba(255,179,71,0.4);color:#FFB347;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(255,179,71,0.15)'" onmouseout="this.style.background='none'">🔨 BID</button>
+    <button onclick="openTrackPanel()" style="background:none;border:1px solid rgba(127,255,192,0.3);color:var(--buy);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(127,255,192,0.1)'" onmouseout="this.style.background='none'">📦 TRACK</button>
     <!-- Messenger direct button top-right -->
     <a class="nav-messenger" href="https://m.me/100068843867509" target="_blank">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
@@ -531,6 +537,13 @@ select option{background:var(--dark4)}
 </section>
 
 <!-- DEFAULT COLLECTION always visible on load -->
+<!-- Action strip: BID · TRACK · VERIFY · BOARD -->
+<div id="action-strip" style="background:var(--dark2);border-bottom:1px solid var(--border);display:flex;align-items:stretch;justify-content:center">
+  <button onclick="openBidPanel()" style="flex:1;max-width:260px;background:none;border:none;border-right:1px solid var(--border);color:#FFB347;font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.08em;padding:0.85rem 0.75rem;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(255,179,71,0.07)'" onmouseout="this.style.background='none'"><span style="font-size:0.95rem">🔨</span> ประมูล · BID</button>
+  <button onclick="openTrackPanel()" style="flex:1;max-width:260px;background:none;border:none;border-right:1px solid var(--border);color:var(--buy);font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.08em;padding:0.85rem 0.75rem;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(127,255,192,0.07)'" onmouseout="this.style.background='none'"><span style="font-size:0.95rem">📦</span> ติดตาม · TRACK</button>
+  <button onclick="openVerifyPanel()" style="flex:1;max-width:260px;background:none;border:none;border-right:1px solid var(--border);color:var(--gold);font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.08em;padding:0.85rem 0.75rem;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(201,168,76,0.07)'" onmouseout="this.style.background='none'"><span style="font-size:0.95rem">🏅</span> ตรวจสอบ · VERIFY</button>
+  <button onclick="scrollToId('comment-section')" style="flex:1;max-width:260px;background:none;border:none;color:var(--text-dim);font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.08em;padding:0.85rem 0.75rem;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(201,168,76,0.05)'" onmouseout="this.style.background='none'"><span style="font-size:0.95rem">💬</span> กระดาน · BOARD</button>
+</div>
 <section id="default-collection" style="background:var(--dark)">
   <div class="container">
     <div class="section-header">
@@ -667,10 +680,21 @@ select option{background:var(--dark4)}
               <div class="form-group"><div class="form-label">ขนาด / SIZE</div><input type="text" class="form-input" placeholder="3.2 × 2.0 ซม."/></div>
             </div>
           </div>
-          <div class="upload-zone" style="margin-top:0.85rem" onclick="showToast('ส่งรูปมาทาง Messenger ได้เลย ✦','t-info')">
-            <div class="upload-icon">📷</div>
-            <div class="upload-text">อัพโหลดรูป / UPLOAD PHOTOS</div>
-            <div class="upload-sub">ส่งรูปผ่าน Messenger · หน้า หลัง ข้าง</div>
+          <!-- Sell form photo upload -->
+          <div style="margin-top:0.85rem">
+            <div class="form-label" style="margin-bottom:6px">รูปภาพพระ / PHOTOS (optional)</div>
+            <div id="sellDropZone"
+                 ondragover="event.preventDefault();this.style.borderColor='var(--gold)';this.style.background='rgba(201,168,76,0.07)'"
+                 ondragleave="this.style.borderColor='';this.style.background=''"
+                 ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';handleSellDrop(event)"
+                 onclick="document.getElementById('sellFileInput').click()"
+                 style="border:2px dashed var(--border-b);background:var(--dark4);padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;border-radius:2px;margin-bottom:8px">
+              <div style="font-size:1.4rem;margin-bottom:0.3rem">📷</div>
+              <div style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--gold);margin-bottom:0.2rem">ลากรูปมาที่นี่ หรือคลิกเลือก</div>
+              <div style="font-size:0.67rem;color:var(--text-muted)">Drag & drop or click to choose · หลายรูปได้</div>
+            </div>
+            <input type="file" id="sellFileInput" accept="image/*" multiple style="display:none" onchange="handleSellFileInput(event)"/>
+            <div id="sellPhotoPreview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px"></div>
           </div>
           <div class="sell-contact-admin">
             <div class="sell-contact-title">📬 ติดต่อแอดมินโดยตรง</div>
@@ -747,6 +771,30 @@ select option{background:var(--dark4)}
 </div>
 
 <!-- FOOTER -->
+<!-- COMMENT BOARD SECTION -->
+<div id="comment-section" style="background:var(--dark2);border-top:1px solid var(--border);padding:2.75rem 1.5rem">
+  <div class="container">
+    <div class="section-header">
+      <div class="sec-eye">กระดานสนทนา — COMMUNITY BOARD</div>
+      <div class="sec-title-th">ความคิดเห็น</div>
+      <div class="sec-title-en">Public Comment Board</div>
+      <div class="sec-sub">แสดงความคิดเห็น ถามคำถาม หรือแลกเปลี่ยนความรู้</div>
+      <div class="sec-line"></div>
+    </div>
+    <!-- Post form -->
+    <div style="background:var(--dark3);border:1px solid var(--border);padding:1.25rem;margin-bottom:1.5rem;max-width:700px;margin-left:auto;margin-right:auto">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <input type="text" id="commentName" class="form-input" placeholder="ชื่อ / Name (optional)"/>
+        <input type="text" id="commentEmail" class="form-input" placeholder="Line ID / Contact (optional)"/>
+      </div>
+      <textarea id="commentText" class="form-input" style="min-height:80px;margin-bottom:8px" placeholder="พิมพ์ความคิดเห็น / Type your comment..."></textarea>
+      <button onclick="submitComment()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;padding:10px 20px;border:none;cursor:pointer;transition:background 0.2s;width:100%" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">💬 ส่งความคิดเห็น · POST COMMENT</button>
+    </div>
+    <!-- Comment list -->
+    <div id="commentList" style="max-width:700px;margin:0 auto"></div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-logo-th">⬡ พระเครื่องบ้านแต้</div>
   <div class="footer-logo-en">BANTAE AMULET</div>
@@ -767,7 +815,7 @@ select option{background:var(--dark4)}
     </div>
     <div class="modal-body">
       <div class="modal-gallery">
-        <img class="modal-main-img" id="mImg" src="" alt=""/>
+        <div style="position:relative;cursor:zoom-in" onclick="openMZoom()" title="คลิกเพื่อขยาย"><img class="modal-main-img" id="mImg" src="" alt="" style="pointer-events:none"/><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.7);font-family:Cinzel,serif;font-size:0.5rem;letter-spacing:0.07em;padding:3px 8px;pointer-events:none">🔍 คลิกเพื่อขยาย</div></div>
         <div class="modal-thumbs" id="mThumbs"></div>
       </div>
       <div class="modal-info">
@@ -777,6 +825,7 @@ select option{background:var(--dark4)}
         <div class="modal-price" id="mPrice"></div>
         <div class="modal-price-note" id="mPriceNote"></div>
         <div class="info-rows" id="mInfo"></div>
+        <div id="mGuarantee"></div>
         <div class="modal-desc" id="mDesc"></div>
         <div class="modal-btns" id="mBtns"></div>
         <div class="cert-bar" style="margin-top:0.6rem">
@@ -875,7 +924,7 @@ select option{background:var(--dark4)}
           <select class="form-input" id="fi_cond"><option>ดีมาก / Excellent</option><option>ดี / Very Good</option><option>ดี มีร่องรอยอายุ</option><option>พอใช้ / Fair</option></select>
         </div>
         <div class="form-group"><div class="form-label">BADGE</div>
-          <select class="form-input" id="fi_badge"><option value="">None</option><option value="FEATURED">FEATURED</option><option value="RARE">RARE</option><option value="NEW">NEW</option><option value="SOLD">SOLD</option></select>
+          <select class="form-input" id="fi_badge"><option value="">None</option><option value="FEATURED">FEATURED</option><option value="RARE">RARE</option><option value="NEW">NEW</option><option value="BID">🔨 BID</option><option value="SOLD">SOLD</option></select>
         </div>
       </div>
       <div class="form-group"><div class="form-label">รายละเอียด / DESCRIPTION</div><textarea class="form-input" id="fi_desc" style="min-height:90px" placeholder="อธิบายรายละเอียดพระ..."></textarea></div>
@@ -1061,7 +1110,7 @@ function renderGrid(gridId, items, mode) {
     <div class="item-card" onclick="openModal(${it.id},'${mode}')">
       <div class="item-img-wrap">
         <img src="${getItemImg(it)}" alt="${it.nameTh}" loading="lazy"/>
-        ${it.badge ? `<div class="item-badge ${it.badge==='SOLD'?'br':it.badge==='NEW'?'bn':'bg'}">${it.badge}</div>` : ''}
+        ${it.badge ? `<div class="item-badge ${it.badge==='SOLD'?'br':it.badge==='NEW'?'bn':it.badge==='BID'?'bid-badge':'bg'}">${it.badge}</div>` : ''}
         <div class="admin-ctrl ${isAdmin?'show':''}">
           <button class="a-btn" onclick="event.stopPropagation();openAddItem(${it.id})" title="Edit">✏️</button>
           ${mode==='buy'?`<button class="a-btn sold-btn" onclick="event.stopPropagation();markAsSold(${it.id})" title="Mark as Sold">🏆</button>`:`<button class="a-btn" onclick="event.stopPropagation();restoreItem(${it.id})" title="Restore to Available" style="font-size:0.6rem">↩️</button>`}
@@ -1147,6 +1196,7 @@ function openModal(id, mode) {
   curItem   = it;
   curItemMd = mode;
   const imgs = getItemImgs(it);
+  _mImgs = imgs; _mImgIdx = 0;
   document.getElementById('mImg').src        = imgs[0];
   document.getElementById('mNameTh').textContent = it.nameTh;
   document.getElementById('mNameEn').textContent = it.nameEn;
@@ -1166,6 +1216,8 @@ function openModal(id, mode) {
     `<img class="thumb ${i===0?'active':''}" src="${src}" onclick="switchThumb(this,'${src}')"/>`
   ).join('');
   document.getElementById('mDesc').textContent = it.desc;
+  const gEl=document.getElementById('mGuarantee');
+  if(gEl){ gEl.innerHTML=(it.certUrl||it.certNote)?`<div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.25);padding:0.7rem 0.9rem;margin:0.7rem 0;display:flex;gap:10px;align-items:center"><div style="font-size:1.2rem">🏅</div><div style="flex:1"><div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.09em;color:var(--gold);margin-bottom:3px">มีใบรับรอง · CERTIFIED</div>${it.certNote?`<div style="font-family:'Sarabun',sans-serif;font-size:0.8rem;color:var(--text-dim);margin-bottom:5px">${it.certNote}</div>`:''} ${it.certUrl?`<button onclick="window.open('${it.certUrl}','_blank')" style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.58rem;font-weight:700;padding:4px 12px;border:none;cursor:pointer">🔍 ดูใบรับรอง</button>`:''}</div></div>`:''; }
   if (mode==='buy') {
     // Pre-filled message — copies to clipboard then opens Messenger
     const itemUrl = window.location.href;
@@ -1481,7 +1533,8 @@ async function openCropFromUrl(i){
   if(!url || url === '⏳') { showToast('ไม่มีรูปในช่องนี้','t-sell'); return; }
 
   // Reset editor state
-  _cropSlot=i; _cropScale=1; _cropAngle=0; _cropFlipH=false; _cropFlipV=false;
+  _cropSlot=i; _cropScale=1; _cropAngle=0;
+  window._cropOriginalSrc = editPhotos[i]||''; _cropFlipH=false; _cropFlipV=false;
   _selW=0; _selH=0; _cropOffX=0; _cropOffY=0;
   _editorVals={bright:0,contrast:0,sat:0,warm:0};
   ['slBright','slContrast','slSat','slWarm'].forEach(id=>{
@@ -1903,7 +1956,16 @@ function deleteItem(id,mode){
 // ============================================================
 // OVERLAY HELPERS
 // ============================================================
-function closeOv(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeOv(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(id === 'itemOverlay'){ try{ closeMZoom(); }catch(e){} }
+  if(id === 'imgZoomOv'){ el.style.display='none'; }
+  else { el.classList.remove('open'); }
+  const _ovIds=['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv','reportDetailOv','bidOv','bidDetailOv','trackOv','verifyOv','cropOverlay','aucFormOv'];
+  const stillOpen=_ovIds.filter(o=>o!==id).some(o=>{ const x=document.getElementById(o); return x&&x.classList.contains('open'); });
+  if(!stillOpen) document.body.style.overflow='';
+}
 
 // Enter key saves item when add/edit modal is open
 document.addEventListener('keydown', function(e){
@@ -1979,6 +2041,45 @@ function showToast(msg,cls='t-gold'){
 // ============================================================
 let reports=[];
 
+// Sell form photos
+let sellPhotos = [];
+
+async function handleSellDrop(e){
+  const files = [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
+  await processSellFiles(files);
+}
+async function handleSellFileInput(e){
+  const files = [...e.target.files];
+  await processSellFiles(files);
+  e.target.value='';
+}
+async function processSellFiles(files){
+  for(const file of files){
+    if(sellPhotos.length >= 6) break;
+    showToast('กำลัง upload รูป...','t-info');
+    const result = await processImage(file);
+    sellPhotos.push(result);
+    renderSellPhotos();
+  }
+}
+function renderSellPhotos(){
+  const preview = document.getElementById('sellPhotoPreview');
+  if(!preview) return;
+  preview.innerHTML = sellPhotos.map((src,i) => `
+    <div style="position:relative;aspect-ratio:1">
+      <img src="${src}" style="width:100%;height:100%;object-fit:cover;border:1px solid var(--border);border-radius:2px"/>
+      <button onclick="sellPhotos.splice(${i},1);renderSellPhotos()" style="position:absolute;top:2px;right:2px;background:rgba(13,11,7,0.85);border:none;color:#ff8080;font-size:0.65rem;width:16px;height:16px;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>`).join('');
+  // Update drop zone text
+  const zone = document.getElementById('sellDropZone');
+  if(zone){
+    const sub = zone.querySelector('div:last-child');
+    if(sub) sub.textContent = sellPhotos.length > 0
+      ? `${sellPhotos.length} รูปแล้ว · คลิกเพิ่มอีก (สูงสุด 6)`
+      : 'Drag & drop or click to choose · หลายรูปได้';
+  }
+}
+
 function submitSellForm(){
   // Collect form data from sell form
   const inputs = document.querySelectorAll('#sell-panel input.form-input, #sell-panel textarea.form-input, #sell-panel select.form-input');
@@ -1989,6 +2090,7 @@ function submitSellForm(){
     amulet:  vals[2] || '',
     price:   vals[3] || '',
     details: vals[4] || '',
+    photos:  [...sellPhotos], // include uploaded photos
     time:    new Date().toLocaleString('th-TH'),
   };
   if(!sub.name && !sub.amulet){ showToast('กรุณากรอกชื่อและรายการพระ','t-sell'); return; }
@@ -2000,8 +2102,10 @@ function submitSellForm(){
     const dot = document.getElementById('reportDot');
     if(dot){ dot.textContent = subs.length; dot.classList.add('show'); }
   }catch(e){}
-  // Clear form
+  // Clear form and photos
   inputs.forEach(i => { if(i.tagName !== 'SELECT') i.value = ''; });
+  sellPhotos = [];
+  renderSellPhotos();
   showToast('ส่งแบบฟอร์มแล้ว! เราจะติดต่อใน 48 ชม. ✦','t-sell');
 }
 function openReportForm(){
@@ -2023,57 +2127,256 @@ function submitReport(){
   closeOv('reportFormOv');
   showToast('ส่งรายงานแล้ว ขอบคุณ ✦','t-gold');
 }
+// ── Report detail popup ──────────────────────────────────────────
+function openReportDetail(type, idx){
+  let data;
+  if(type==='sell'){
+    let subs=[];
+    try{ subs=JSON.parse(localStorage.getItem('bantae_sell_subs')||'[]'); }catch(e){}
+    data = subs[idx];
+    if(!data) return;
+    // Build sell detail HTML
+    document.getElementById('reportDetailContent').innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <div style="background:rgba(58,26,26,0.8);border:1px solid rgba(255,176,144,0.3);padding:4px 12px;font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.08em;color:var(--sell)">💰 ต้องการขาย</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">${data.time}</div>
+      </div>
+      <div style="background:var(--dark4);border:1px solid var(--border);padding:1rem;margin-bottom:1rem;border-radius:2px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-family:'Sarabun',sans-serif;font-size:0.88rem">
+          <div><span style="color:var(--text-muted);font-size:0.72rem;font-family:Cinzel,serif;letter-spacing:0.05em;display:block;margin-bottom:2px">ชื่อ / NAME</span><span style="color:var(--text)">${data.name||'-'}</span></div>
+          <div><span style="color:var(--text-muted);font-size:0.72rem;font-family:Cinzel,serif;letter-spacing:0.05em;display:block;margin-bottom:2px">ติดต่อ / CONTACT</span><span style="color:var(--gold)">${data.contact||'-'}</span></div>
+          <div><span style="color:var(--text-muted);font-size:0.72rem;font-family:Cinzel,serif;letter-spacing:0.05em;display:block;margin-bottom:2px">ชื่อพระ / AMULET</span><span style="color:var(--text)">${data.amulet||'-'}</span></div>
+          <div><span style="color:var(--text-muted);font-size:0.72rem;font-family:Cinzel,serif;letter-spacing:0.05em;display:block;margin-bottom:2px">ราคา / PRICE</span><span style="color:var(--buy)">${data.price||'-'}</span></div>
+        </div>
+        ${data.details?`<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="color:var(--text-muted);font-size:0.72rem;font-family:Cinzel,serif;letter-spacing:0.05em;display:block;margin-bottom:4px">รายละเอียด / DETAILS</span><div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text-dim);line-height:1.7">${data.details}</div></div>`:''}
+      </div>
+      ${data.photos&&data.photos.length?`
+        <div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px">รูปภาพ / PHOTOS (${data.photos.length})</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:1rem">
+          ${data.photos.map((p,pi)=>`<img src="${p}" onclick="zoomImage('${p}')" style="width:100%;aspect-ratio:1;object-fit:cover;border:1px solid var(--border);border-radius:2px;cursor:zoom-in;transition:transform 0.2s" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''" />`).join('')}
+        </div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://m.me/100068843867509" target="_blank" class="btn-messenger" style="flex:1;min-width:160px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
+          ติดต่อทาง Messenger
+        </a>
+        <a href="tel:${data.contact}" style="background:none;border:1px solid var(--border-b);color:var(--gold);font-family:Cinzel,serif;font-size:0.68rem;letter-spacing:0.07em;padding:12px;cursor:pointer;flex:1;min-width:100px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">📞 โทร</a>
+        <button onclick="deleteReportDetail('sell',${idx})" style="background:none;border:1px solid rgba(229,62,62,0.3);color:#ff8080;font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.06em;padding:10px 16px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='#E53E3E';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#ff8080'">🗑 ลบ</button>
+      </div>`;
+  } else {
+    // Problem report
+    data = reports[idx];
+    if(!data) return;
+    document.getElementById('reportDetailContent').innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <div style="background:rgba(201,168,76,0.1);border:1px solid var(--border-b);padding:4px 12px;font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.08em;color:var(--gold)">${data.type}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">${data.time}</div>
+      </div>
+      <div style="background:var(--dark4);border:1px solid var(--border);padding:1rem;margin-bottom:1rem;border-radius:2px">
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text-muted);margin-bottom:4px">จาก / From: <span style="color:var(--text)">${data.name||'ไม่ระบุ'}</span></div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.92rem;color:var(--text-dim);line-height:1.75;margin-top:8px">${data.msg}</div>
+      </div>
+      <button onclick="deleteReportDetail('report',${idx})" style="background:none;border:1px solid rgba(229,62,62,0.3);color:#ff8080;font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.06em;padding:10px 16px;cursor:pointer" onmouseover="this.style.background='#E53E3E';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#ff8080'">🗑 ลบ</button>`;
+  }
+  document.getElementById('reportDetailOv').classList.add('open');
+}
+
+function deleteReportDetail(type, idx){
+  if(!confirm('ลบรายการนี้?')) return;
+  if(type==='sell'){
+    let subs=[];
+    try{ subs=JSON.parse(localStorage.getItem('bantae_sell_subs')||'[]'); }catch(e){}
+    subs.splice(idx,1);
+    localStorage.setItem('bantae_sell_subs',JSON.stringify(subs));
+  } else {
+    reports.splice(idx,1);
+  }
+  closeOv('reportDetailOv');
+  openReports(); // refresh list
+}
+
+// ── Canvas Zoom Viewer ─────────────────────────────────────
+let _mImgs = [], _mImgIdx = 0;
+function zoomImage(src){ _mImgs=[src]; _mImgIdx=0; openMZoom(); }
+
+(function(){
+  let _img=null,_scale=1,_offX=0,_offY=0;
+  let _drag=false,_dsx=0,_dsy=0,_dox=0,_doy=0;
+  let _bdgTimer=null;
+
+  function gc(){ return document.getElementById('mZoomCanvas'); }
+  function gl(){ return document.getElementById('mZoomLightbox'); }
+
+  function draw(){
+    const c=gc(); if(!c||!_img) return;
+    const W=c.width=c.offsetWidth, H=c.height=c.offsetHeight;
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0a0905'; ctx.fillRect(0,0,W,H);
+    const base=Math.min(W/_img.naturalWidth,H/_img.naturalHeight);
+    const s=base*_scale, dw=_img.naturalWidth*s, dh=_img.naturalHeight*s;
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(_img, W/2+_offX-dw/2, H/2+_offY-dh/2, dw, dh);
+  }
+
+  function showBadge(){
+    const b=document.getElementById('zoomLevelBadge');
+    if(!b) return;
+    b.textContent=Math.round(_scale*100)+'%'; b.style.opacity='1';
+    clearTimeout(_bdgTimer); _bdgTimer=setTimeout(()=>b.style.opacity='0',1100);
+  }
+
+  window.openMZoom=function(){
+    if(!_mImgs.length) return;
+    const lb=gl(); if(!lb) return;
+    _scale=1; _offX=0; _offY=0;
+    const i=new Image(); i.crossOrigin='anonymous';
+    i.onload=i.onerror=()=>{ _img=i; requestAnimationFrame(draw); };
+    i.src=_mImgs[_mImgIdx];
+    lb.style.opacity='1'; lb.style.pointerEvents='all';
+    const al=document.getElementById('lboxArrowL'),ar=document.getElementById('lboxArrowR');
+    if(al) al.style.display=_mImgs.length>1?'flex':'none';
+    if(ar) ar.style.display=_mImgs.length>1?'flex':'none';
+    const ctr=document.getElementById('mZoomCounter');
+    if(ctr) ctr.textContent=_mImgs.length>1?(_mImgIdx+1)+'/'+_mImgs.length:'';
+  };
+
+  window.closeMZoom=function(){
+    const lb=gl(); if(lb){ lb.style.opacity='0'; lb.style.pointerEvents='none'; } _img=null;
+  };
+
+  window.mZoomNav=function(dir){
+    _scale=1;_offX=0;_offY=0;
+    _mImgIdx=((_mImgIdx+dir)%_mImgs.length+_mImgs.length)%_mImgs.length;
+    const i=new Image(); i.crossOrigin='anonymous';
+    i.onload=i.onerror=()=>{ _img=i; requestAnimationFrame(draw); };
+    i.src=_mImgs[_mImgIdx];
+    const ctr=document.getElementById('mZoomCounter');
+    if(ctr) ctr.textContent=_mImgs.length>1?(_mImgIdx+1)+'/'+_mImgs.length:'';
+  };
+
+  window.addEventListener('wheel',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    e.preventDefault();
+    _scale=Math.max(0.15,Math.min(20,_scale*(e.deltaY<0?1.12:0.9)));
+    draw(); showBadge();
+  },{passive:false});
+
+  window.addEventListener('mousedown',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    if(e.target.tagName==='BUTTON') return;
+    _drag=true; _dsx=e.clientX; _dsy=e.clientY; _dox=_offX; _doy=_offY;
+    const c=gc(); if(c) c.style.cursor='grabbing';
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!_drag) return;
+    _offX=_dox+(e.clientX-_dsx); _offY=_doy+(e.clientY-_dsy); draw();
+  });
+  window.addEventListener('mouseup',()=>{
+    _drag=false; const c=gc(); if(c) c.style.cursor='grab';
+  });
+  window.addEventListener('dblclick',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    if(e.target.tagName==='BUTTON') return;
+    if(_scale>1.05){ _scale=1;_offX=0;_offY=0; } else { _scale=2.5; }
+    draw(); showBadge();
+  });
+  window.addEventListener('click',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    if(e.target.tagName==='BUTTON') return;
+    const dx=e.clientX-_dsx, dy=e.clientY-_dsy;
+    if(Math.abs(dx)<4&&Math.abs(dy)<4&&_scale<=1.05) closeMZoom();
+  });
+
+  // Pinch (mobile)
+  let _lpd=0,_ltsx=0,_ltsy=0,_ltox=0,_ltoy=0;
+  window.addEventListener('touchstart',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    if(e.target.tagName==='BUTTON') return;
+    e.preventDefault();
+    if(e.touches.length===2) _lpd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    else { _ltsx=e.touches[0].clientX;_ltsy=e.touches[0].clientY;_ltox=_offX;_ltoy=_offY; }
+  },{passive:false});
+  window.addEventListener('touchmove',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    e.preventDefault();
+    if(e.touches.length===2){
+      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      if(_lpd>0){ _scale=Math.max(0.15,Math.min(20,_scale*(d/_lpd))); draw(); showBadge(); } _lpd=d;
+    } else {
+      _offX=_ltox+(e.touches[0].clientX-_ltsx); _offY=_ltoy+(e.touches[0].clientY-_ltsy); draw();
+    }
+  },{passive:false});
+  window.addEventListener('touchend',e=>{ if(e.touches.length<2) _lpd=0; });
+
+  window.addEventListener('keydown',e=>{
+    const lb=gl(); if(!lb||lb.style.pointerEvents==='none') return;
+    if(e.key==='ArrowLeft') mZoomNav(-1);
+    if(e.key==='ArrowRight') mZoomNav(1);
+    if(e.key==='Escape') closeMZoom();
+    if(e.key==='+'||e.key==='='){ _scale=Math.min(20,_scale*1.2); draw(); showBadge(); }
+    if(e.key==='-'){ _scale=Math.max(0.15,_scale/1.2); draw(); showBadge(); }
+    if(e.key==='0'){ _scale=1;_offX=0;_offY=0; draw(); showBadge(); }
+  });
+  window.addEventListener('resize',()=>{ const lb=gl(); if(lb&&lb.style.pointerEvents!=='none') draw(); });
+})();
+
 function openReports(){
   if(!isAdmin){ showToast('กรุณาเข้าสู่ระบบแอดมิน','t-sell'); return; }
-
-  // Load sell submissions from localStorage
   let sellSubs = [];
   try { sellSubs = JSON.parse(localStorage.getItem('bantae_sell_subs') || '[]'); } catch(e){}
-
   const allReports = [...reports];
   const list = document.getElementById('reportsList');
   const hasSells = sellSubs.length > 0;
   const hasReports = allReports.length > 0;
-
-  let html2 = '';
+  let h = '';
 
   if(hasSells){
-    html2 += `<div style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em;color:var(--sell);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,176,144,0.2)">💰 ต้องการขาย — SELL SUBMISSIONS (${sellSubs.length})</div>`;
-    html2 += sellSubs.map((s,i) => `
-      <div style="background:rgba(58,26,26,0.4);border:1px solid rgba(255,176,144,0.2);padding:0.85rem;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem">
-          <span style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--sell)">ต้องการขาย</span>
+    h += `<div style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em;color:var(--sell);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,176,144,0.2)">💰 ต้องการขาย — SELL SUBMISSIONS (${sellSubs.length})</div>`;
+    h += sellSubs.map((s,i) => `
+      <div onclick="openReportDetail('sell',${i})"
+           style="background:rgba(58,26,26,0.4);border:1px solid rgba(255,176,144,0.2);padding:0.85rem;margin-bottom:8px;cursor:pointer;transition:all 0.2s;border-radius:2px"
+           onmouseover="this.style.borderColor='rgba(255,176,144,0.5)';this.style.background='rgba(58,26,26,0.7)'"
+           onmouseout="this.style.borderColor='rgba(255,176,144,0.2)';this.style.background='rgba(58,26,26,0.4)'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.4rem">
+          <span style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--sell)">💰 ต้องการขาย</span>
           <span style="font-size:0.63rem;color:var(--text-muted)">${s.time}</span>
         </div>
-        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim);line-height:1.6">
-          <div>👤 ${s.name||'ไม่ระบุชื่อ'} &nbsp;|&nbsp; 📞 ${s.contact||'-'}</div>
-          <div>🏺 ${s.amulet||'-'} &nbsp;|&nbsp; 💰 ${s.price||'-'}</div>
-          ${s.details ? `<div style="margin-top:4px;color:var(--text-muted)">📝 ${s.details}</div>` : ''}
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim)">
+          <strong style="color:var(--text)">👤 ${s.name||'ไม่ระบุ'}</strong> · 📞 ${s.contact||'-'}
         </div>
-        <button onclick="deleteSellSub(${i})" style="background:none;border:none;color:var(--text-muted);font-size:0.7rem;cursor:pointer;margin-top:6px;padding:0" onmouseover="this.style.color='#ff8080'" onmouseout="this.style.color=''">🗑 ลบ</button>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-muted);margin-top:2px">
+          🏺 ${s.amulet||'-'} · 💰 ${s.price||'-'}
+        </div>
+        ${s.photos&&s.photos.length?`<div style="display:flex;gap:4px;margin-top:6px">${s.photos.slice(0,3).map(p=>`<img src="${p}" style="width:40px;height:40px;object-fit:cover;border:1px solid var(--border);border-radius:2px"/>`).join('')}${s.photos.length>3?`<div style="width:40px;height:40px;background:var(--dark4);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-muted)">+${s.photos.length-3}</div>`:''}</div>`:''}
+        <div style="font-size:0.65rem;color:var(--gold);margin-top:6px;font-family:Cinzel,serif;letter-spacing:0.05em">คลิกเพื่อดูรายละเอียด →</div>
       </div>`).join('');
   }
 
   if(hasReports){
-    html2 += `<div style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-top:${hasSells?'1rem':'0'}">📋 รายงานปัญหา — REPORTS (${allReports.length})</div>`;
-    html2 += allReports.map((r,i) => `
-      <div style="background:var(--dark4);border:1px solid var(--border);padding:0.85rem;margin-bottom:8px">
+    h += `<div style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-top:${hasSells?'1rem':'0'}">📋 รายงานปัญหา — REPORTS (${allReports.length})</div>`;
+    h += allReports.map((r,i) => `
+      <div onclick="openReportDetail('report',${i})"
+           style="background:var(--dark4);border:1px solid var(--border);padding:0.85rem;margin-bottom:8px;cursor:pointer;transition:all 0.2s;border-radius:2px"
+           onmouseover="this.style.borderColor='var(--border-b)';this.style.background='var(--dark3)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark4)'">
         <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem">
           <span style="font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.07em;color:var(--gold)">${r.type}</span>
           <span style="font-size:0.63rem;color:var(--text-muted)">${r.time}</span>
         </div>
-        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim);line-height:1.6">${r.msg}</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px">จาก: ${r.name}</div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.msg}</div>
+        <div style="font-size:0.65rem;color:var(--gold);margin-top:4px;font-family:Cinzel,serif;letter-spacing:0.05em">คลิกเพื่อดูรายละเอียด →</div>
       </div>`).join('');
   }
 
   if(!hasSells && !hasReports){
-    html2 = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em">ไม่มีรายการ · No messages yet</div>';
+    h = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.08em">ไม่มีรายการ · No messages yet</div>';
   }
 
-  list.innerHTML = html2;
+  list.innerHTML = h;
   document.getElementById('reportsOv').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
   document.getElementById('reportDot').classList.remove('show');
 }
 
@@ -2274,6 +2577,7 @@ function normalizeItem(it) {
     condition: it.condition||'', price: it.price||'',
     priceVal: it.priceVal||0, ageVal: it.ageVal||2500,
     desc: it.desc||'', photos: it.photos||[], imgs: it.imgs||[0,1,2],
+    certUrl: it.certUrl||'', certNote: it.certNote||'',
   };
 }
 
@@ -2352,43 +2656,40 @@ function closeCrop(){
 const REMOVEBG_KEY = 'oE9cJNbERtFwYmZMnBAshA8Y';
 
 async function removeBackground(){
-  const canvas = document.getElementById('cropCanvas');
-  // Convert current canvas to blob
-  canvas.toBlob(async blob => {
-    showToast('🪄 Removing background...', 't-info');
-    const key = REMOVEBG_KEY || window._removebgKey || '';
-    if(!key){
-      // Use free photoscissors/remove.bg demo proxy — limited but works
-      // Fallback: open remove.bg in new tab with instructions
-      showToast('ต้องการ remove.bg API Key — เปิดในแท็บใหม่...', 't-sell');
-      setTimeout(()=> window.open('https://www.remove.bg/upload', '_blank'), 1000);
-      return;
+  if(!_cropImg&&!window._cropOriginalSrc){ showToast('โหลดรูปก่อน','t-sell'); return; }
+  showToast('🪄 ส่งรูปต้นฉบับคุณภาพสูงไปลบพื้นหลัง...','t-info');
+  try{
+    let blob;
+    const origSrc=window._cropOriginalSrc||'';
+    if(origSrc.startsWith('http')){ try{ const r=await fetch(origSrc); if(r.ok) blob=await r.blob(); }catch(e){} }
+    if(!blob&&origSrc.startsWith('data:')){
+      const b64=origSrc.split(',')[1], mime=origSrc.match(/data:(.*?);/)?.[1]||'image/png';
+      const bytes=atob(b64), arr=new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      blob=new Blob([arr],{type:mime});
     }
-    try {
-      const form = new FormData();
-      form.append('image_file', blob, 'image.jpg');
-      form.append('size', 'auto');
-      const res = await fetch('https://api.remove.bg/v1.0/removebg', {
-        method: 'POST',
-        headers: { 'X-Api-Key': key },
-        body: form,
-      });
-      if(!res.ok){ const e=await res.text(); throw new Error(e); }
-      const resultBlob = await res.blob();
-      const blobUrl = URL.createObjectURL(resultBlob);
-      // Load result back into editor
-      const img = new Image();
-      img.onload = ()=>{
-        _cropImg = img;
-        _cropOffX=0; _cropOffY=0;
-        drawCropCanvas();
-        showToast('ลบพื้นหลังแล้ว ✦ — กด Apply & Save', 't-buy');
-      };
-      img.src = blobUrl;
-    } catch(e){
-      showToast('Remove BG ล้มเหลว: ' + e.message, 't-sell');
+    if(!blob&&_cropImg){
+      const tc=document.createElement('canvas');
+      tc.width=_cropImg.naturalWidth||_cropImg.width; tc.height=_cropImg.naturalHeight||_cropImg.height;
+      tc.getContext('2d').drawImage(_cropImg,0,0);
+      blob=await new Promise(res=>tc.toBlob(res,'image/png'));
     }
-  }, 'image/jpeg', 0.9);
+    if(!blob) throw new Error('ไม่สามารถโหลดรูป');
+    const form=new FormData();
+    form.append('image_file',blob,'image.png'); form.append('size','auto');
+    const res=await fetch('https://api.remove.bg/v1.0/removebg',{method:'POST',headers:{'X-Api-Key':REMOVEBG_KEY},body:form});
+    if(!res.ok) throw new Error('HTTP '+res.status+': '+(await res.text()).slice(0,80));
+    const blobUrl=URL.createObjectURL(await res.blob());
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>{
+      _cropImg=img; _cropOffX=0; _cropOffY=0;
+      const c=document.getElementById('cropCanvas');
+      _cropScale=Math.min(c.width/img.width,c.height/img.height)*0.9;
+      drawCropCanvas(); showToast('✅ ลบพื้นหลังแล้ว คุณภาพสูง — กด Apply & Save','t-buy');
+    };
+    img.onerror=()=>showToast('โหลดผลลัพธ์ไม่ได้','t-sell');
+    img.src=blobUrl;
+  }catch(e){ showToast('Remove BG ล้มเหลว: '+e.message,'t-sell'); }
 }
 
 function fitImageToSquare(){
@@ -2525,6 +2826,278 @@ function applyCrop(){
   }
 }
 
+// ============================================================
+// BID SYSTEM
+// ============================================================
+function openBidPanel(){
+  // Show bid items (items with BID badge)
+  const bidItems = ITEMS.filter(it=>it.badge==='BID');
+  const el = document.getElementById('bidItemsList');
+  if(el){
+    if(bidItems.length){
+      el.innerHTML = `<div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px">รายการประมูล · ITEMS UP FOR BID</div>` +
+      bidItems.map(it=>`
+        <div style="background:var(--dark4);border:1px solid rgba(255,179,71,0.25);padding:0.85rem;margin-bottom:8px;display:flex;gap:10px;align-items:center;border-radius:2px">
+          <img src="${getItemImg(it)}" style="width:52px;height:52px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;border-radius:2px"/>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text);margin-bottom:2px">${it.nameTh}</div>
+            <div style="font-family:Cinzel,serif;font-size:0.78rem;color:var(--gold)">${it.price}</div>
+          </div>
+          <div style="font-size:0.65rem;color:#FFB347;font-family:Cinzel,serif;letter-spacing:0.05em;text-align:center;flex-shrink:0">🔨<br/>BIDDING<br/>SOON</div>
+        </div>`).join('');
+    } else {
+      el.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-muted);font-family:Sarabun,sans-serif;font-size:0.85rem">ยังไม่มีรายการประมูล<br/>No items listed for bidding yet</div>';
+    }
+  }
+  document.getElementById('bidOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function registerBidInterest(){
+  const name = document.getElementById('bidName').value.trim();
+  const contact = document.getElementById('bidContact').value.trim();
+  if(!contact){ showToast('กรุณาใส่ช่องทางติดต่อ','t-sell'); return; }
+  try{
+    const regs = JSON.parse(localStorage.getItem('bantae_bid_regs')||'[]');
+    regs.push({name, contact, time: new Date().toLocaleString('th-TH')});
+    localStorage.setItem('bantae_bid_regs', JSON.stringify(regs));
+  }catch(e){}
+  document.getElementById('bidName').value='';
+  document.getElementById('bidContact').value='';
+  showToast('ลงทะเบียนแล้ว ✦ เราจะแจ้งเตือนเมื่อเปิดประมูล','t-buy');
+}
+
+// ============================================================
+// ORDER TRACKING
+// ============================================================
+function openTrackPanel(){
+  document.getElementById('trackResult').innerHTML='';
+  document.getElementById('trackCode').value='';
+  // Show admin panel if logged in
+  const ap = document.getElementById('trackAdminPanel');
+  if(ap) ap.style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('trackOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+const STATUS_INFO = {
+  confirmed: {icon:'✅', label:'ยืนยันคำสั่งซื้อแล้ว', en:'Order Confirmed', color:'#7FFFC0'},
+  packing:   {icon:'📦', label:'กำลังจัดเตรียมพัสดุ', en:'Packing & Preparing', color:'#FFB347'},
+  shipped:   {icon:'🚚', label:'จัดส่งแล้ว — อยู่ระหว่างขนส่ง', en:'Shipped', color:'#7BB8FF'},
+  delivered: {icon:'🎉', label:'ถึงมือผู้รับแล้ว', en:'Delivered', color:'var(--gold)'},
+};
+
+function searchTrack(){
+  const code = document.getElementById('trackCode').value.trim().toUpperCase();
+  if(!code){ showToast('กรุณาใส่รหัสคำสั่งซื้อ','t-sell'); return; }
+  let orders=[];
+  try{ orders=JSON.parse(localStorage.getItem('bantae_orders')||'[]'); }catch(e){}
+  const order = orders.find(o=>o.code.toUpperCase()===code);
+  const el = document.getElementById('trackResult');
+  if(!order){
+    el.innerHTML = `<div style="text-align:center;padding:1.5rem;background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.2);border-radius:2px">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem">🔍</div>
+      <div style="font-family:Cinzel,serif;font-size:0.75rem;letter-spacing:0.08em;color:#ff8080;margin-bottom:4px">ไม่พบรหัสนี้ · Order Not Found</div>
+      <div style="font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-muted)">รหัส "${code}" ไม่ถูกต้อง หรือยังไม่ได้อัปเดต<br/>กรุณาติดต่อ admin ทาง Messenger</div>
+    </div>`;
+    return;
+  }
+  const st = STATUS_INFO[order.status] || STATUS_INFO.confirmed;
+  const steps = ['confirmed','packing','shipped','delivered'];
+  const curStep = steps.indexOf(order.status);
+  el.innerHTML = `
+    <div style="background:var(--dark4);border:1px solid var(--border);border-radius:2px;overflow:hidden">
+      <div style="background:rgba(201,168,76,0.08);padding:1rem 1.1rem;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:2px">ORDER CODE</div>
+            <div style="font-family:Cinzel,serif;font-size:0.95rem;color:var(--gold);letter-spacing:0.1em">${order.code}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:1.5rem">${st.icon}</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text);font-weight:500">${st.label}</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">${st.en}</div>
+      </div>
+      <!-- Progress bar -->
+      <div style="padding:1rem 1.1rem;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:0">
+          ${steps.map((s,i)=>{
+            const info=STATUS_INFO[s];
+            const done=i<=curStep;
+            return `<div style="flex:1;text-align:center">
+              <div style="width:28px;height:28px;border-radius:50%;background:${done?st.color:'var(--dark3)'};border:2px solid ${done?st.color:'var(--border)'};display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:0.8rem;transition:all 0.3s">${done?info.icon:'○'}</div>
+              <div style="font-size:0.55rem;color:${done?st.color:'var(--text-muted)'};margin-top:4px;font-family:Cinzel,serif;letter-spacing:0.03em">${info.en}</div>
+            </div>${i<3?`<div style="flex:0.5;height:2px;background:${i<curStep?st.color:'var(--border)'};margin-bottom:18px"></div>`:''}`;
+          }).join('')}
+        </div>
+      </div>
+      <!-- Details -->
+      <div style="padding:1rem 1.1rem">
+        <div style="display:grid;gap:6px;font-family:'Sarabun',sans-serif;font-size:0.85rem">
+          <div style="display:flex;gap:8px"><span style="color:var(--text-muted);width:80px;flex-shrink:0">ผู้ซื้อ</span><span style="color:var(--text)">${order.buyer||'-'}</span></div>
+          <div style="display:flex;gap:8px"><span style="color:var(--text-muted);width:80px;flex-shrink:0">รายการ</span><span style="color:var(--text)">${order.item||'-'}</span></div>
+          ${order.tracking?`<div style="display:flex;gap:8px"><span style="color:var(--text-muted);width:80px;flex-shrink:0">เลขพัสดุ</span><span style="color:var(--gold);font-family:Cinzel,serif;letter-spacing:0.05em">${order.tracking}</span></div>`:''}
+          ${order.note?`<div style="display:flex;gap:8px"><span style="color:var(--text-muted);width:80px;flex-shrink:0">หมายเหตุ</span><span style="color:var(--text-dim)">${order.note}</span></div>`:''}
+          <div style="display:flex;gap:8px"><span style="color:var(--text-muted);width:80px;flex-shrink:0">อัปเดต</span><span style="color:var(--text-muted);font-size:0.78rem">${order.updated||order.time||'-'}</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function saveTrackOrder(){
+  if(!isAdmin){ showToast('กรุณา login admin','t-sell'); return; }
+  const code = document.getElementById('tCode').value.trim().toUpperCase();
+  if(!code){ showToast('กรุณาใส่รหัสคำสั่งซื้อ','t-sell'); return; }
+  let orders=[];
+  try{ orders=JSON.parse(localStorage.getItem('bantae_orders')||'[]'); }catch(e){}
+  const existing = orders.findIndex(o=>o.code.toUpperCase()===code);
+  const order = {
+    code,
+    buyer: document.getElementById('tBuyer').value.trim(),
+    item:  document.getElementById('tItem').value.trim(),
+    status:document.getElementById('tStatus').value,
+    tracking:document.getElementById('tTracking').value.trim(),
+    note:  document.getElementById('tNote').value.trim(),
+    updated: new Date().toLocaleString('th-TH'),
+  };
+  if(existing>=0) orders[existing]=order; else orders.unshift(order);
+  localStorage.setItem('bantae_orders', JSON.stringify(orders));
+  showToast('บันทึกคำสั่งซื้อแล้ว ✦','t-gold');
+  // Auto-search to show result
+  document.getElementById('trackCode').value=code;
+  searchTrack();
+}
+
+// ============================================================
+// COMMENT BOARD
+// ============================================================
+let comments = [];
+function loadComments(){
+  try{ comments=JSON.parse(localStorage.getItem('bantae_comments')||'[]'); }catch(e){}
+  renderComments();
+}
+function renderComments(){
+  const el = document.getElementById('commentList');
+  if(!el) return;
+  if(!comments.length){
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:Sarabun,sans-serif;font-size:0.85rem">ยังไม่มีความคิดเห็น · No comments yet. Be the first!</div>';
+    return;
+  }
+  el.innerHTML = comments.map((c,i)=>`
+    <div style="background:var(--dark3);border:1px solid var(--border);padding:1rem;margin-bottom:8px;border-radius:2px;position:relative">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem">
+        <div>
+          <span style="font-family:Cinzel,serif;font-size:0.7rem;letter-spacing:0.06em;color:var(--gold)">${c.name||'Anonymous'}</span>
+          ${c.contact?`<span style="font-size:0.68rem;color:var(--text-muted);margin-left:8px">${c.contact}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:0.65rem;color:var(--text-muted)">${c.time}</span>
+          ${isAdmin?`<button onclick="deleteComment(${i})" style="background:none;border:none;color:var(--text-muted);font-size:0.75rem;cursor:pointer;padding:0 2px" title="Delete" onmouseover="this.style.color='#ff8080'" onmouseout="this.style.color=''">🗑</button>`:''}
+        </div>
+      </div>
+      <div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text-dim);line-height:1.75;white-space:pre-wrap">${c.text}</div>
+      ${isAdmin&&c.adminReply?`<div style="margin-top:8px;padding:8px 10px;background:rgba(201,168,76,0.06);border-left:2px solid var(--gold);font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-dim)"><span style="font-family:Cinzel,serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.06em">⬡ ADMIN: </span>${c.adminReply}</div>`:''}
+      ${!isAdmin&&c.adminReply?`<div style="margin-top:8px;padding:8px 10px;background:rgba(201,168,76,0.06);border-left:2px solid var(--gold);font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-dim)"><span style="font-family:Cinzel,serif;font-size:0.6rem;color:var(--gold);letter-spacing:0.06em">⬡ ADMIN: </span>${c.adminReply}</div>`:''}
+      ${isAdmin?`<div style="margin-top:8px;display:flex;gap:6px">
+        <input type="text" placeholder="Admin reply..." class="form-input" style="flex:1;font-size:0.82rem;padding:6px 10px" id="reply_${i}"/>
+        <button onclick="adminReply(${i})" style="background:var(--gold);color:var(--dark);border:none;font-family:Cinzel,serif;font-size:0.6rem;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap">↩ Reply</button>
+      </div>`:''}
+    </div>`).join('');
+}
+function submitComment(){
+  const text = document.getElementById('commentText').value.trim();
+  if(!text){ showToast('กรุณาพิมพ์ความคิดเห็น','t-sell'); return; }
+  const c = {
+    name: document.getElementById('commentName').value.trim()||'Anonymous',
+    contact: document.getElementById('commentEmail').value.trim(),
+    text,
+    time: new Date().toLocaleString('th-TH'),
+    adminReply: '',
+  };
+  comments.unshift(c);
+  saveComments();
+  document.getElementById('commentText').value='';
+  renderComments();
+  showToast('ส่งความคิดเห็นแล้ว ✦','t-buy');
+}
+function deleteComment(i){
+  if(!isAdmin) return;
+  comments.splice(i,1);
+  saveComments();
+  renderComments();
+}
+function adminReply(i){
+  const inp = document.getElementById('reply_'+i);
+  if(!inp||!inp.value.trim()) return;
+  comments[i].adminReply = inp.value.trim();
+  saveComments();
+  renderComments();
+  showToast('ตอบกลับแล้ว ✦','t-gold');
+}
+function saveComments(){
+  try{ localStorage.setItem('bantae_comments',JSON.stringify(comments)); }catch(e){}
+}
+
+// ============================================================
+// PARCEL TRACKING — Thai Post + Flash Express
+// ============================================================
+let _carrier = 'thaipost';
+
+function switchTrackTab(tab){
+  const isOrder = tab==='order';
+  document.getElementById('tabOrderContent').style.display = isOrder?'block':'none';
+  document.getElementById('tabShipContent').style.display  = isOrder?'none':'block';
+  const to = document.getElementById('tabOrder');
+  const ts = document.getElementById('tabShip');
+  if(to){ to.style.borderBottomColor=isOrder?'var(--gold)':'transparent'; to.style.color=isOrder?'var(--gold)':'var(--text-muted)'; }
+  if(ts){ ts.style.borderBottomColor=isOrder?'transparent':'var(--gold)'; ts.style.color=isOrder?'var(--text-muted)':'var(--gold)'; }
+}
+
+function setCarrier(c){
+  _carrier = c;
+  const tp = document.getElementById('carrierThaipost');
+  const fl = document.getElementById('carrierFlash');
+  if(tp){ tp.style.background=c==='thaipost'?'rgba(201,168,76,0.15)':'none'; tp.style.borderColor=c==='thaipost'?'var(--gold)':'var(--border)'; tp.style.color=c==='thaipost'?'var(--gold)':'var(--text-muted)'; }
+  if(fl){ fl.style.background=c==='flash'?'rgba(255,80,0,0.12)':'none'; fl.style.borderColor=c==='flash'?'#FF5000':'var(--border)'; fl.style.color=c==='flash'?'#FF5000':'var(--text-muted)'; }
+}
+
+function trackParcel(){
+  const code = document.getElementById('parcelCode').value.trim();
+  if(!code){ showToast('กรุณาใส่เลขพัสดุ','t-sell'); return; }
+  const el = document.getElementById('parcelResult');
+
+  // Thai Post tracking URL
+  const THAIPOST_URL = `https://track.thailandpost.co.th/?trackNumber=${code}`;
+  // Flash Express tracking URL
+  const FLASH_URL = `https://www.flashexpress.co.th/tracking/?se=${code}`;
+
+  const carrierName = _carrier==='thaipost' ? '📮 ไปรษณีย์ไทย / Thailand Post' : '⚡ Flash Express';
+  const trackUrl = _carrier==='thaipost' ? THAIPOST_URL : FLASH_URL;
+  const trackColor = _carrier==='thaipost' ? 'var(--gold)' : '#FF5000';
+  const trackBg = _carrier==='thaipost' ? 'rgba(201,168,76,0.08)' : 'rgba(255,80,0,0.08)';
+
+  el.innerHTML = `
+    <div style="background:${trackBg};border:1px solid ${trackColor}33;padding:1.25rem;border-radius:2px;text-align:center">
+      <div style="font-size:1.5rem;margin-bottom:0.5rem">${_carrier==='thaipost'?'📮':'⚡'}</div>
+      <div style="font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:0.08em;color:${trackColor};margin-bottom:0.35rem">${carrierName}</div>
+      <div style="font-family:'Courier New',monospace;font-size:1rem;color:var(--text);margin-bottom:0.75rem;letter-spacing:0.08em">${code}</div>
+      <div style="font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.6">
+        กดปุ่มด้านล่างเพื่อติดตามพัสดุบนเว็บไซต์ของบริษัทขนส่ง<br/>
+        <span style="font-size:0.75rem;color:var(--text-muted)">Click below to track on the carrier's official website</span>
+      </div>
+      <a href="${trackUrl}" target="_blank"
+        style="display:inline-flex;align-items:center;gap:8px;background:${trackColor};color:${_carrier==='thaipost'?'var(--dark)':'#fff'};font-family:Cinzel,serif;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;padding:12px 24px;text-decoration:none;border-radius:2px;transition:opacity 0.2s"
+        onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+        🔍 ติดตามพัสดุ · TRACK NOW
+      </a>
+      <div style="margin-top:0.75rem;font-size:0.7rem;color:var(--text-muted)">
+        เปิดในหน้าต่างใหม่ · Opens in new window
+      </div>
+    </div>`;
+}
+
 // ── INIT ────────────────────────────────────────────────────────
 // 1. Restore admin session
 try{
@@ -2630,5 +3203,173 @@ loadItemsFromDB();
   <div style="font-family:Cinzel,serif;font-size:0.82rem;letter-spacing:0.12em;color:#C9A84C">กำลังโหลด · LOADING</div>
 </div>
 
+<!-- REPORT DETAIL MODAL -->
+<div class="auth-overlay" id="reportDetailOv" onclick="if(event.target===this)closeOv('reportDetailOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;position:relative">
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:0.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center;z-index:2">
+      <div style="font-family:Cinzel,serif;font-size:0.78rem;letter-spacing:0.09em;color:var(--gold)">📋 รายละเอียด · Detail</div>
+      <button class="mico-close" onclick="closeOv('reportDetailOv')">✕</button>
+    </div>
+    <div style="padding:1.25rem" id="reportDetailContent"></div>
+  </div>
+</div>
+
+<!-- IMAGE ZOOM OVERLAY -->
+<!-- Zoom Lightbox -->
+<div id="mZoomLightbox" style="position:fixed;inset:0;background:#000;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.18s;overflow:hidden;touch-action:none">
+  <canvas id="mZoomCanvas" style="position:absolute;inset:0;width:100%;height:100%;cursor:grab;display:block;touch-action:none"></canvas>
+  <button onclick="closeMZoom()" style="position:fixed;top:12px;right:14px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:1.1rem;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>
+  <button id="lboxArrowL" onclick="mZoomNav(-1)" style="position:fixed;top:50%;transform:translateY(-50%);left:8px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:1.8rem;width:44px;height:70px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">&#8249;</button>
+  <button id="lboxArrowR" onclick="mZoomNav(1)" style="position:fixed;top:50%;transform:translateY(-50%);right:8px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:1.8rem;width:44px;height:70px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">&#8250;</button>
+  <div id="mZoomCounter" style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;color:rgba(255,255,255,0.45);background:rgba(0,0,0,0.45);padding:4px 14px;pointer-events:none"></div>
+  <div id="zoomLevelBadge" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.6);font-family:'Cinzel',serif;font-size:0.58rem;padding:3px 12px;pointer-events:none;opacity:0;transition:opacity 0.25s">100%</div>
+  <div style="position:fixed;bottom:44px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:0.5rem;color:rgba(255,255,255,0.25);pointer-events:none;white-space:nowrap">Scroll=zoom · Drag=pan · Double-click=reset · ←→=next</div>
+</div>
+
+<!-- BID PANEL MODAL -->
+<div class="auth-overlay" id="bidOv" style="z-index:700;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeOv('bidOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:560px;max-height:88vh;overflow-y:auto">
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:0.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:Cinzel,serif;font-size:0.82rem;letter-spacing:0.09em;color:var(--gold)">🔨 ประมูลพระ · AUCTION / BID</div>
+      <button class="mico-close" onclick="closeOv('bidOv')">✕</button>
+    </div>
+    <div style="padding:1.5rem">
+      <!-- Coming soon notice -->
+      <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);padding:1.5rem;text-align:center;margin-bottom:1.5rem;border-radius:2px">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem">🔨</div>
+        <div style="font-family:Cinzel,serif;font-size:1rem;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem">AUCTION COMING SOON</div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text-dim);line-height:1.7">ระบบประมูลพระกำลังอยู่ในการพัฒนา<br/>เปิดตัวเร็วๆ นี้ — ลงทะเบียนเพื่อรับแจ้งเตือนก่อนใคร</div>
+      </div>
+      <!-- Bid items list (items with BID badge) -->
+      <div id="bidItemsList"></div>
+      <!-- Register interest form -->
+      <div style="background:var(--dark4);border:1px solid var(--border);padding:1.25rem;border-radius:2px">
+        <div style="font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.75rem">🔔 แจ้งเตือนเมื่อเปิดประมูล · NOTIFY ME</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <input type="text" id="bidName" class="form-input" placeholder="ชื่อ / Name"/>
+          <input type="text" id="bidContact" class="form-input" placeholder="LINE ID หรือ โทรศัพท์"/>
+          <button onclick="registerBidInterest()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;padding:10px;border:none;cursor:pointer" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">ลงทะเบียน · REGISTER INTEREST</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER TRACKING MODAL -->
+<div class="auth-overlay" id="trackOv" style="z-index:700" onclick="if(event.target===this)closeOv('trackOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:520px;max-height:88vh;overflow-y:auto">
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:0.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:Cinzel,serif;font-size:0.82rem;letter-spacing:0.09em;color:var(--gold)">📦 ติดตามคำสั่งซื้อ · ORDER TRACKING</div>
+      <button class="mico-close" onclick="closeOv('trackOv')">✕</button>
+    </div>
+    <div style="padding:1.5rem">
+      <!-- Tabs: Order / Shipping -->
+      <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:1rem">
+        <button onclick="switchTrackTab('order')" id="tabOrder"
+          style="flex:1;background:none;border:none;border-bottom:2px solid var(--gold);color:var(--gold);font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.07em;padding:0.6rem;cursor:pointer">
+          📋 คำสั่งซื้อ · ORDER
+        </button>
+        <button onclick="switchTrackTab('ship')" id="tabShip"
+          style="flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.07em;padding:0.6rem;cursor:pointer">
+          🚚 ติดตามพัสดุ · PARCEL
+        </button>
+      </div>
+
+      <!-- ORDER TAB -->
+      <div id="tabOrderContent">
+        <div style="display:flex;gap:8px;margin-bottom:1rem">
+          <input type="text" id="trackCode" class="form-input" style="flex:1" placeholder="รหัสคำสั่งซื้อ / Order code (BT-2026-001)"/>
+          <button onclick="searchTrack()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;padding:0 16px;border:none;cursor:pointer;white-space:nowrap">🔍 TRACK</button>
+        </div>
+        <div id="trackResult"></div>
+      </div>
+
+      <!-- PARCEL TAB -->
+      <div id="tabShipContent" style="display:none">
+        <div style="margin-bottom:0.75rem">
+          <div style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:6px">เลือกบริษัทขนส่ง · Select Carrier</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+            <button onclick="setCarrier('thaipost')" id="carrierThaipost"
+              style="background:rgba(201,168,76,0.15);border:2px solid var(--gold);color:var(--gold);font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.06em;padding:10px;cursor:pointer;transition:all 0.2s;border-radius:2px">
+              📮 ไปรษณีย์ไทย<br/><span style="font-size:0.55rem;color:var(--text-muted)">Thailand Post / EMS</span>
+            </button>
+            <button onclick="setCarrier('flash')" id="carrierFlash"
+              style="background:none;border:2px solid var(--border);color:var(--text-muted);font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.06em;padding:10px;cursor:pointer;transition:all 0.2s;border-radius:2px">
+              ⚡ Flash Express<br/><span style="font-size:0.55rem">flashexpress.co.th</span>
+            </button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="parcelCode" class="form-input" style="flex:1" placeholder="เลขพัสดุ / Tracking number"/>
+            <button onclick="trackParcel()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;padding:0 16px;border:none;cursor:pointer;white-space:nowrap">🔍 TRACK</button>
+          </div>
+        </div>
+        <div id="parcelResult"></div>
+      </div>
+      <!-- Admin: add tracking -->
+      <div id="trackAdminPanel" style="display:none;margin-top:1.25rem;background:rgba(201,168,76,0.05);border:1px solid var(--border);padding:1.1rem;border-radius:2px">
+        <div style="font-family:Cinzel,serif;font-size:0.68rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.75rem">⬡ ADD / UPDATE ORDER (Admin)</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <input type="text" id="tCode" class="form-input" placeholder="Order code (BT-2026-001)"/>
+          <input type="text" id="tBuyer" class="form-input" placeholder="ชื่อผู้ซื้อ / Buyer name"/>
+          <input type="text" id="tItem" class="form-input" placeholder="รายการ / Item name"/>
+          <select id="tStatus" class="form-input">
+            <option value="confirmed">✅ ยืนยันคำสั่งซื้อ / Order Confirmed</option>
+            <option value="packing">📦 กำลังจัดส่ง / Packing</option>
+            <option value="shipped">🚚 จัดส่งแล้ว / Shipped</option>
+            <option value="delivered">🎉 ถึงมือแล้ว / Delivered</option>
+          </select>
+          <input type="text" id="tTracking" class="form-input" placeholder="เลขพัสดุ / Tracking number (optional)"/>
+          <input type="text" id="tNote" class="form-input" placeholder="หมายเหตุ / Note"/>
+          <button onclick="saveTrackOrder()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;padding:10px;border:none;cursor:pointer">💾 SAVE ORDER</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VERIFY PANEL -->
+<div class="auth-overlay" id="verifyOv" style="z-index:700" onclick="if(event.target===this)closeOv('verifyOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:580px;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column">
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:2;flex-shrink:0">
+      <div style="font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.1em;color:var(--gold)">🏅 ตรวจสอบความแท้ · VERIFY</div>
+      <button class="mico-close" onclick="closeOv('verifyOv')">✕</button>
+    </div>
+    <div style="padding:1.25rem"><div id="verifyList"></div></div>
+  </div>
+</div>
 </body>
-</html>
+</html>async function markAsSold(id){
+  id = Number(id); // normalize to number
+  if(!confirm('ย้ายพระชิ้นนี้ไปยัง "ขายแล้ว"?\nMove this item to Sold?')) return;
+  const it = ITEMS.find(i=>Number(i.id)===id);
+  if(!it){ showToast('ไม่พบรายการ id:'+id+' ('+ITEMS.length+' items)','t-sell'); return; }
+  it.badge = 'SOLD';
+  ITEMS = ITEMS.filter(i=>i.id!==id);
+  SOLD.unshift(it);
+  showToast('กำลังบันทึก...','t-gold');
+  const ok = await saveItemsToDB();
+  if(ok){ renderAll(); showToast('ย้ายไปขายแล้ว ✦','t-gold'); }
+  else { // rollback
+    ITEMS.unshift(it); SOLD.shift();
+    showToast('บันทึกไม่สำเร็จ','t-sell');
+  }
+}
+
+async function restoreItem(id){
+  id = Number(id);
+  if(!confirm('คืนพระกลับมา "กำลังหา"?\nRestore to Available?')) return;
+  const it = SOLD.find(i=>Number(i.id)===id);
+  if(!it){ showToast('ไม่พบรายการ','t-sell'); return; }
+  it.badge = '';
+  SOLD = SOLD.filter(i=>i.id!==id);
+  ITEMS.unshift(it);
+  showToast('กำลังบันทึก...','t-gold');
+  const ok = await saveItemsToDB();
+  if(ok){ renderAll(); showToast('คืนพระกลับแล้ว ✦','t-buy'); }
+  else { // rollback
+    SOLD.unshift(it); ITEMS.shift();
+    showToast('บันทึกไม่สำเร็จ','t-sell');
+  }
+}
+
+
