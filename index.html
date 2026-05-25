@@ -1265,6 +1265,123 @@ function openModal(id, mode) {
   document.getElementById('itemOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
+// ── LINE Notify ──────────────────────────────────────────────
+async function sendLineNotify(message){
+  const token = window._lineNotifyToken || LINE_NOTIFY_TOKEN;
+  if(!token) return false;
+  try{
+    // LINE Notify requires server-side call due to CORS.
+    // We use a CORS proxy (allorigins) to relay the request.
+    const body = new URLSearchParams({ message });
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://notify-api.line.me/api/notify');
+    const res = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    });
+    return res.ok;
+  }catch(e){
+    console.warn('LINE Notify failed:', e.message);
+    return false;
+  }
+}
+
+// ── Buy Now — collect buyer info then notify ──────────────────
+let _pendingBuyItem = null;
+
+function openBuyForm(itemId){
+  const it = ITEMS.find(i=>String(i.id)===String(itemId));
+  if(!it) return;
+  _pendingBuyItem = it;
+  // Build the buy form overlay
+  const ov = document.getElementById('buyFormOv');
+  if(!ov) return;
+  document.getElementById('buyFormItemName').textContent = it.nameTh;
+  document.getElementById('buyFormItemPrice').textContent = it.price;
+  document.getElementById('buyFormItemImg').src = getItemImg(it);
+  document.getElementById('buyFormName').value = '';
+  document.getElementById('buyFormPhone').value = '';
+  document.getElementById('buyFormLine').value = '';
+  document.getElementById('buyFormNote').value = '';
+  document.getElementById('buyFormStatus').textContent = '';
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function submitBuyForm(){
+  const it = _pendingBuyItem;
+  if(!it){ showToast('ไม่พบรายการ','t-sell'); return; }
+
+  const name  = document.getElementById('buyFormName').value.trim();
+  const phone = document.getElementById('buyFormPhone').value.trim();
+  const line  = document.getElementById('buyFormLine').value.trim();
+  const note  = document.getElementById('buyFormNote').value.trim();
+
+  if(!name){ showToast('กรุณาใส่ชื่อ','t-sell'); return; }
+  if(!phone){ showToast('กรุณาใส่เบอร์โทร','t-sell'); return; }
+
+  const statusEl = document.getElementById('buyFormStatus');
+  const btn = document.getElementById('buyFormSubmitBtn');
+  btn.disabled = true;
+  statusEl.style.color = 'var(--gold)';
+  statusEl.textContent = '📤 กำลังส่งข้อมูล...';
+
+  // Build LINE message
+  const now = new Date().toLocaleString('th-TH');
+  const msg = [
+    '',
+    '🔔 มีคนต้องการซื้อพระ!',
+    '─────────────────',
+    `📿 ${it.nameTh}`,
+    it.nameEn ? `   ${it.nameEn}` : '',
+    `💰 ${it.price}`,
+    `🏷 รหัส: #${it.id}`,
+    '─────────────────',
+    `👤 ชื่อ: ${name}`,
+    `📞 โทร: ${phone}`,
+    line  ? `💬 LINE: ${line}` : '',
+    note  ? `📝 หมายเหตุ: ${note}` : '',
+    '─────────────────',
+    `⏰ ${now}`,
+    `🌐 bantae amulet`,
+  ].filter(Boolean).join('\\n');
+
+  // Try LINE Notify
+  const token = window._lineNotifyToken || LINE_NOTIFY_TOKEN;
+  let sent = false;
+  if(token){
+    sent = await sendLineNotify(msg);
+  }
+
+  // Always copy message to clipboard as backup
+  try{ await navigator.clipboard.writeText(msg); }catch(e){}
+
+  // Open Messenger with pre-filled context
+  const messengerMsg = encodeURIComponent(`สนใจซื้อ: ${it.nameTh} (${it.price}) — ${name} โทร ${phone}`);
+
+  if(sent){
+    statusEl.style.color = '#7FFFC0';
+    statusEl.textContent = '✅ ส่งแจ้งเตือน LINE แล้ว! แอดมินจะติดต่อกลับเร็วๆ นี้';
+    showToast('✅ ส่ง LINE แจ้งแอดมินแล้ว! รอการติดต่อกลับ', 't-buy');
+    setTimeout(()=>{
+      closeOv('buyFormOv');
+    }, 2500);
+  } else {
+    // LINE Notify not set up — fall back to Messenger
+    statusEl.style.color = 'var(--gold)';
+    statusEl.textContent = '✅ คัดลอกข้อมูลแล้ว — กำลังเปิด Messenger...';
+    setTimeout(()=>{
+      window.open(MESSENGER, '_blank');
+      closeOv('buyFormOv');
+      showToast('ข้อมูลถูกคัดลอกแล้ว — วางใน Messenger', 't-buy');
+    }, 800);
+  }
+  btn.disabled = false;
+}
+
 function copyAutoMsg(e, msg){
   // Copy item info to clipboard before opening Messenger
   if(navigator.clipboard){
@@ -2586,6 +2703,15 @@ function showLoading(show) {
   if (el) el.style.display = show ? 'flex' : 'none';
 }
 
+function saveLineToken(){
+  const t = document.getElementById('lineTokenInput')?.value.trim()||'';
+  window._lineNotifyToken = t;
+  try{ localStorage.setItem('bantae_line_token', t); }catch(e){}
+  const el = document.getElementById('lineTokenStatus');
+  if(el){ el.textContent = t ? '✅ LINE Notify พร้อมใช้' : 'ยังไม่มี token'; el.style.color = t ? '#7FFFC0' : 'var(--text-muted)'; }
+  showToast('บันทึก LINE Token แล้ว', 't-buy');
+}
+
 function renderAll() {
   // Always update the always-visible default grid
   const defaultSec = document.getElementById('default-collection');
@@ -3337,6 +3463,66 @@ loadItemsFromDB();
     <div style="padding:1.25rem"><div id="verifyList"></div></div>
   </div>
 </div>
+<!-- BUY FORM OVERLAY -->
+<div class="auth-overlay" id="buyFormOv" style="z-index:800" onclick="if(event.target===this)closeOv('buyFormOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:440px;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column">
+    <!-- Header -->
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:2;flex-shrink:0">
+      <div style="font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--gold)">🛒 สั่งซื้อ · PLACE ORDER</div>
+      <button class="mico-close" onclick="closeOv('buyFormOv')">✕</button>
+    </div>
+    <!-- Item info -->
+    <div style="display:flex;gap:12px;align-items:center;padding:1rem 1.1rem;border-bottom:1px solid var(--border);background:var(--dark4)">
+      <img id="buyFormItemImg" src="" style="width:64px;height:64px;object-fit:cover;border:1px solid var(--border);flex-shrink:0"/>
+      <div>
+        <div id="buyFormItemName" style="font-family:'Sarabun',sans-serif;font-size:0.95rem;color:var(--text);margin-bottom:3px"></div>
+        <div id="buyFormItemPrice" style="font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);font-weight:700"></div>
+      </div>
+    </div>
+    <!-- Form -->
+    <div style="padding:1.1rem">
+      <div style="font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-dim);line-height:1.7;margin-bottom:1rem;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);padding:0.75rem">
+        📲 กรอกข้อมูลด้านล่าง — แอดมินจะติดต่อกลับภายใน <strong style="color:var(--gold)">2 ชั่วโมง</strong> เพื่อยืนยันและแจ้งเลขบัญชี
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px">ชื่อ-นามสกุล / NAME *</div>
+          <input type="text" id="buyFormName" class="form-input" placeholder="สมชาย ใจดี" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px">เบอร์โทรศัพท์ / PHONE *</div>
+          <input type="tel" id="buyFormPhone" class="form-input" placeholder="08X-XXX-XXXX" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px">LINE ID (ไม่บังคับ)</div>
+          <input type="text" id="buyFormLine" class="form-input" placeholder="@lineID หรือ ชื่อใน LINE" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px">หมายเหตุ / NOTE</div>
+          <input type="text" id="buyFormNote" class="form-input" placeholder="ต้องการด่วน, ส่งต่างประเทศ, ฯลฯ" style="width:100%"/>
+        </div>
+      </div>
+      <div id="buyFormStatus" style="font-family:'Sarabun',sans-serif;font-size:0.82rem;margin:10px 0;min-height:20px;text-align:center"></div>
+      <button id="buyFormSubmitBtn" onclick="submitBuyForm()" style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:0.09em;padding:14px;border:none;cursor:pointer;width:100%;transition:background 0.2s;margin-top:4px" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">
+        📲 ส่งคำสั่งซื้อ · SEND ORDER
+      </button>
+      <div style="font-family:'Sarabun',sans-serif;font-size:0.73rem;color:var(--text-muted);text-align:center;margin-top:8px;line-height:1.6">
+        ข้อมูลของท่านจะถูกใช้เพื่อการติดต่อซื้อขายเท่านั้น<br/>
+        ชำระเงินหลังจากได้รับการยืนยันจากแอดมินเท่านั้น
+      </div>
+    </div>
+    <!-- Admin LINE token config (hidden from public, shown to admin) -->
+    <div id="lineTokenAdminBox" style="display:none;border-top:1px solid var(--border);padding:0.85rem;background:var(--dark4)">
+      <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--gold);margin-bottom:5px">⚙️ ADMIN: LINE Notify Token</div>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="lineTokenInput" class="form-input" style="flex:1;font-size:0.75rem" placeholder="ey... (จาก notify-bot.line.me)"/>
+        <button onclick="saveLineToken()" style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.6rem;font-weight:700;padding:6px 10px;border:none;cursor:pointer;flex-shrink:0">SAVE</button>
+      </div>
+      <div id="lineTokenStatus" style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:'Sarabun',sans-serif"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>async function markAsSold(id){
   id = Number(id); // normalize to number
