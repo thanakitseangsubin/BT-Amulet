@@ -2,7 +2,9 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin"/>
 <title>พระเครื่องบ้านแต้ — Bantae Amulet</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -256,7 +258,7 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:1.6rem
 /* === MODALS === */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:400;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.22s}
 .overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:840px;max-height:92vh;overflow-y:auto}
+.modal{background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:700px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column}
 .modal-topbar{position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:8px 13px;z-index:10}
 .modal-label{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.08em;color:var(--text-muted)}
 .modal-topbar-r{display:flex;gap:6px;align-items:center}
@@ -264,13 +266,20 @@ footer{background:var(--dark2);border-top:1px solid var(--border);padding:1.6rem
 .mico-btn:hover{border-color:var(--gold);color:var(--gold)}
 .mico-close{background:none;border:1px solid var(--border);color:var(--text-dim);font-size:0.95rem;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;line-height:1}
 .mico-close:hover{border-color:#ff6b6b;color:#ff6b6b}
-.modal-body{display:grid;grid-template-columns:1fr 1fr}
-.modal-gallery{background:var(--dark4)}
-.modal-main-img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.modal-thumbs{display:flex;gap:4px;padding:7px;flex-wrap:wrap}
-.thumb{width:44px;height:44px;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:border-color 0.2s}
-.thumb.active{border-color:var(--gold)}
-.modal-info{padding:1.4rem;display:flex;flex-direction:column}
+.modal-body{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0}
+.modal-gallery{background:var(--dark4);flex-shrink:0}
+.modal-main-img{width:100%;max-height:45vh;object-fit:contain;display:block;background:#0a0905}
+.modal-thumbs{display:flex;gap:5px;padding:6px 8px;flex-wrap:nowrap;overflow-x:auto}
+.thumb{width:48px;height:48px;flex-shrink:0;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:border-color 0.2s,opacity 0.2s;opacity:0.6}
+.thumb:hover{opacity:1}
+.thumb.active{border-color:var(--gold);opacity:1}
+.modal-info{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.modal-info-body{flex:1;overflow-y:auto;padding:1rem 1.25rem 0.5rem}
+.modal-action-bar{flex-shrink:0;background:var(--dark3);border-top:1px solid var(--border);padding:0.75rem 1.25rem;display:flex;gap:8px}
+.btn-buy-now{flex:1;background:#06C755;color:#fff;font-family:"Cinzel",serif;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;padding:12px 8px;border:none;cursor:pointer;transition:background 0.2s}
+.btn-buy-now:hover{background:#05a347}
+.btn-messenger-sm{flex:1;background:var(--messenger);color:#fff;font-family:"Cinzel",serif;font-size:0.65rem;font-weight:600;letter-spacing:0.07em;padding:12px 8px;border:none;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-cart-sm{background:none;border:1px solid var(--border-b);color:var(--gold);font-family:"Cinzel",serif;font-size:0.72rem;padding:12px 14px;cursor:pointer}
 .modal-cat{display:inline-block;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.11em;padding:3px 9px;margin-bottom:0.7rem;font-weight:700}
 .mc-buy{background:rgba(26,58,42,0.8);color:var(--buy);border:1px solid rgba(127,255,192,0.2)}
 .mc-sell{background:rgba(58,26,26,0.8);color:var(--sell);border:1px solid rgba(255,176,144,0.2)}
@@ -466,10 +475,22 @@ select option{background:var(--dark4)}
     <button class="abar-btn" onclick="openAddItem(null)">＋ ADD ITEM</button>
     <button class="abar-btn" onclick="togglePenMode()" id="penModeBtn">✏️ PEN EDIT</button>
     <button class="abar-btn" onclick="openReports()">📋 REPORTS<span class="report-dot" id="reportDot">0</span></button>
+    <button class="abar-btn" onclick="openLineSettings()" style="border-color:rgba(0,200,80,0.5);color:#06C755" title="ตั้งค่า LINE Notify">📲 LINE</button>
+    <div style="display:flex;align-items:center;gap:4px;background:rgba(6,199,85,0.08);border:1px solid rgba(6,199,85,0.3);padding:3px 8px 3px 4px">
+      <span style="color:#06C755;font-size:0.7rem">📲</span>
+      <input type="text" id="lineTokenQuick"
+        placeholder="LINE Token — วางที่นี่แล้วกด Enter"
+        style="background:transparent;border:none;outline:none;color:#fff;font-family:'Sarabun',sans-serif;font-size:0.72rem;width:220px;padding:2px 4px"
+        onkeydown="if(event.key==='Enter'){window._lineNotifyToken=this.value.trim();try{localStorage.setItem('bantae_line_token',this.value.trim());}catch(e){}updateLineStatus();showToast(this.value.trim()?'✅ LINE Token บันทึกแล้ว':'ลบ Token แล้ว','t-buy');}"
+        oninput="if(this.value.trim()!==document.getElementById('lineTokenInput').value){var li=document.getElementById('lineTokenInput');if(li)li.value=this.value;}"
+      />
+      <span id="lineTokenQuickStatus" style="font-size:0.65rem;color:#06C755"></span>
+    </div>
     <button class="abar-btn" onclick="fixDatabaseStructure()" style="border-color:rgba(127,255,192,0.4);color:var(--buy)">🔧 FIX DATA</button>
     <button class="abar-btn red" onclick="logoutAdmin()">LOGOUT</button>
   </div>
 </div>
+
 
 <!-- NAV -->
 <nav>
@@ -479,15 +500,12 @@ select option{background:var(--dark4)}
   </div>
   <ul class="nav-links">
     <li><a onclick="scrollToId('default-collection')">COLLECTION</a></li>
-    <li><a onclick="openBidPanel()">🔨 BID</a></li>
-    <li><a onclick="openTrackPanel()">📦 TRACK</a></li>
-    <li><a onclick="scrollToId('comment-section')">💬 BOARD</a></li>
     <li><a onclick="scrollToId('about')">ABOUT</a></li>
     <li><a onclick="scrollToId('contact-info')">CONTACT</a></li>
   </ul>
   <div class="nav-right">
-    <!-- BID + TRACK always visible buttons -->
-    <button onclick="openBidPanel()" style="background:none;border:1px solid rgba(255,179,71,0.4);color:#FFB347;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(255,179,71,0.15)'" onmouseout="this.style.background='none'">🔨 BID</button>
+    <!-- removed BID/TRACK from nav -->
+    <!-- <button onclick="openBidPanel()" style="background:none;border:1px solid rgba(255,179,71,0.4);color:#FFB347;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(255,179,71,0.15)'" onmouseout="this.style.background='none'">🔨 BID</button>
     <button onclick="openTrackPanel()" style="background:none;border:1px solid rgba(127,255,192,0.3);color:var(--buy);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(127,255,192,0.1)'" onmouseout="this.style.background='none'">📦 TRACK</button>
     <!-- Messenger direct button top-right -->
     <a class="nav-messenger" href="https://m.me/100068843867509" target="_blank">
@@ -497,19 +515,30 @@ select option{background:var(--dark4)}
     <button class="cart-icon-btn" onclick="openCart()" title="ตะกร้า">
       🛒<span class="badge" id="cartBadge">0</span>
     </button>
-    <button class="nav-btn" onclick="setMode('buy')">🔍 หา</button>
-    <button class="nav-btn" onclick="setMode('sell')">💰 ขาย</button>
-    <button class="nav-report-btn" onclick="openReportForm()">รายงานปัญหา</button>
+    <button class="nav-btn" onclick="setMode('buy')" data-i18n="nav.find">🔍 หา</button>
+    <button class="nav-btn" onclick="setMode('sell')" data-i18n="nav.sell">💰 ขาย</button>
     <button class="nav-login-btn" id="loginNavBtn" onclick="openLogin()">LOGIN</button>
-    <button onclick="toggleLang()" id="langBtn" style="background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.07em;padding:5px 10px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="if(!window._isEng){this.style.borderColor='';this.style.color=''}">🌐 EN</button>
+    <div style="position:relative" id="langDropWrap">
+      <button onclick="toggleLangMenu()" id="langBtn"
+        style="background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.07em;padding:5px 10px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:4px"
+        onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+        onmouseout="this.style.borderColor='';this.style.color=''">
+        🌐 <span id="langLabel">EN</span>
+      </button>
+      <div id="langMenu" style="display:none;position:absolute;top:calc(100%+4px);right:0;background:var(--dark3);border:1px solid var(--border-b);z-index:500;min-width:110px">
+        <button onclick="setLang('th')" style="display:block;width:100%;background:none;border:none;color:var(--text);font-family:'Sarabun',sans-serif;font-size:0.8rem;padding:8px 14px;cursor:pointer;text-align:left;transition:background 0.15s" onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='none'">🇹🇭 ภาษาไทย</button>
+        <button onclick="setLang('en')" style="display:block;width:100%;background:none;border:none;color:var(--text);font-family:'Cinzel',serif;font-size:0.72rem;padding:8px 14px;cursor:pointer;text-align:left;transition:background 0.15s" onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='none'">🇬🇧 English</button>
+        <button onclick="setLang('zh')" style="display:block;width:100%;background:none;border:none;color:var(--text);font-family:'Sarabun',sans-serif;font-size:0.8rem;padding:8px 14px;cursor:pointer;text-align:left;transition:background 0.15s" onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='none'">🇨🇳 中文</button>
+      </div>
+    </div>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
-  <div class="hero-name-th" id="heroNameTh">พระเครื่องบ้านแต้</div>
-  <div class="hero-name-en" id="heroNameEn">BANTAE AMULET</div>
+  <div class="hero-name-th" id="heroNameTh" data-th="พระเครื่องบ้านแต้" data-en="Bantae Amulet" data-zh="班泰佛牌">พระเครื่องบ้านแต้</div>
+  <div class="hero-name-en" id="heroNameEn" data-th="BANTAE AMULET" data-en="BANTAE AMULET" data-zh="BANTAE AMULET">BANTAE AMULET</div>
   <div class="hero-divider"></div>
   <p class="hero-tagline" id="heroTaglineTh">ความชำนาญเฉพาะทาง · ปรัชญา ความเชื่อ ศิลปกรรม สะสม พุทธศิลป<br/>กรุเก่า สาย สะสมความเก่า ตามแบบแผนของเรา</p>
   <p class="hero-tagline-en" id="heroTaglineEn">Specialist in philosophy, sacred belief, Buddhist art &amp; antique collection<br/>Ancient kru · Lineage collecting — in our own tradition</p>
@@ -517,19 +546,19 @@ select option{background:var(--dark4)}
   <div class="mode-split">
     <div class="mode-btn buy-btn" id="buyModeBtn" onclick="setMode('buy')">
       <span class="mode-icon">🔍</span>
-      <div class="mode-th" id="buyModeTh">กำลังหา</div>
+      <div class="mode-th" id="buyModeTh" data-i18n="mode.buy">กำลังหา</div>
       <div class="mode-en" id="buyModeEn">Looking to Buy</div>
       <div class="mode-sub" id="buyModeSub">BROWSE COLLECTION</div>
     </div>
     <div class="mode-btn sell-btn" id="sellModeBtn" onclick="setMode('sell')">
       <span class="mode-icon">💰</span>
-      <div class="mode-th" id="sellModeTh">ต้องการขาย</div>
+      <div class="mode-th" id="sellModeTh" data-i18n="mode.sell">ต้องการขาย</div>
       <div class="mode-en" id="sellModeEn">Want to Sell</div>
       <div class="mode-sub" id="sellModeSub">SELL YOUR AMULET</div>
     </div>
     <div class="mode-btn sold-btn" onclick="setMode('sold')" id="soldModeBtn">
       <span class="mode-icon">🏆</span>
-      <div class="mode-th" id="soldModeTh" style="color:var(--gold)">ขายแล้ว</div>
+      <div class="mode-th" id="soldModeTh" style="color:var(--gold)" data-i18n="mode.sold">ขายแล้ว</div>
       <div class="mode-en" id="soldModeEn">Previously Sold</div>
       <div class="mode-sub" id="soldModeSub" style="color:rgba(201,168,76,0.45)">SEE SOLD ITEMS</div>
     </div>
@@ -548,9 +577,9 @@ select option{background:var(--dark4)}
   <div class="container">
     <div class="section-header">
       <div class="sec-eye">คอลเลกชัน — COLLECTION</div>
-      <div class="sec-title-th" id="collectionTitleEl">พระเครื่องทั้งหมด</div>
+      <div class="sec-title-th" id="collectionTitleEl" data-i18n="coll.title">พระเครื่องทั้งหมด</div>
       <div class="sec-title-en">All Sacred Amulets</div>
-      <div class="sec-sub" id="collectionSubEl">คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy</div>
+      <div class="sec-sub" id="collectionSubEl" data-i18n="coll.sub">คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy</div>
       <div class="sec-line"></div>
     </div>
     <div class="items-grid" id="defaultGrid"></div>
@@ -649,13 +678,13 @@ select option{background:var(--dark4)}
         <div class="sec-eye">ลงขาย — LIST YOUR AMULET</div>
         <div class="sec-title-th">ส่งพระเพื่อลงขาย</div>
         <div class="sec-title-en">Submit Your Amulet For Sale</div>
-        <div class="sec-sub">ฟรีค่าลงประกาศ · รับเงินเมื่อขายได้</div>
+        <div class="sec-sub" data-i18n="sell.free">ฟรีค่าลงประกาศ · รับเงินเมื่อขายได้</div>
         <div class="sec-line"></div>
       </div>
       <div class="sell-grid">
         <div class="sell-info">
-          <h3>วิธีการขาย — How It Works</h3>
-          <p>เราจัดการทุกอย่าง ตั้งแต่การตรวจสอบ ถ่ายภาพ จนหาผู้ซื้อที่เหมาะสม ท่านจะได้รับเงินเมื่อขายเสร็จเท่านั้น</p>
+          <h3 data-i18n="sell.howTitle">วิธีการขาย — How It Works</h3>
+          <p data-i18n="sell.howDesc">เราจัดการทุกอย่าง ตั้งแต่การตรวจสอบ ถ่ายภาพ จนหาผู้ซื้อที่เหมาะสม ท่านจะได้รับเงินเมื่อขายเสร็จเท่านั้น</p>
           <div class="sell-steps">
             <div class="sell-step"><div class="step-num">1</div><div><div class="step-title">ส่งข้อมูล</div><div class="step-desc">Fill the form with your contact details.</div></div></div>
             <div class="sell-step"><div class="step-num">2</div><div><div class="step-title">ตรวจสอบ</div><div class="step-desc">Expert verifies within 48 hrs.</div></div></div>
@@ -716,15 +745,15 @@ select option{background:var(--dark4)}
   <div class="about-grid">
     <div class="about-text">
       <h2 id="aboutTitle">พระเครื่องบ้านแต้</h2>
-      <p id="aboutP1">ความชำนาญเฉพาะทางด้าน ปรัชญา ความเชื่อ ศิลปกรรม การสะสม และพุทธศิลป์ ดำเนินการจากนครราชสีมา ด้วยความรักและความเคารพต่อพระเครื่องไทย</p>
+      <p id="aboutP1" data-i18n="about.p1">ความชำนาญเฉพาะทางด้าน ปรัชญา ความเชื่อ ศิลปกรรม การสะสม และพุทธศิลป์ ดำเนินการจากนครราชสีมา ด้วยความรักและความเคารพต่อพระเครื่องไทย</p>
       <p id="aboutP2">Specialist knowledge in philosophy, sacred belief, Buddhist art, and antique collection. Based in Nakhon Ratchasima — ส่งไวทั้งในไทยและต่างประเทศ</p>
       <div class="thai-quote" id="aboutQuote">เชื่อว่าถ้าท่านเข้ามาในนี้แล้วสิ่งที่เราชอบคงไม่ต่างกัน<br/><span style="font-size:0.78rem;color:var(--text-muted)">If you are here, we likely share the same passion.</span></div>
     </div>
     <div class="about-features">
-      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title">AUTHENTICITY GUARANTEED</div><div class="feature-desc">ทุกชิ้นผ่านการตรวจสอบโดยผู้เชี่ยวชาญ · Each item verified.</div></div></div>
-      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title">ส่งไวทั้งในไทยและต่างประเทศ</div><div class="feature-desc">Fast shipping across Thailand & worldwide. EMS & DHL.</div></div></div>
-      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title">กรุเก่า — ANCIENT KRU</div><div class="feature-desc">สายสะสมความเก่า ตามแบบแผนของเรา · Authentic ancient pieces.</div></div></div>
-      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title">FREE TO LIST</div><div class="feature-desc">ฟรีค่าลงประกาศ รับค่าธรรมเนียมเมื่อขายได้เท่านั้น</div></div></div>
+      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title">AUTHENTICITY GUARANTEED</div><div class="feature-desc" data-i18n="about.verify">ทุกชิ้นผ่านการตรวจสอบโดยผู้เชี่ยวชาญ · Each item verified.</div></div></div>
+      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title" data-i18n="about.ship">ส่งไวทั้งในไทยและต่างประเทศ</div><div class="feature-desc">Fast shipping across Thailand & worldwide. EMS & DHL.</div></div></div>
+      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title" data-i18n="about.kru">กรุเก่า — ANCIENT KRU</div><div class="feature-desc" data-i18n="about.kru2">สายสะสมความเก่า ตามแบบแผนของเรา · Authentic ancient pieces.</div></div></div>
+      <div class="feature"><div class="feature-icon">✦</div><div><div class="feature-title">FREE TO LIST</div><div class="feature-desc" data-i18n="about.fee">ฟรีค่าลงประกาศ รับค่าธรรมเนียมเมื่อขายได้เท่านั้น</div></div></div>
     </div>
   </div>
 </div>
@@ -733,7 +762,7 @@ select option{background:var(--dark4)}
 <div class="contact-info-strip" id="contact-info">
   <div class="container">
     <div class="section-header">
-      <div class="sec-eye">ติดต่อเรา — CONTACT</div>
+      <div class="sec-eye" data-i18n="contact.title">ติดต่อเรา — CONTACT</div>
       <div class="sec-title-th" id="contactTitle">พระเครื่องบ้านแต้</div>
       <div class="sec-line"></div>
     </div>
@@ -747,7 +776,7 @@ select option{background:var(--dark4)}
       <a class="contact-card contact-card-link" href="https://www.google.com/maps/search/Nakhon+Ratchasima" target="_blank">
         <div class="contact-card-icon">📍</div>
         <div class="contact-card-label">LOCATION / ที่ตั้ง</div>
-        <div class="contact-card-val">นครราชสีมา →</div>
+        <div class="contact-card-val" data-i18n="contact.location">นครราชสีมา →</div>
         <div class="contact-card-sub">Nakhon Ratchasima, Thailand<br/>ส่งไวทั้งในไทยและต่างประเทศ</div>
       </a>
       <a class="contact-card contact-card-link" href="https://m.me/100068843867509" target="_blank">
@@ -755,7 +784,7 @@ select option{background:var(--dark4)}
           <svg class="logo-messenger" viewBox="0 0 24 24" fill="#0084FF"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
         </div>
         <div class="contact-card-label">MESSENGER</div>
-        <div class="contact-card-val" style="color:var(--buy)">คุยกับเราได้เลย →</div>
+        <div class="contact-card-val" style="color:var(--buy)" data-i18n="contact.chat">คุยกับเราได้เลย →</div>
         <div class="contact-card-sub">Chat directly · ตอบไว</div>
       </a>
       <a class="contact-card contact-card-link" href="https://www.facebook.com/profile.php?id=100068843867509" target="_blank">
@@ -764,7 +793,7 @@ select option{background:var(--dark4)}
         </div>
         <div class="contact-card-label">FACEBOOK PAGE</div>
         <div class="contact-card-val" style="color:#7EB8FF">พระเครื่องบ้านแต้ →</div>
-        <div class="contact-card-sub">ติดตามคอลเลกชันใหม่</div>
+        <div class="contact-card-sub" data-i18n="contact.follow">ติดตามคอลเลกชันใหม่</div>
       </a>
     </div>
   </div>
@@ -775,10 +804,10 @@ select option{background:var(--dark4)}
 <div id="comment-section" style="background:var(--dark2);border-top:1px solid var(--border);padding:2.75rem 1.5rem">
   <div class="container">
     <div class="section-header">
-      <div class="sec-eye">กระดานสนทนา — COMMUNITY BOARD</div>
-      <div class="sec-title-th">ความคิดเห็น</div>
+      <div class="sec-eye" data-i18n="board.title">กระดานสนทนา — COMMUNITY BOARD</div>
+      <div class="sec-title-th" data-i18n="board.subtitle">ความคิดเห็น</div>
       <div class="sec-title-en">Public Comment Board</div>
-      <div class="sec-sub">แสดงความคิดเห็น ถามคำถาม หรือแลกเปลี่ยนความรู้</div>
+      <div class="sec-sub" data-i18n="board.desc">แสดงความคิดเห็น ถามคำถาม หรือแลกเปลี่ยนความรู้</div>
       <div class="sec-line"></div>
     </div>
     <!-- Post form -->
@@ -788,7 +817,7 @@ select option{background:var(--dark4)}
         <input type="text" id="commentEmail" class="form-input" placeholder="Line ID / Contact (optional)"/>
       </div>
       <textarea id="commentText" class="form-input" style="min-height:80px;margin-bottom:8px" placeholder="พิมพ์ความคิดเห็น / Type your comment..."></textarea>
-      <button onclick="submitComment()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;padding:10px 20px;border:none;cursor:pointer;transition:background 0.2s;width:100%" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">💬 ส่งความคิดเห็น · POST COMMENT</button>
+      <button onclick="submitComment()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;padding:10px 20px;border:none;cursor:pointer;transition:background 0.2s;width:100%" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'" data-i18n="board.post">💬 ส่งความคิดเห็น · POST COMMENT</button>
     </div>
     <!-- Comment list -->
     <div id="commentList" style="max-width:700px;margin:0 auto"></div>
@@ -798,9 +827,9 @@ select option{background:var(--dark4)}
 <footer>
   <div class="footer-logo-th">⬡ พระเครื่องบ้านแต้</div>
   <div class="footer-logo-en">BANTAE AMULET</div>
-  <div class="footer-tagline">เชื่อว่าถ้าท่านเข้ามาในนี้แล้วสิ่งที่เราชอบคงไม่ต่างกัน</div>
-  <div class="footer-sub">นครราชสีมา · 083 987 9659 · ส่งไวทั้งในไทยและต่างประเทศ</div>
-  <div class="footer-sub" style="margin-top:0.3rem;font-size:0.68rem;color:var(--text-muted)">© 2026 พระเครื่องบ้านแต้ — Bantae Amulet</div>
+  <div class="footer-tagline" data-i18n="hero.belief">เชื่อว่าถ้าท่านเข้ามาในนี้แล้วสิ่งที่เราชอบคงไม่ต่างกัน</div>
+  <div class="footer-sub" data-i18n="footer.tagline">นครราชสีมา · 083 987 9659 · ส่งไวทั้งในไทยและต่างประเทศ</div>
+  <div class="footer-sub" style="margin-top:0.3rem;font-size:0.68rem;color:var(--text-muted)" data-i18n="footer.copy">© 2026 พระเครื่องบ้านแต้ — Bantae Amulet</div>
 </footer>
 
 <!-- ITEM DETAIL MODAL -->
@@ -815,22 +844,38 @@ select option{background:var(--dark4)}
     </div>
     <div class="modal-body">
       <div class="modal-gallery">
-        <div style="position:relative;cursor:zoom-in" onclick="openMZoom()" title="คลิกเพื่อขยาย"><img class="modal-main-img" id="mImg" src="" alt="" style="pointer-events:none"/><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.7);font-family:Cinzel,serif;font-size:0.5rem;letter-spacing:0.07em;padding:3px 8px;pointer-events:none">🔍 คลิกเพื่อขยาย</div></div>
+        <div style="position:relative;cursor:zoom-in" onclick="openMZoom()" title="คลิกเพื่อขยาย"><img class="modal-main-img" id="mImg" src="" alt="" style="pointer-events:none"/><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.7);font-family:Cinzel,serif;font-size:0.5rem;letter-spacing:0.07em;padding:3px 8px;pointer-events:none" data-i18n="modal.zoom">🔍 คลิกเพื่อขยาย</div></div>
         <div class="modal-thumbs" id="mThumbs"></div>
       </div>
       <div class="modal-info">
-        <div class="modal-cat mc-buy" id="mCat"></div>
-        <div class="modal-title-th" id="mNameTh"></div>
-        <div class="modal-title-en" id="mNameEn"></div>
-        <div class="modal-price" id="mPrice"></div>
-        <div class="modal-price-note" id="mPriceNote"></div>
-        <div class="info-rows" id="mInfo"></div>
-        <div id="mGuarantee"></div>
-        <div class="modal-desc" id="mDesc"></div>
-        <div class="modal-btns" id="mBtns"></div>
-        <div class="cert-bar" style="margin-top:0.6rem">
-          <div style="color:var(--gold);font-size:0.78rem">✦</div>
-          <div class="cert-text">ผ่านการตรวจสอบ · Authenticity verified by our expert.</div>
+        <div class="modal-info-body">
+          <div class="modal-cat mc-buy" id="mCat"></div>
+          <div class="modal-title-th" id="mNameTh"></div>
+          <div class="modal-title-en" id="mNameEn"></div>
+          <div class="modal-price" id="mPrice"></div>
+          <div class="modal-price-note" id="mPriceNote"></div>
+          <div class="info-rows" id="mInfo"></div>
+          <div id="mGuarantee"></div>
+          <div class="modal-desc" id="mDesc"></div>
+          <div class="cert-bar" style="margin-top:0.6rem;margin-bottom:0.5rem">
+            <div style="color:var(--gold);font-size:0.78rem">✦</div>
+            <div class="cert-text" data-i18n="modal.cert">ผ่านการตรวจสอบ · Authenticity verified by our expert.</div>
+          </div>
+        </div>
+        <div class="modal-action-bar" id="mActionBar">
+          <!-- LINE button (green) -->
+          <button class="btn-buy-now" id="mBuyNowBtn"
+            style="background:#06C755;display:flex;align-items:center;justify-content:center;gap:7px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            ซื้อผ่านไลน์
+          </button>
+          <!-- Messenger button (blue) -->
+          <a class="btn-messenger-sm" id="mMessengerBtn" href="" target="_blank"
+            style="background:#0084FF;display:flex;align-items:center;justify-content:center;gap:7px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
+            ซื้อผ่าน Messenger
+          </a>
+          <button class="btn-cart-sm" id="mCartBtn" title="เพิ่มในตะกร้า">+🛒</button>
         </div>
       </div>
     </div>
@@ -841,7 +886,7 @@ select option{background:var(--dark4)}
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-panel" id="cartPanel">
   <div class="cart-header">
-    <div class="cart-title">🛒 ตะกร้า · CART</div>
+    <div class="cart-title" data-i18n="cart.title">🛒 ตะกร้า · CART</div>
     <button class="mico-close" onclick="closeCart()">✕</button>
   </div>
   <div class="cart-tabs">
@@ -858,7 +903,7 @@ select option{background:var(--dark4)}
         <label style="font-family:Cinzel,serif;font-size:0.57rem;letter-spacing:0.06em;color:var(--text-dim);display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="selAllBuy" onchange="selectAll('buy',this.checked)" style="accent-color:var(--gold);width:13px;height:13px;cursor:pointer"/> เลือกทั้งหมด
         </label>
-        <button onclick="deleteSelected('buy')" style="background:none;border:1px solid rgba(229,62,62,0.3);color:#ff8080;font-family:Cinzel,serif;font-size:0.54rem;letter-spacing:0.05em;padding:3px 9px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='#E53E3E';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#ff8080'">ลบที่เลือก</button>
+        <button onclick="deleteSelected('buy')" style="background:none;border:1px solid rgba(229,62,62,0.3);color:#ff8080;font-family:Cinzel,serif;font-size:0.54rem;letter-spacing:0.05em;padding:3px 9px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='#E53E3E';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#ff8080'" data-i18n="cart.deleteSelected">ลบที่เลือก</button>
       </div>
       <div id="cpBuyItems"></div>
     </div>
@@ -1006,7 +1051,10 @@ const MESSENGER   = 'https://m.me/100068843867509';
 const JB_URL      = 'https://api.jsonbin.io/v3/b/69fb4a1036566621a830dc9b';        // JSONBin endpoint
 // ImgBB — free image hosting with API. Get key at imgbb.com/api → Account → API
 // Takes ~1 min to sign up, then paste your key here
-const IMGBB_KEY   = '';  // ← paste your ImgBB API key here e.g. 'a1b2c3d4e5f6....'
+const IMGBB_KEY          = 'oE9cJNbERtFwYmZMnBAshA8Y';
+const CLOUDINARY_CLOUD  = 'dx0fk9j5b';
+const CLOUDINARY_PRESET = 'bantae_unsigned';
+const LINE_NOTIFY_TOKEN = '';
 const JB_KEY      = '$2a$10$biemqQ9HdFoUoooBQmWBXObKAoI4vYjirl0ynI.boL3FFyWxykOZi';  // JSONBin master key
 const ADMIN_USER  = 'admin';
 const ADMIN_PASS  = 'bantae2026';  // admin login password
@@ -1224,43 +1272,31 @@ function openModal(id, mode) {
     const autoMsg = `สวัสดีครับ สนใจพระชิ้นนี้ครับ 🙏\n📿 ${it.nameTh}${it.nameEn?' ('+it.nameEn+')':''}\n💰 ${it.price}\n🔗 ${itemUrl}`;
     const messengerBuyLink = `https://m.me/100068843867509`;
 
-    document.getElementById('mBtns').innerHTML = `
-      <div style="background:rgba(201,168,76,0.05);border:1px solid var(--border);padding:9px 11px;font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim);line-height:1.7;margin-bottom:4px">
-        🙏 กดปุ่ม Messenger ด้านล่าง — ระบบจะคัดลอกข้อมูลพระไปให้อัตโนมัติ<br/>
-        <span style="font-size:0.73rem;color:var(--text-muted)">Click BUY NOW → message is copied → paste it in Messenger</span>
-      </div>
-      <div style="background:var(--dark4);border:1px solid var(--border);padding:7px 10px;margin-bottom:5px;font-family:'Courier New',monospace;font-size:0.72rem;color:var(--text-muted);line-height:1.6;border-radius:2px">
-        📋 ข้อความที่จะถูกคัดลอก:<br/>
-        <span style="color:var(--text-dim)">\${autoMsg.replace(/\n/g,'<br/>')}</span>
-      </div>
-      <div id="msgCopyHint" style="font-size:0.73rem;color:var(--text-muted);margin-bottom:5px;font-family:'Sarabun',sans-serif">
-        👆 กด BUY NOW → เปิด Messenger → วางข้อความ (Ctrl+V หรือกดค้างแล้ว Paste)
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:5px">
-        <a class="btn-messenger" href="${MESSENGER}" target="_blank" style="padding:10px 8px;font-size:0.65rem">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
-          ซื้อเลย · BUY NOW
-        </a>
-        <button onclick="toggleContactBox()" style="background:none;border:1px solid var(--border);color:var(--text-dim);font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.06em;padding:10px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor=\'var(--gold)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'\';this.style.color=\'\'">
-          📋 ข้อมูลติดต่อ
-        </button>
-      </div>
-      <div id="contactInfoBox" style="display:none;background:var(--dark4);border:1px solid var(--border);padding:0.9rem;margin-bottom:5px">
-        <div style="font-family:Cinzel,serif;font-size:0.63rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.5rem">ข้อมูลติดต่อ · Contact</div>
-        <div style="font-family:Sarabun,sans-serif;font-size:0.82rem;color:var(--text-dim);display:flex;flex-direction:column;gap:5px">
-          <div>📞 <a href="tel:0839879659" style="color:var(--gold);text-decoration:none">083 987 9659</a> — โทร / LINE / WhatsApp</div>
-          <div>💬 <a href="https://m.me/100068843867509" target="_blank" style="color:var(--gold);text-decoration:none">Messenger</a> — ตอบไว ทุกวัน</div>
-          <div>📘 <a href="https://www.facebook.com/profile.php?id=100068843867509" target="_blank" style="color:var(--gold);text-decoration:none">Facebook — พระเครื่องบ้านแต้</a></div>
-          <div>📍 นครราชสีมา · Nakhon Ratchasima</div>
-        </div>
-      </div>
-      <button class="btn-outline-gold" onclick="quickCart(${id},\'buy\');closeOv(\'itemOverlay\');showToast(\'เพิ่มในตะกร้าแล้ว ✦\',\'t-buy\')">+ เพิ่มในตะกร้า · ADD TO CART</button>
-    `;
+    const _bb=document.getElementById('mBuyNowBtn'),_mb=document.getElementById('mMessengerBtn'),_cb=document.getElementById('mCartBtn');
+    if(_bb){
+      _bb.style.background='#06C755';
+      // LINE button: open buy form (which sends LINE Notify)
+      // The form has both LINE and Messenger buttons so user can choose
+      _bb.onclick=()=>openBuyForm(id);
+    }
+    if(_mb){
+      // Messenger button: open Messenger directly with item info pre-copied
+      _mb.removeAttribute('href');
+      _mb.style.background='#0084FF';
+      _mb.onclick=(e)=>{
+        e.preventDefault();
+        const _it=ITEMS.find(i=>i.id===id)||SOLD.find(i=>i.id===id)||{nameTh:'',price:''};
+        const _msg='สนใจพระ: '+_it.nameTh+' ('+_it.price+')';
+        try{ navigator.clipboard.writeText(_msg); }catch(ex){}
+        window.open(MESSENGER,'_blank');
+      };
+    }
+    if(_cb){ _cb.onclick=()=>{ quickCart(id,'buy'); closeOv('itemOverlay'); showToast('เพิ่มในตะกร้าแล้ว ✦','t-buy'); }; }
   } else {
-    document.getElementById('mBtns').innerHTML = `
-      <a class="btn-messenger" href="${MESSENGER}" target="_blank" style="background:#5C1A1A;border:1px solid rgba(255,176,144,0.25)"><svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>&nbsp; สอบถามขาย · SELL SIMILAR — MESSENGER</a>
-      <button class="btn-outline-gold" onclick="quickCart(${id},'sell');closeOv('itemOverlay');showToast('เพิ่มในรายการขายแล้ว','t-sell')">+ เพิ่มในรายการขาย</button>
-    `;
+    const _bb2=document.getElementById('mBuyNowBtn'),_mb2=document.getElementById('mMessengerBtn'),_cb2=document.getElementById('mCartBtn');
+    if(_bb2){ _bb2.style.background='#5C1A1A'; _bb2.textContent='💬 ขอขายพระ'; _bb2.onclick=()=>window.open(MESSENGER,'_blank'); }
+    if(_mb2) _mb2.href=MESSENGER;
+    if(_cb2){ _cb2.onclick=()=>{ quickCart(id,'sell'); closeOv('itemOverlay'); showToast('เพิ่มในรายการขายแล้ว','t-sell'); }; }
   }
   document.getElementById('itemOverlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -1327,59 +1363,110 @@ async function submitBuyForm(){
   const btn = document.getElementById('buyFormSubmitBtn');
   btn.disabled = true;
   statusEl.style.color = 'var(--gold)';
-  statusEl.textContent = '📤 กำลังส่งข้อมูล...';
+  statusEl.textContent = '📲 กำลังส่งไป LINE...';
 
-  // Build LINE message
   const now = new Date().toLocaleString('th-TH');
-  const msg = [
-    '',
+  const msgParts = [
     '🔔 มีคนต้องการซื้อพระ!',
     '─────────────────',
-    `📿 ${it.nameTh}`,
-    it.nameEn ? `   ${it.nameEn}` : '',
-    `💰 ${it.price}`,
-    `🏷 รหัส: #${it.id}`,
+    '📿 ' + it.nameTh + (it.nameEn ? ' (' + it.nameEn + ')' : ''),
+    '💰 ' + it.price,
+    '🏷 รหัส: #' + it.id,
     '─────────────────',
-    `👤 ชื่อ: ${name}`,
-    `📞 โทร: ${phone}`,
-    line  ? `💬 LINE: ${line}` : '',
-    note  ? `📝 หมายเหตุ: ${note}` : '',
+    '👤 ชื่อ: ' + name,
+    '📞 โทร: ' + phone,
+    line  ? '💬 LINE: ' + line : '',
+    note  ? '📝 หมายเหตุ: ' + note : '',
     '─────────────────',
-    `⏰ ${now}`,
-    `🌐 bantae amulet`,
-  ].filter(Boolean).join('\\n');
+    '⏰ ' + now,
+  ].filter(Boolean);
+  const msg = '\n' + msgParts.join('\n');
 
-  // Try LINE Notify
-  const token = window._lineNotifyToken || LINE_NOTIFY_TOKEN;
-  let sent = false;
+  const token = window._lineNotifyToken || localStorage.getItem('bantae_line_token') || '';
   if(token){
-    sent = await sendLineNotify(msg);
+    const sent = await sendLineNotify(msg);
+    btn.disabled = false;
+    if(sent){
+      statusEl.style.color = '#06C755';
+      statusEl.textContent = '✅ ส่ง LINE แจ้งแอดมินแล้ว! รอการติดต่อกลับ';
+      showToast('✅ ส่ง LINE สำเร็จ! แอดมินจะติดต่อกลับ', 't-buy');
+      setTimeout(()=> closeOv('buyFormOv'), 2000);
+      return;
+    }
   }
-
-  // Always copy message to clipboard as backup
-  try{ await navigator.clipboard.writeText(msg); }catch(e){}
-
-  // Open Messenger with pre-filled context
-  const messengerMsg = encodeURIComponent(`สนใจซื้อ: ${it.nameTh} (${it.price}) — ${name} โทร ${phone}`);
-
-  if(sent){
-    statusEl.style.color = '#7FFFC0';
-    statusEl.textContent = '✅ ส่งแจ้งเตือน LINE แล้ว! แอดมินจะติดต่อกลับเร็วๆ นี้';
-    showToast('✅ ส่ง LINE แจ้งแอดมินแล้ว! รอการติดต่อกลับ', 't-buy');
-    setTimeout(()=>{
-      closeOv('buyFormOv');
-    }, 2500);
-  } else {
-    // LINE Notify not set up — fall back to Messenger
-    statusEl.style.color = 'var(--gold)';
-    statusEl.textContent = '✅ คัดลอกข้อมูลแล้ว — กำลังเปิด Messenger...';
-    setTimeout(()=>{
-      window.open(MESSENGER, '_blank');
-      closeOv('buyFormOv');
-      showToast('ข้อมูลถูกคัดลอกแล้ว — วางใน Messenger', 't-buy');
-    }, 800);
-  }
+  // No token — copy message and show contact options
   btn.disabled = false;
+  const fullMsg = msgParts.join('\n');
+  try{ navigator.clipboard.writeText(fullMsg); }catch(e){}
+
+  // Build LINE URL with pre-filled message text
+  // line://msg/text/ opens LINE with text ready to share
+  const lineShareUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(fullMsg);
+
+  statusEl.style.color = '#06C755';
+  statusEl.textContent = '✅ คัดลอกข้อมูลแล้ว — เลือกช่องทางติดต่อ';
+
+  const wrap = btn.parentNode;
+  btn.style.display = 'none';
+  const existing = document.getElementById('buyFallbackBtns');
+  if(!existing){
+    const fb = document.createElement('div');
+    fb.id = 'buyFallbackBtns';
+    fb.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:6px';
+    // Info box
+    fb.innerHTML = '<div style="background:rgba(6,199,85,0.07);border:1px solid rgba(6,199,85,0.2);padding:10px 12px;font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim);line-height:1.7">'
+      +'<strong style="color:#06C755">✅ คัดลอกข้อมูลแล้ว</strong><br/>'
+      +'กดปุ่มด้านล่างเพื่อส่งข้อความถึงแอดมิน — ข้อมูลจะถูกส่งให้อัตโนมัติ'
+      +'</div>';
+    // LINE button — opens LINE app with message pre-filled
+    const lineBtn = document.createElement('a');
+    lineBtn.href = lineShareUrl;
+    lineBtn.target = '_blank';
+    lineBtn.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:10px;background:#06C755;color:#fff;font-family:Cinzel,serif;font-size:0.72rem;font-weight:700;padding:13px;text-decoration:none;transition:background 0.2s';
+    lineBtn.onmouseenter = function(){ this.style.background='#05a347'; };
+    lineBtn.onmouseleave = function(){ this.style.background='#06C755'; };
+    lineBtn.onclick = function(){ setTimeout(function(){ closeOv('buyFormOv'); }, 300); };
+    lineBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>'
+      +'ซื้อผ่านไลน์';
+    // Messenger button
+    const msgBtn = document.createElement('a');
+    msgBtn.href = MESSENGER;
+    msgBtn.target = '_blank';
+    msgBtn.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:10px;background:#0084FF;color:#fff;font-family:Cinzel,serif;font-size:0.72rem;font-weight:700;padding:13px;text-decoration:none;transition:background 0.2s';
+    msgBtn.onmouseenter = function(){ this.style.background='#006dd1'; };
+    msgBtn.onmouseleave = function(){ this.style.background='#0084FF'; };
+    msgBtn.onclick = function(){ setTimeout(function(){ closeOv('buyFormOv'); }, 300); };
+    msgBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>'
+      +'ซื้อผ่าน Messenger';
+    fb.appendChild(lineBtn);
+    fb.appendChild(msgBtn);
+    wrap.appendChild(fb);
+  }
+}
+
+function submitBuyFormMessenger(){
+  const it = _pendingBuyItem;
+  if(!it){ window.open(MESSENGER,'_blank'); return; }
+  const name  = (document.getElementById('buyFormName')||{value:''}).value.trim();
+  const phone = (document.getElementById('buyFormPhone')||{value:''}).value.trim();
+  const line  = (document.getElementById('buyFormLine')||{value:''}).value.trim();
+  const note  = (document.getElementById('buyFormNote')||{value:''}).value.trim();
+  const now   = new Date().toLocaleString('th-TH');
+  const msgParts = [
+    '🔔 สนใจซื้อพระ: ' + it.nameTh,
+    '💰 ' + it.price,
+    '─────────────────',
+    name  ? '👤 ' + name  : '',
+    phone ? '📞 ' + phone : '',
+    line  ? '💬 LINE: ' + line  : '',
+    note  ? '📝 ' + note  : '',
+    '⏰ ' + now,
+  ].filter(Boolean);
+  const msg = msgParts.join('\n');
+  try{ navigator.clipboard.writeText(msg); }catch(e){}
+  closeOv('buyFormOv');
+  window.open(MESSENGER, '_blank');
+  showToast('📋 คัดลอกข้อมูลแล้ว — วางใน Messenger', 't-buy');
 }
 
 function copyAutoMsg(e, msg){
@@ -1473,9 +1560,12 @@ function switchCart(tab){
 // LOGIN / ADMIN
 // ============================================================
 function openLogin(){ document.getElementById('lusr').value=''; document.getElementById('lpwd').value=''; document.getElementById('loginOv').classList.add('open'); document.body.style.overflow='hidden'; }
+let _loginAttempts=0,_loginLocked=false,_loginLockTimer=null;
 function doLogin(){
+  if(_loginLocked){showToast('ล็อกชั่วคราว กรุณารอ 30 วินาที','t-sell');return;}
   const u=document.getElementById('lusr').value.trim(), p=document.getElementById('lpwd').value.trim();
   if(u===ADMIN_USER&&p===ADMIN_PASS){
+    _loginAttempts=0;
     isAdmin=true;
     document.getElementById('adminBar').classList.add('show');
     document.getElementById('loginNavBtn').textContent='⬡ ADMIN';
@@ -2038,6 +2128,9 @@ async function saveItem(){
     badge: badge,
     photos: [...editPhotos],
     imgs: [0,1,2],
+    certUrl: (document.getElementById('fi_certUrl')||{value:''}).value.trim(),
+    certNote: (document.getElementById('fi_certNote')||{value:''}).value.trim(),
+    certCode: ((document.getElementById('fi_certCode')||{value:''}).value.trim()).toUpperCase(),
   };
 
   const editId = parseInt(document.getElementById('aiEditId').value)||0;
@@ -2079,7 +2172,7 @@ function closeOv(id){
   if(id === 'itemOverlay'){ try{ closeMZoom(); }catch(e){} }
   if(id === 'imgZoomOv'){ el.style.display='none'; }
   else { el.classList.remove('open'); }
-  const _ovIds=['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv','reportDetailOv','bidOv','bidDetailOv','trackOv','verifyOv','cropOverlay','aucFormOv'];
+  const _ovIds=['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv','reportDetailOv','bidOv','bidDetailOv','trackOv','verifyOv','cropOverlay','aucFormOv','lineSettingsOv','buyFormOv'];
   const stillOpen=_ovIds.filter(o=>o!==id).some(o=>{ const x=document.getElementById(o); return x&&x.classList.contains('open'); });
   if(!stillOpen) document.body.style.overflow='';
 }
@@ -2457,7 +2550,7 @@ function openReports(){
            onmouseover="this.style.borderColor='rgba(255,176,144,0.5)';this.style.background='rgba(58,26,26,0.7)'"
            onmouseout="this.style.borderColor='rgba(255,176,144,0.2)';this.style.background='rgba(58,26,26,0.4)'">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.4rem">
-          <span style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--sell)">💰 ต้องการขาย</span>
+          <span style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.07em;color:var(--sell)" data-i18n="cart.sell">💰 ต้องการขาย</span>
           <span style="font-size:0.63rem;color:var(--text-muted)">${s.time}</span>
         </div>
         <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim)">
@@ -2526,7 +2619,7 @@ async function loadItemsFromDB() {
       // Always update cache so next page load is instant
       try {
         localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD}));
-        console.log('✅ JSONBin loaded:', ITEMS.length, 'items,', SOLD.length, 'sold');
+        console.log('✅ Items loaded');
       } catch(e){}
     } else {
       throw new Error('HTTP ' + res.status);
@@ -2644,6 +2737,22 @@ function updateImgbbStatus(key){
   }
 }
 
+async function uploadToCloudinary(file){
+  const cloud=window._cloudinaryCloud||CLOUDINARY_CLOUD||'';
+  if(!cloud||cloud.length<3) return null;
+  try{
+    const form=new FormData();
+    form.append('file',file);
+    form.append('upload_preset',CLOUDINARY_PRESET||'bantae_unsigned');
+    form.append('folder','bantae');
+    const res=await fetch('https://api.cloudinary.com/v1_1/'+cloud+'/image/upload',{method:'POST',body:form});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.secure_url) return data.secure_url.replace('/upload/','/upload/q_auto:best,f_auto/');
+    throw new Error('no url');
+  }catch(e){console.warn('Cloudinary:',e.message);return null;}
+}
+
 async function uploadToImgBB(base64Data) {
   const key = window._imgbbKey || IMGBB_KEY;
   if (!key){ console.warn('No ImgBB key set'); return null; }
@@ -2684,6 +2793,9 @@ async function processImage(file) {
   });
 }
 
+// HTML escape to prevent XSS
+function _esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
 function normalizeItem(it) {
   return {
     id: Number(it.id) || Math.floor(Math.random()*900000+100000),
@@ -2694,7 +2806,7 @@ function normalizeItem(it) {
     condition: it.condition||'', price: it.price||'',
     priceVal: it.priceVal||0, ageVal: it.ageVal||2500,
     desc: it.desc||'', photos: it.photos||[], imgs: it.imgs||[0,1,2],
-    certUrl: it.certUrl||'', certNote: it.certNote||'',
+    certUrl: it.certUrl||'', certNote: it.certNote||'', certCode: it.certCode||'',
   };
 }
 
@@ -2703,14 +2815,344 @@ function showLoading(show) {
   if (el) el.style.display = show ? 'flex' : 'none';
 }
 
+function openLineSettings(){
+  const t = window._lineNotifyToken || localStorage.getItem('bantae_line_token') || '';
+  const inp = document.getElementById('lineTokenInput');
+  if(inp) inp.value = t;
+  const q = document.getElementById('lineTokenQuick');
+  if(q) q.value = t;
+  updateLineStatus();
+  document.getElementById('lineSettingsOv').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function updateLineStatus(){
+  const t = window._lineNotifyToken || '';
+  const el = document.getElementById('lineTokenStatus');
+  if(el){
+    if(t && t.length > 10){
+      el.innerHTML = '<span style="color:#06C755">✅ พร้อมใช้งาน — ลูกค้าสั่งซื้อ คุณจะได้รับ LINE ทันที</span>';
+    } else {
+      el.innerHTML = '<span style="color:var(--text-muted)">ยังไม่มี token — ทำตามขั้นตอนด้านบน</span>';
+    }
+  }
+  const qs = document.getElementById('lineTokenQuickStatus');
+  if(qs){ qs.textContent = t && t.length > 10 ? '✅' : ''; }
+  const q = document.getElementById('lineTokenQuick');
+  if(q && q.value !== t) q.value = t;
+}
+
 function saveLineToken(){
-  const t = document.getElementById('lineTokenInput')?.value.trim()||'';
+  const t = (document.getElementById('lineTokenInput')?.value || '').trim();
   window._lineNotifyToken = t;
   try{ localStorage.setItem('bantae_line_token', t); }catch(e){}
-  const el = document.getElementById('lineTokenStatus');
-  if(el){ el.textContent = t ? '✅ LINE Notify พร้อมใช้' : 'ยังไม่มี token'; el.style.color = t ? '#7FFFC0' : 'var(--text-muted)'; }
-  showToast('บันทึก LINE Token แล้ว', 't-buy');
+  updateLineStatus();
+  if(t) showToast('✅ บันทึก LINE Token แล้ว — พร้อมรับแจ้งเตือน', 't-buy');
+  else  showToast('ลบ LINE Token แล้ว', 't-sell');
 }
+
+async function testLineNotify(){
+  const token = window._lineNotifyToken || localStorage.getItem('bantae_line_token') || '';
+  if(!token){ showToast('ใส่ token ก่อนแล้วกด SAVE','t-sell'); return; }
+  showToast('📲 กำลังส่งทดสอบ...','t-info');
+  const ok = await sendLineNotify('\n🔔 ทดสอบระบบ LINE Notify\n✅ พระเครื่องบ้านแต้ — ระบบแจ้งเตือนพร้อมใช้งาน!\n⏰ ' + new Date().toLocaleString('th-TH'));
+  if(ok) showToast('✅ LINE ส่งสำเร็จ! ตรวจสอบ LINE ของคุณ','t-buy');
+  else   showToast('❌ ส่งไม่ได้ — ตรวจสอบ token อีกครั้ง','t-sell');
+}
+
+// ============================================================
+// TRILINGUAL SYSTEM — TH / EN / ZH (Mandarin)
+// ============================================================
+window._lang = 'th';
+
+const _TRANSLATIONS = {
+  th: {
+    'hero.tagline1': 'ความชำนาญเฉพาะทาง · ปรัชญา ความเชื่อ ศิลปกรรม สะสม พุทธศิลป',
+    'hero.tagline2': 'กรุเก่า สาย สะสมความเก่า ตามแบบแผนของเรา',
+    'hero.belief': 'เชื่อว่าถ้าท่านเข้ามาในนี้แล้วสิ่งที่เราชอบคงไม่ต่างกัน',
+    'mode.buy': 'กำลังหา',
+    'mode.sell': 'ต้องการขาย',
+    'mode.sold': 'ขายแล้ว',
+    'coll.title': 'พระเครื่องทั้งหมด',
+    'coll.sub': 'คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy',
+    'board.title': 'กระดานสนทนา — COMMUNITY BOARD',
+    'board.subtitle': 'ความคิดเห็น',
+    'board.desc': 'แสดงความคิดเห็น ถามคำถาม หรือแลกเปลี่ยนความรู้',
+    'board.post': '💬 ส่งความคิดเห็น · POST COMMENT',
+    'about.p1': 'ความชำนาญเฉพาะทางด้าน ปรัชญา ความเชื่อ ศิลปกรรม การสะสม และพุทธศิลป์ ดำเนินการจากนครราชสีมา ด้วยความรักและความเคารพต่อพระเครื่องไทย',
+    'about.ship': 'ส่งไวทั้งในไทยและต่างประเทศ',
+    'about.verify': 'ทุกชิ้นผ่านการตรวจสอบโดยผู้เชี่ยวชาญ · Each item verified.',
+    'about.kru': 'กรุเก่า — ANCIENT KRU',
+    'about.kru2': 'สายสะสมความเก่า ตามแบบแผนของเรา · Authentic ancient pieces.',
+    'about.fee': 'ฟรีค่าลงประกาศ รับค่าธรรมเนียมเมื่อขายได้เท่านั้น',
+    'strip.bid': 'ประมูล · BID',
+    'strip.track': 'ติดตาม · TRACK',
+    'strip.verify': 'ตรวจสอบ · VERIFY',
+    'strip.board': 'กระดาน · BOARD',
+    'sell.howTitle': 'วิธีการขาย — How It Works',
+    'sell.howDesc': 'เราจัดการทุกอย่าง ตั้งแต่การตรวจสอบ ถ่ายภาพ จนหาผู้ซื้อที่เหมาะสม ท่านจะได้รับเงินเมื่อขายเสร็จเท่านั้น',
+    'sell.free': 'ฟรีค่าลงประกาศ · รับเงินเมื่อขายได้',
+    'contact.title': 'ติดต่อเรา — CONTACT',
+    'contact.chat': 'คุยกับเราได้เลย →',
+    'contact.location': 'นครราชสีมา →',
+    'contact.follow': 'ติดตามคอลเลกชันใหม่',
+    'cart.title': '🛒 ตะกร้า · CART',
+    'cart.sell': '💰 ต้องการขาย',
+    'cart.selectAll': 'เลือกทั้งหมด',
+    'cart.deleteSelected': 'ลบที่เลือก',
+    'verify.title': '🏅 ตรวจสอบใบรับรอง · VERIFY',
+    'verify.how': '⬡ วิธีใช้',
+    'verify.desc': 'พิมพ์รหัสใบรับรองที่อยู่บนกระดาษรับรองของท่าน ระบบจะแสดงข้อมูลพระที่ตรงกัน',
+    'verify.btn': '🔍 ตรวจสอบ',
+    'buy.title': '🛒 สั่งซื้อ · แจ้งซื้อพระ',
+    'buy.info': '📲 กรอกข้อมูลด้านล่าง — แอดมินจะติดต่อกลับภายใน',
+    'buy.info2': 'เพื่อยืนยันและแจ้งเลขบัญชี',
+    'buy.name': 'ชื่อ-นามสกุล / NAME *',
+    'buy.phone': 'เบอร์โทรศัพท์ / PHONE *',
+    'buy.disclaimer': 'ข้อมูลของท่านจะถูกใช้เพื่อการติดต่อซื้อขายเท่านั้น',
+    'buy.pay': 'ชำระเงินหลังจากได้รับการยืนยันจากแอดมินเท่านั้น',
+    'bid.title': '🔨 ประมูลพระ · LIVE AUCTION',
+    'bid.detail': 'รายละเอียดประมูล',
+    'bid.back': '← รายการ',
+    'footer.tagline': 'นครราชสีมา · 083 987 9659 · ส่งไวทั้งในไทยและต่างประเทศ',
+    'footer.copy': '© 2026 พระเครื่องบ้านแต้ — Bantae Amulet',
+    'modal.cert': 'ผ่านการตรวจสอบ · Authenticity verified by our expert.',
+    'modal.zoom': '🔍 คลิกเพื่อขยาย',
+    'modal.buy': 'ซื้อผ่านไลน์',
+    'modal.msg': 'ซื้อผ่าน Messenger',
+    'nav.find': '🔍 หา',
+    'nav.sell': '💰 ขาย'
+  },
+  en: {
+    'hero.tagline1': 'Specialist · Philosophy · Belief · Buddhist Art · Collection',
+    'hero.tagline2': 'Ancient Kru — Lineage Collecting in Our Own Tradition',
+    'hero.belief': 'If you are here, we likely share the same passion.',
+    'mode.buy': 'Browse',
+    'mode.sell': 'Sell',
+    'mode.sold': 'Sold',
+    'coll.title': 'All Amulets',
+    'coll.sub': 'Click any amulet for details and pricing',
+    'board.title': 'Community Board',
+    'board.subtitle': 'Comments',
+    'board.desc': 'Share comments, ask questions, or exchange knowledge.',
+    'board.post': '💬 Post Comment',
+    'about.p1': 'Specialist expertise in philosophy, sacred belief, Buddhist art, and antique collection. Based in Nakhon Ratchasima with love and respect for Thai amulets.',
+    'about.ship': 'Fast shipping across Thailand and worldwide.',
+    'about.verify': 'Every piece verified by our expert.',
+    'about.kru': 'Ancient Kru',
+    'about.kru2': 'Authentic ancient pieces in our tradition.',
+    'about.fee': 'Free listing — commission only on sale.',
+    'strip.bid': 'Auction · BID',
+    'strip.track': 'Track · TRACK',
+    'strip.verify': 'Verify · VERIFY',
+    'strip.board': 'Board · BOARD',
+    'sell.howTitle': 'How It Works',
+    'sell.howDesc': 'We handle everything — verification, photography, and finding the right buyer. You get paid only when sold.',
+    'sell.free': 'Free listing · Get paid on sale',
+    'contact.title': 'Contact Us',
+    'contact.chat': 'Chat with us →',
+    'contact.location': 'Nakhon Ratchasima →',
+    'contact.follow': 'Follow new collections',
+    'cart.title': '🛒 Cart',
+    'cart.sell': '💰 Want to Sell',
+    'cart.selectAll': 'Select All',
+    'cart.deleteSelected': 'Delete Selected',
+    'verify.title': '🏅 Verify Certificate',
+    'verify.how': '⬡ How to use',
+    'verify.desc': 'Enter the certificate code printed on your authenticity document.',
+    'verify.btn': '🔍 Verify',
+    'buy.title': '🛒 Place Order',
+    'buy.info': '📲 Fill in below — admin will contact you within',
+    'buy.info2': 'to confirm and provide payment details.',
+    'buy.name': 'Full Name *',
+    'buy.phone': 'Phone Number *',
+    'buy.disclaimer': 'Your information will only be used for transaction contact.',
+    'buy.pay': 'Payment only after admin confirmation.',
+    'bid.title': '🔨 Live Auction',
+    'bid.detail': 'Auction Detail',
+    'bid.back': '← Back',
+    'footer.tagline': 'Nakhon Ratchasima · 083 987 9659 · Fast shipping worldwide',
+    'footer.copy': '© 2026 Bantae Amulet',
+    'modal.cert': 'Authenticity verified by our expert.',
+    'modal.zoom': '🔍 Click to zoom',
+    'modal.buy': 'Buy via LINE',
+    'modal.msg': 'Buy via Messenger',
+    'nav.find': '🔍 Find',
+    'nav.sell': '💰 Sell'
+  },
+  zh: {
+    'hero.tagline1': '专注哲学 · 信仰 · 佛教艺术 · 古物收藏',
+    'hero.tagline2': '古窖 · 传承收藏 · 以我们自己的传统',
+    'hero.belief': '若您来到这里，我们的喜好或许不谋而合。',
+    'mode.buy': '浏览',
+    'mode.sell': '出售',
+    'mode.sold': '已售',
+    'coll.title': '全部佛牌',
+    'coll.sub': '点击佛牌查看详情及价格',
+    'board.title': '讨论区',
+    'board.subtitle': '评论',
+    'board.desc': '分享评论、提问或交流知识。',
+    'board.post': '💬 发表评论',
+    'about.p1': '专注于哲学、信仰、佛教艺术及古物收藏。来自那空叻差是玛，以热爱与敬意传承泰国佛牌文化。',
+    'about.ship': '泰国及全球快速发货。',
+    'about.verify': '每件佛牌均经专家鉴定。',
+    'about.kru': '古窖',
+    'about.kru2': '我们传统中的真品古物。',
+    'about.fee': '免费刊登，仅在售出时收取佣金。',
+    'strip.bid': '拍卖',
+    'strip.track': '包裹追踪',
+    'strip.verify': '验证',
+    'strip.board': '留言板',
+    'sell.howTitle': '如何出售',
+    'sell.howDesc': '我们处理一切——鉴定、摄影、寻找合适买家。仅在售出后付款。',
+    'sell.free': '免费刊登 · 售出后收款',
+    'contact.title': '联系我们',
+    'contact.chat': '直接联系我们 →',
+    'contact.location': '那空叻差是玛 →',
+    'contact.follow': '关注新藏品',
+    'cart.title': '🛒 购物车',
+    'cart.sell': '💰 出售',
+    'cart.selectAll': '全选',
+    'cart.deleteSelected': '删除所选',
+    'verify.title': '🏅 证书验证',
+    'verify.how': '⬡ 使用方法',
+    'verify.desc': '输入您认证证书上的编号，系统将显示对应佛牌信息。',
+    'verify.btn': '🔍 验证',
+    'buy.title': '🛒 下单购买',
+    'buy.info': '📲 请填写以下信息 — 管理员将在',
+    'buy.info2': '内与您确认并提供付款信息。',
+    'buy.name': '姓名 *',
+    'buy.phone': '电话号码 *',
+    'buy.disclaimer': '您的信息仅用于交易联系。',
+    'buy.pay': '仅在管理员确认后付款。',
+    'bid.title': '🔨 实时拍卖',
+    'bid.detail': '拍卖详情',
+    'bid.back': '← 返回',
+    'footer.tagline': '那空叻差是玛 · 083 987 9659 · 全球快速发货',
+    'footer.copy': '© 2026 班泰佛牌',
+    'modal.cert': '经专家鉴定真品。',
+    'modal.zoom': '🔍 点击放大',
+    'modal.buy': '通过LINE购买',
+    'modal.msg': '通过Messenger购买',
+    'nav.find': '🔍 搜索',
+    'nav.sell': '💰 出售'
+  }
+};
+
+function toggleLangMenu(){
+  var m=document.getElementById('langMenu');
+  if(m) m.style.display=m.style.display==='none'?'block':'none';
+}
+// Close lang menu when clicking outside
+document.addEventListener('click',function(e){
+  var wrap=document.getElementById('langDropWrap');
+  if(wrap&&!wrap.contains(e.target)){
+    var m=document.getElementById('langMenu'); if(m) m.style.display='none';
+  }
+});
+
+function setLang(lang){
+  window._lang = lang;
+  // Close dropdown
+  var m = document.getElementById('langMenu'); if(m) m.style.display='none';
+  // Update button label
+  var lbl = document.getElementById('langLabel');
+  if(lbl) lbl.textContent = lang==='th' ? 'TH' : lang==='en' ? 'EN' : '中';
+  var t = _TRANSLATIONS[lang] || _TRANSLATIONS.th;
+
+  // 1. Apply all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var key = el.getAttribute('data-i18n');
+    if(t[key] !== undefined) el.innerHTML = t[key];
+  });
+
+  // 2. Apply data-th/en/zh attributes
+  document.querySelectorAll('[data-th]').forEach(function(el){
+    var val = el.getAttribute('data-'+lang) || el.getAttribute('data-th') || '';
+    if(val) el.innerHTML = val;
+  });
+
+  // 3. Placeholder translations
+  var placeholders = {
+    'verifyCertInput': { th:'รหัสใบรับรอง เช่น BT-2024-001', en:'Certificate code e.g. BT-2024-001', zh:'证书编号，例如 BT-2024-001' },
+    'buyFormName':  { th:'สมชาย ใจดี', en:'Your Full Name', zh:'您的姓名' },
+    'buyFormPhone': { th:'08X-XXX-XXXX', en:'Phone Number', zh:'电话号码' },
+    'buyFormLine':  { th:'@lineID หรือ ชื่อใน LINE', en:'LINE ID (optional)', zh:'LINE ID（选填）' },
+    'buyFormNote':  { th:'ต้องการด่วน, ส่งต่างประเทศ, ฯลฯ', en:'Urgent, international shipping, etc.', zh:'加急、国际快递等' },
+    'commentName':  { th:'ชื่อ / Name (optional)', en:'Name (optional)', zh:'姓名（选填）' },
+    'commentText':  { th:'แสดงความคิดเห็น...', en:'Share your thoughts...', zh:'分享您的想法...' },
+    'lineTokenInput': { th:'วาง token ที่นี่...', en:'Paste token here...', zh:'在此粘贴token...' },
+    'lineTokenQuick': { th:'LINE Token — วางที่นี่แล้วกด Enter', en:'LINE Token — paste and press Enter', zh:'LINE Token — 粘贴后按Enter' },
+    'bfName':  { th:'ชื่อ / Name *', en:'Full Name *', zh:'姓名 *' },
+    'bfEmail': { th:'Email *', en:'Email *', zh:'电子邮件 *' },
+    'bfPhone': { th:'เบอร์โทร / Phone * (OTP)', en:'Phone * (for OTP)', zh:'电话 * （OTP验证）' },
+    'bfAmt':   { th:'ราคาเสนอ (ขั้นต่ำ)', en:'Bid amount (minimum)', zh:'出价金额（最低）' },
+  };
+  Object.keys(placeholders).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && placeholders[id][lang]) el.placeholder = placeholders[id][lang];
+  });
+
+  // 4. Nav links text
+  var navLinks = document.querySelectorAll('.nav-links li a');
+  var navTexts = {
+    th: ['COLLECTION','ABOUT','CONTACT'],
+    en: ['COLLECTION','ABOUT','CONTACT'],
+    zh: ['收藏','关于','联系']
+  };
+  var texts = navTexts[lang] || navTexts.th;
+  navLinks.forEach(function(a,i){ if(texts[i]) a.textContent = texts[i]; });
+
+  // 5. Action strip buttons (keep icons)
+  var strip = document.getElementById('action-strip');
+  if(strip){
+    var stripTexts = {
+      th: ['ประมูล · BID','ติดตาม · TRACK','ตรวจสอบ · VERIFY','กระดาน · BOARD'],
+      en: ['Auction · BID','Track Parcel','Verify · VERIFY','Board'],
+      zh: ['拍卖','包裹追踪','验证','留言板']
+    };
+    var st = stripTexts[lang] || stripTexts.th;
+    strip.querySelectorAll('button').forEach(function(btn,i){
+      if(st[i]){
+        var span = btn.querySelector('span');
+        var icon = span ? span.outerHTML : '';
+        btn.innerHTML = icon + ' ' + st[i];
+      }
+    });
+  }
+
+  // 6. Mode buttons (find by current content pattern)
+  var modeBtns = {
+    'buyModeBtn':  { th:'กำลังหา', en:'Browse', zh:'浏览' },
+    'sellModeBtn': { th:'ต้องการขาย', en:'Sell', zh:'出售' },
+    'soldModeBtn': { th:'ขายแล้ว', en:'Sold', zh:'已售' },
+  };
+  Object.keys(modeBtns).forEach(function(id){
+    var btn = document.getElementById(id);
+    if(!btn) return;
+    var thEl = btn.querySelector('[id$="Th"],[id$="ModeTh"],.mode-btn-th');
+    if(thEl) thEl.textContent = modeBtns[id][lang] || modeBtns[id].th;
+  });
+
+  // 7. Category filter buttons
+  var catTexts = {
+    th: ['ทั้งหมด','พระบูชา','เหรียญ','พระกรุ','เครื่องราง','รูปหล่อ'],
+    en: ['All','Buddha Images','Coins','Ancient','Charms','Cast Figures'],
+    zh: ['全部','佛像','硬币','古藏','法器','铸像']
+  };
+  var ct = catTexts[lang] || catTexts.th;
+  document.querySelectorAll('.filter-btn').forEach(function(btn,i){
+    if(ct[i] !== undefined) btn.textContent = ct[i];
+  });
+  document.querySelectorAll('.cat-card').forEach(function(card,i){
+    var label = card.querySelector('.cat-label,.cat-name,span:last-child');
+    if(label && ct[i+1]) label.textContent = ct[i+1];
+  });
+
+  // 8. Save preference
+  try{ localStorage.setItem('bantae_lang', lang); }catch(e){}
+}
+function toggleLang(){ setLang(window._lang==='th'?'en':'th'); }
 
 function renderAll() {
   // Always update the always-visible default grid
@@ -2955,42 +3397,414 @@ function applyCrop(){
 // ============================================================
 // BID SYSTEM
 // ============================================================
+// ── Auction / Bid System ─────────────────────────────────────
+function _getAuctions(){ try{ return JSON.parse(localStorage.getItem('bantae_auctions')||'[]'); }catch(e){ return []; } }
+function _saveAuctions(a){ try{ localStorage.setItem('bantae_auctions',JSON.stringify(a)); }catch(e){} }
+function _getBids(id){ try{ return JSON.parse(localStorage.getItem('bantae_bids_'+id)||'[]'); }catch(e){ return []; } }
+function _saveBids(id,a){ try{ localStorage.setItem('bantae_bids_'+id,JSON.stringify(a)); }catch(e){} }
+function _getAucForItem(itemId){ return _getAuctions().find(a=>String(a.itemId)===String(itemId)); }
+function _topBid(aucId){ const b=_getBids(aucId); return b.length?b.reduce((m,x)=>x.amount>m.amount?x:m,b[0]):null; }
+function _cdStr(end){ const d=end-Date.now(); if(d<=0) return null; const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000); return (h?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+
+let _bidTimers={};
+function _clearBidTimers(){ Object.values(_bidTimers).forEach(clearInterval); _bidTimers={}; }
+
 function openBidPanel(){
-  // Show bid items (items with BID badge)
-  const bidItems = ITEMS.filter(it=>it.badge==='BID');
-  const el = document.getElementById('bidItemsList');
-  if(el){
-    if(bidItems.length){
-      el.innerHTML = `<div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px">รายการประมูล · ITEMS UP FOR BID</div>` +
-      bidItems.map(it=>`
-        <div style="background:var(--dark4);border:1px solid rgba(255,179,71,0.25);padding:0.85rem;margin-bottom:8px;display:flex;gap:10px;align-items:center;border-radius:2px">
-          <img src="${getItemImg(it)}" style="width:52px;height:52px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;border-radius:2px"/>
-          <div style="flex:1;min-width:0">
-            <div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text);margin-bottom:2px">${it.nameTh}</div>
-            <div style="font-family:Cinzel,serif;font-size:0.78rem;color:var(--gold)">${it.price}</div>
-          </div>
-          <div style="font-size:0.65rem;color:#FFB347;font-family:Cinzel,serif;letter-spacing:0.05em;text-align:center;flex-shrink:0">🔨<br/>BIDDING<br/>SOON</div>
-        </div>`).join('');
-    } else {
-      el.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-muted);font-family:Sarabun,sans-serif;font-size:0.85rem">ยังไม่มีรายการประมูล<br/>No items listed for bidding yet</div>';
-    }
+  const el=document.getElementById('bidListPane'); if(!el) return;
+  _clearBidTimers();
+  const bidItems=ITEMS.filter(function(it){return it.badge==='BID';});
+  let html='';
+  if(!bidItems.length){
+    html='<div style="text-align:center;padding:3rem 1rem"><div style="font-size:2.5rem;opacity:0.3;margin-bottom:0.75rem">🔨</div>'
+      +'<div style="font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:0.09em;color:var(--text-muted)">ยังไม่มีรายการประมูล<br/>No auction items yet</div>'
+      +(isAdmin?'<button onclick="openCreateAuction()" style="margin-top:1rem;background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.65rem;font-weight:700;padding:10px 20px;border:none;cursor:pointer">+ สร้างการประมูล</button>':'')
+      +'</div>';
+  } else {
+    if(isAdmin) html='<div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem"><button onclick="openCreateAuction()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.6rem;font-weight:700;padding:7px 14px;border:none;cursor:pointer">+ สร้างการประมูล</button></div>';
+    bidItems.forEach(function(it){
+      var auc=_getAucForItem(it.id)||{id:'auc_'+it.id,itemId:it.id,startPrice:1000,increment:200,endTime:null};
+      var tb=_topBid(auc.id), cur=tb?tb.amount:auc.startPrice, cnt=_getBids(auc.id).length, ended=auc.endTime&&Date.now()>auc.endTime;
+      var card=document.createElement('div');
+      card.style.cssText='background:var(--dark4);border:1px solid rgba(255,179,71,0.25);margin-bottom:10px;cursor:pointer;transition:border-color 0.2s';
+      card.onmouseenter=function(){this.style.borderColor='rgba(255,179,71,0.6)';};
+      card.onmouseleave=function(){this.style.borderColor='rgba(255,179,71,0.25)';};
+      card.onclick=function(){openBidDetail(it.id);};
+      card.innerHTML='<div style="display:flex;gap:12px;padding:0.85rem">'
+        +'<div style="position:relative;flex-shrink:0"><img src="'+getItemImg(it)+'" style="width:72px;height:72px;object-fit:cover;border:1px solid var(--border)"/>'
+        +(!ended?'<div style="position:absolute;top:4px;left:4px;background:#E53E3E;color:#fff;font-family:Cinzel,serif;font-size:0.45rem;padding:2px 5px">LIVE</div>':'')
+        +'</div><div style="flex:1;min-width:0">'
+        +'<div style="font-family:Sarabun,sans-serif;font-size:0.9rem;color:var(--text);margin-bottom:2px">'+it.nameTh+'</div>'
+        +'<div style="font-family:Cinzel,serif;font-size:0.6rem;color:var(--text-muted);margin-bottom:4px">'+cnt+' bids · Min: ฿'+(cur+(auc.increment||200)).toLocaleString()+'</div>'
+        +'<div style="font-family:Cinzel,serif;font-size:1.05rem;color:var(--gold);font-weight:700">฿ '+cur.toLocaleString()+'</div>'
+        +'<div id="bct_'+it.id+'" style="font-family:Cinzel,serif;font-size:0.65rem;color:'+(ended?'var(--text-muted)':'#FFB347')+'">'+(ended?'⏱ Ended':auc.endTime?'⏱ ...':'⏱ กำลังจะเริ่ม')+'</div>'
+        +'</div></div>';
+      el.appendChild(card);
+      if(auc.endTime&&!ended){
+        _bidTimers['c'+it.id]=setInterval(function(){
+          var e=document.getElementById('bct_'+it.id); if(!e){clearInterval(_bidTimers['c'+it.id]);return;}
+          var cd=_cdStr(auc.endTime); if(!cd){e.textContent='⏱ Ended';clearInterval(_bidTimers['c'+it.id]);return;}
+          e.textContent='⏱ '+cd; e.style.color=auc.endTime-Date.now()<3600000?'#E53E3E':'#FFB347';
+        },1000);
+      }
+    });
+  }
+  el.innerHTML=html;
+  if(bidItems.length){
+    bidItems.forEach(function(it){
+      var auc=_getAucForItem(it.id)||{id:'auc_'+it.id,itemId:it.id,startPrice:1000,increment:200,endTime:null};
+      var tb=_topBid(auc.id), cur=tb?tb.amount:auc.startPrice, cnt=_getBids(auc.id).length, ended=auc.endTime&&Date.now()>auc.endTime;
+      var card=document.createElement('div');
+      card.style.cssText='background:var(--dark4);border:1px solid rgba(255,179,71,0.25);margin-bottom:10px;cursor:pointer;transition:border-color 0.2s';
+      card.onmouseenter=function(){this.style.borderColor='rgba(255,179,71,0.6)';};
+      card.onmouseleave=function(){this.style.borderColor='rgba(255,179,71,0.25)';};
+      card.onclick=function(){openBidDetail(it.id);};
+      card.innerHTML='<div style="display:flex;gap:12px;padding:0.85rem">'
+        +'<div style="position:relative;flex-shrink:0"><img src="'+getItemImg(it)+'" style="width:72px;height:72px;object-fit:cover;border:1px solid var(--border)"/>'
+        +(!ended?'<div style="position:absolute;top:4px;left:4px;background:#E53E3E;color:#fff;font-family:Cinzel,serif;font-size:0.45rem;padding:2px 5px">LIVE</div>':'')
+        +'</div><div style="flex:1;min-width:0">'
+        +'<div style="font-family:Sarabun,sans-serif;font-size:0.9rem;color:var(--text);margin-bottom:2px">'+it.nameTh+'</div>'
+        +'<div style="font-family:Cinzel,serif;font-size:0.6rem;color:var(--text-muted);margin-bottom:4px">'+cnt+' bids · Min: ฿'+(cur+(auc.increment||200)).toLocaleString()+'</div>'
+        +'<div style="font-family:Cinzel,serif;font-size:1.05rem;color:var(--gold);font-weight:700">฿ '+cur.toLocaleString()+'</div>'
+        +'<div id="bct_'+it.id+'" style="font-family:Cinzel,serif;font-size:0.65rem;color:'+(ended?'var(--text-muted)':'#FFB347')+'">'+(ended?'⏱ Ended':auc.endTime?'⏱ ...':'⏱ กำลังจะเริ่ม')+'</div>'
+        +'</div></div>';
+      el.appendChild(card);
+      if(auc.endTime&&!ended){
+        _bidTimers['c'+it.id]=setInterval(function(){
+          var e=document.getElementById('bct_'+it.id); if(!e){clearInterval(_bidTimers['c'+it.id]);return;}
+          var cd=_cdStr(auc.endTime); if(!cd){e.textContent='⏱ Ended';clearInterval(_bidTimers['c'+it.id]);return;}
+          e.textContent='⏱ '+cd; e.style.color=auc.endTime-Date.now()<3600000?'#E53E3E':'#FFB347';
+        },1000);
+      }
+    });
   }
   document.getElementById('bidOv').classList.add('open');
   document.body.style.overflow='hidden';
 }
 
-function registerBidInterest(){
-  const name = document.getElementById('bidName').value.trim();
-  const contact = document.getElementById('bidContact').value.trim();
-  if(!contact){ showToast('กรุณาใส่ช่องทางติดต่อ','t-sell'); return; }
-  try{
-    const regs = JSON.parse(localStorage.getItem('bantae_bid_regs')||'[]');
-    regs.push({name, contact, time: new Date().toLocaleString('th-TH')});
-    localStorage.setItem('bantae_bid_regs', JSON.stringify(regs));
-  }catch(e){}
-  document.getElementById('bidName').value='';
-  document.getElementById('bidContact').value='';
-  showToast('ลงทะเบียนแล้ว ✦ เราจะแจ้งเตือนเมื่อเปิดประมูล','t-buy');
+let _curBidItemId=null,_bidDetailTimer=null,_curBidAucId=null,_curBidMinNext=1200,_curBidIncr=200;
+function openBidDetail(itemId){
+  _curBidItemId=itemId;
+  const it=ITEMS.find(function(i){ return String(i.id)===String(itemId); }); if(!it) return;
+  const auc=_getAucForItem(itemId)||{id:'auc_'+itemId,itemId:itemId,startPrice:1000,increment:200,endTime:null,shippingInfo:'ส่ง EMS ทั่วไทย / DHL ต่างประเทศ',rules:['ราคาต้องสูงกว่าปัจจุบัน','ผู้ชนะได้รับการติดต่อภายใน 24 ชม.']};
+  _renderBidDetail(it,auc);
+  document.getElementById('bidDetailOv').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function _renderBidDetail(it,auc){
+  var dp=document.getElementById('bidDetailPane'); if(!dp) return;
+  if(_bidDetailTimer) clearInterval(_bidDetailTimer);
+  var bids=_getBids(auc.id); var tb=_topBid(auc.id); var cur=tb?tb.amount:(auc.startPrice||1000);
+  var minNext=cur+(auc.increment||200); var ended=auc.endTime&&Date.now()>auc.endTime;
+  var aucId=auc.id; var incr=auc.increment||200;
+  _curBidAucId=aucId; _curBidMinNext=minNext; _curBidIncr=incr;
+
+  // Build HTML using array join to avoid quote escaping
+  var h=[];
+  h.push('<div style="padding:1rem">');
+  // Item header
+  h.push('<div style="display:flex;gap:12px;margin-bottom:1rem">');
+  h.push('<img src="'+getItemImg(it)+'" style="width:80px;height:80px;object-fit:cover;border:1px solid var(--border);flex-shrink:0"/>');
+  h.push('<div><div style="font-family:Sarabun,sans-serif;font-size:1rem;color:var(--text);margin-bottom:3px">'+it.nameTh+'</div>');
+  h.push('<div style="font-family:Cinzel,serif;font-size:0.62rem;color:var(--text-dim)">'+(it.nameEn||'')+'</div></div></div>');
+  // Timer
+  h.push('<div style="background:var(--dark4);border:1px solid rgba(255,179,71,0.3);padding:0.85rem;text-align:center;margin-bottom:0.85rem">');
+  h.push('<div style="font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.1em;color:#FFB347;margin-bottom:4px">&#9201; เวลาที่เหลือ</div>');
+  h.push('<div id="bdTimer" style="font-family:Cinzel,serif;font-size:1.5rem;color:#FFB347;font-weight:700">'+(ended?'หมดเวลา':auc.endTime?(_cdStr(auc.endTime)||'หมดเวลา'):'กำลังจะเริ่ม')+'</div>');
+  if(auc.endTime) h.push('<div style="font-size:0.68rem;color:var(--text-muted);margin-top:3px;font-family:Sarabun,sans-serif">สิ้นสุด '+new Date(auc.endTime).toLocaleString('th-TH')+'</div>');
+  h.push('</div>');
+  // Price
+  h.push('<div style="background:rgba(201,168,76,0.06);border:1px solid var(--border);padding:0.85rem;margin-bottom:0.85rem">');
+  h.push('<div style="font-family:Cinzel,serif;font-size:0.55rem;color:var(--text-muted);margin-bottom:3px">'+(bids.length?'ราคาสูงสุดปัจจุบัน':'ราคาเริ่ม')+'</div>');
+  h.push('<div style="font-family:Cinzel,serif;font-size:1.4rem;color:var(--gold);font-weight:700">&#3647; '+cur.toLocaleString()+'</div>');
+  h.push('<div style="display:flex;justify-content:space-between;margin-top:6px">');
+  h.push('<div><div style="font-family:Cinzel,serif;font-size:0.55rem;color:var(--text-muted)">ราคาขั้นต่ำถัดไป</div>');
+  h.push('<div style="font-family:Cinzel,serif;font-size:0.9rem;color:var(--buy);font-weight:600">&#3647; '+minNext.toLocaleString()+'</div></div>');
+  h.push('<div style="text-align:right"><div style="font-family:Cinzel,serif;font-size:0.55rem;color:var(--text-muted)">จำนวน bids</div>');
+  h.push('<div style="font-family:Cinzel,serif;font-size:0.9rem;color:var(--text-dim)">'+bids.length+' bids</div></div></div></div>');
+  // Bid history
+  if(bids.length){
+    h.push('<div style="margin-bottom:0.85rem"><div style="font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:5px">&#128202; BID HISTORY</div>');
+    h.push('<div style="border:1px solid var(--border);max-height:120px;overflow-y:auto">');
+    var sorted=[].concat(bids).sort(function(a,b){return b.amount-a.amount;});
+    sorted.forEach(function(b,i){
+      h.push('<div style="display:flex;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--border);'+(i===0?'background:rgba(201,168,76,0.07)':'')+'">');
+      h.push('<span style="font-family:Sarabun,sans-serif;font-size:0.78rem;color:var(--text-dim)">'+(i===0?'&#128081; ':'')+b.maskedName+'</span>');
+      h.push('<span style="font-family:Cinzel,serif;font-size:0.8rem;color:var(--gold)">&#3647; '+b.amount.toLocaleString()+'</span>');
+      h.push('<span style="font-size:0.65rem;color:var(--text-muted)">'+b.time+'</span></div>');
+    });
+    h.push('</div></div>');
+  }
+  // Bid form or ended message
+  if(!ended){
+    h.push('<div style="background:var(--dark4);border:1px solid var(--border);padding:0.9rem;margin-bottom:0.85rem">');
+    h.push('<div style="font-family:Cinzel,serif;font-size:0.62rem;letter-spacing:0.09em;color:var(--gold);margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)">&#128296; เสนอราคา &middot; PLACE BID</div>');
+    h.push('<input class="form-input" id="bfName" placeholder="ชื่อ / Name *" style="margin-bottom:6px;width:100%;box-sizing:border-box"/>');
+    h.push('<input class="form-input" id="bfEmail" type="email" placeholder="Email *" style="margin-bottom:6px;width:100%;box-sizing:border-box"/>');
+    h.push('<input class="form-input" id="bfPhone" type="tel" placeholder="เบอร์โทร / Phone * (OTP)" style="margin-bottom:6px;width:100%;box-sizing:border-box"/>');
+    h.push('<input class="form-input" id="bfAmt" type="number" min="'+minNext+'" step="'+incr+'" placeholder="'+minNext.toLocaleString()+' (ขั้นต่ำ)" style="width:100%;box-sizing:border-box;margin-bottom:4px"/>');
+    h.push('<div style="font-family:Sarabun,sans-serif;font-size:0.7rem;color:var(--text-muted);margin-bottom:8px">ขั้นต่ำ &#3647;'+minNext.toLocaleString()+' &middot; เพิ่มทีละ &#3647;'+incr.toLocaleString()+'</div>');
+    h.push('<button id="bdBidBtn" onclick="_requestBidOTP()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.72rem;font-weight:700;letter-spacing:0.09em;padding:13px;border:none;cursor:pointer;width:100%;margin-top:4px">&#128296; เสนอราคา</button>');
+    // OTP step — hidden until requested
+    h.push('<div id="bdOtpBox" style="display:none"></div>');
+    if(auc.buyNowPrice){
+      h.push('<div style="text-align:center;margin:6px 0;font-size:0.55rem;color:var(--text-muted)">&#8212; OR &#8212;</div>');
+      h.push('<button onclick="_buyNowBid()" style="background:none;border:1px solid var(--border-b);color:var(--gold);font-family:Cinzel,serif;font-size:0.68rem;padding:10px;cursor:pointer;width:100%">&#9889; ซื้อทันที &#3647;'+auc.buyNowPrice.toLocaleString()+'</button>');
+    }
+    h.push('</div>');
+  } else {
+    h.push('<div style="background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.2);padding:1rem;text-align:center;margin-bottom:0.85rem">');
+    h.push('<div style="font-family:Cinzel,serif;font-size:0.82rem;color:#ff8080;margin-bottom:5px">&#9201; การประมูลสิ้นสุดแล้ว</div>');
+    if(tb) h.push('<div>ราคาสูงสุด: <strong style="color:var(--gold)">&#3647; '+tb.amount.toLocaleString()+'</strong></div>');
+    h.push('</div>');
+  }
+  // Shipping & rules (simple)
+  h.push('<div style="margin-bottom:0.75rem"><div style="font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:4px">&#128230; การจัดส่ง</div>');
+  h.push('<div style="font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim)">'+(auc.shippingInfo||'ส่ง EMS ทั่วไทย / DHL ต่างประเทศ')+'</div></div>');
+  // Admin controls
+  if(isAdmin){
+    h.push('<div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap">');
+    h.push('<button onclick="openEditAuction(_curBidAucId)" style="background:none;border:1px solid var(--border-b);color:var(--gold);font-family:Cinzel,serif;font-size:0.6rem;padding:6px 12px;cursor:pointer">&#9999; แก้ไข</button>');
+    h.push('<button onclick="_clearBids(_curBidAucId)" style="background:none;border:1px solid rgba(229,62,62,0.3);color:#ff8080;font-family:Cinzel,serif;font-size:0.6rem;padding:6px 12px;cursor:pointer">&#128465; ล้าง Bids</button>');
+    h.push('<button onclick="_closeAuction(_curBidAucId)" style="background:none;border:1px solid rgba(255,179,71,0.4);color:#FFB347;font-family:Cinzel,serif;font-size:0.6rem;padding:6px 12px;cursor:pointer">&#9209; ปิดประมูล</button>');
+    h.push('</div>');
+  }
+  h.push('</div>');
+  dp.innerHTML=h.join('');
+  if(auc.endTime&&!ended){
+    _bidDetailTimer=setInterval(function(){
+      var el=document.getElementById('bdTimer'); if(!el){clearInterval(_bidDetailTimer);return;}
+      var cd=_cdStr(auc.endTime); if(!cd){el.textContent='หมดเวลา';el.style.color='var(--text-muted)';clearInterval(_bidDetailTimer);return;}
+      el.textContent=cd; el.style.color=auc.endTime-Date.now()<3600000?'#E53E3E':'#FFB347';
+    },1000);
+  }
+}
+
+let _pendingBidData=null,_bidOtpCode=null;
+function _cancelOtp(){
+  if(_otpResendTimer) clearInterval(_otpResendTimer);
+  var b=document.getElementById('bdOtpBox'); if(b){ b.style.display='none'; b.innerHTML=''; }
+  var bb=document.getElementById('bdBidBtn'); if(bb) bb.style.display='block';
+  _pendingBidData=null; _bidOtpCode=null;
+}
+
+let _otpResendTimer=null, _otpResendSeconds=0;
+
+function _requestBidOTP(aucId,minNext,incr){
+  aucId=aucId||_curBidAucId; minNext=minNext||_curBidMinNext; incr=incr||_curBidIncr;
+  var nameEl=document.getElementById('bfName'), emailEl=document.getElementById('bfEmail'),
+      phoneEl=document.getElementById('bfPhone'), amtEl=document.getElementById('bfAmt');
+  var name=nameEl?nameEl.value.trim():'', email=emailEl?emailEl.value.trim():'',
+      phone=phoneEl?phoneEl.value.trim():'', amt=parseInt(amtEl?amtEl.value:0)||0;
+  // Validate
+  if(!name){ showToast('กรุณาใส่ชื่อ-นามสกุล','t-sell'); nameEl&&nameEl.focus(); return; }
+  if(!phone||phone.replace(/[^0-9]/g,'').length<9){ showToast('กรุณาใส่เบอร์โทร 9+ หลัก','t-sell'); phoneEl&&phoneEl.focus(); return; }
+  if(!email||!email.includes('@')){ showToast('กรุณาใส่ Email ที่ถูกต้อง','t-sell'); emailEl&&emailEl.focus(); return; }
+  if(amt<minNext){ showToast('ราคาขั้นต่ำ ฿'+minNext.toLocaleString(),'t-sell'); amtEl&&amtEl.focus(); return; }
+  if((amt-minNext)%(incr||200)!==0&&amt!==minNext){
+    var rounded=minNext+Math.round((amt-minNext)/(incr||200))*(incr||200);
+    showToast('ต้องเพิ่มทีละ ฿'+(incr||200).toLocaleString()+' — ลองราคา ฿'+rounded.toLocaleString(),'t-sell'); return;
+  }
+  // Generate OTP
+  _bidOtpCode=String(Math.floor(100000+Math.random()*900000));
+  _pendingBidData={aucId:aucId,name:name,email:email,phone:phone,amount:amt};
+  // Send OTP to admin LINE so admin can relay to bidder if needed
+  var notifyMsg='\n🔔 คำขอประมูลใหม่!\n'
+    +'📿 รหัส: '+aucId+'\n'
+    +'💰 ราคาเสนอ: ฿'+amt.toLocaleString()+'\n'
+    +'👤 '+name+' | 📞 '+phone+'\n'
+    +'🔑 OTP สำหรับผู้เสนอ: '+_bidOtpCode;
+  var token=window._lineNotifyToken||localStorage.getItem('bantae_line_token')||'';
+  if(token) sendLineNotify(notifyMsg).catch(function(){});
+  // Build OTP UI
+  var box=document.getElementById('bdOtpBox');
+  var btn=document.getElementById('bdBidBtn');
+  if(btn) btn.style.display='none';
+  if(box){
+    box.style.display='block';
+    box.style.cssText='display:block';
+    box.innerHTML='<div style="background:var(--dark3);border:2px solid var(--gold);padding:1.25rem;text-align:center;margin-top:8px">'
+      // Header
+      +'<div style="font-family:Cinzel,serif;font-size:0.65rem;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.75rem">&#128274; ยืนยันตัวตน · OTP VERIFICATION</div>'
+      // OTP display box — shows the code prominently
+      +'<div style="background:var(--dark4);border:1px dashed rgba(201,168,76,0.4);padding:1rem;margin-bottom:0.85rem">'
+      +'<div style="font-family:Sarabun,sans-serif;font-size:0.78rem;color:var(--text-dim);margin-bottom:6px">รหัส OTP ของท่าน (ส่งให้แอดมินยืนยันด้วย)</div>'
+      +'<div id="bdOtpDisplay" style="font-family:Cinzel,serif;font-size:2.2rem;letter-spacing:0.35em;color:var(--gold);font-weight:700;cursor:pointer;user-select:all" title="คลิกเพื่อคัดลอก" onclick="_copyOtp()">'+_bidOtpCode+'</div>'
+      +'<div style="font-family:Sarabun,sans-serif;font-size:0.68rem;color:var(--text-muted);margin-top:4px">&#128203; คลิกตัวเลขเพื่อคัดลอก</div>'
+      +'</div>'
+      // Info
+      +'<div style="font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.65">'
+      +'กรอกรหัส OTP ด้านบน แล้วกดยืนยัน<br/>'
+      +'<span style="font-size:0.72rem;color:var(--text-muted)">แอดมินจะส่งรหัสนี้ยืนยันทาง LINE/โทรศัพท์</span>'
+      +'</div>'
+      // 6 individual digit boxes
+      +'<div id="bdOtpDigits" style="display:flex;justify-content:center;gap:8px;margin-bottom:1rem">'
+      +'<input class="otp-digit" type="tel" maxlength="1" style="width:42px;height:52px;text-align:center;font-family:Cinzel,serif;font-size:1.4rem;font-weight:700;background:var(--dark4);border:2px solid var(--border);color:var(--gold);outline:none;transition:border-color 0.2s" oninput="_otpDigitInput(this,0)" onkeydown="_otpDigitKey(event,0)"/>'
+      +'<input class="otp-digit" type="tel" maxlength="1" style="width:42px;height:52px;text-align:center;font-family:Cinzel,serif;font-size:1.4rem;font-weight:700;background:var(--dark4);border:2px solid var(--border);color:var(--gold);outline:none;transition:border-color 0.2s" oninput="_otpDigitInput(this,1)" onkeydown="_otpDigitKey(event,1)"/>'
+      +'<input class="otp-digit" type="tel" maxlength="1" style="width:42px;height:52px;text-align:center;font-family:Cinzel,serif;font-size:1.4rem;font-weight:700;background:var(--dark4);border:2px solid var(--border);color:var(--gold);outline:none;transition:border-color 0.2s" oninput="_otpDigitInput(this,2)" onkeydown="_otpDigitKey(event,2)"/>'
+      +'<input class="otp-digit" type="tel" maxlength="1" style="width:42px;height:52px;text-align:center;font-family:Cinzel,serif;font-size:1.4rem;font-weight:700;background:var(--dark4);border:2px solid var(--border);color:var(--gold);outline:none;transition:border-color 0.2s" oninput="_otpDigitInput(this,3)" onkeydown="_otpDigitKey(event,3)"/>'
+      +'<input class="otp-digit" type="tel" maxlength="1" style="width:42px;height:52px;text-align:center;font-family:Cinzel,serif;font-size:1.4rem;font-weight:700;background:var(--dark4);border:2px solid var(--border);color:var(--gold);outline:none;transition:border-color 0.2s" oninput="_otpDigitInput(this,4)" onkeydown="_otpDigitKey(event,4)"/>'
+      +'<input class="otp-digit" type="tel" maxlength="1" style="width:42px;height:52px;text-align:center;font-family:Cinzel,serif;font-size:1.4rem;font-weight:700;background:var(--dark4);border:2px solid var(--border);color:var(--gold);outline:none;transition:border-color 0.2s" oninput="_otpDigitInput(this,5)" onkeydown="_otpDigitKey(event,5)"/>'
+      +'</div>'
+      // Buttons
+      +'<div style="display:flex;gap:8px">'
+      +'<button onclick="_cancelOtp()" style="flex:1;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:Cinzel,serif;font-size:0.62rem;padding:10px;cursor:pointer">&#8592; แก้ไข</button>'
+      +'<button onclick="_verifyBidOTP()" id="bdOtpVerifyBtn" style="flex:2;background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.68rem;font-weight:700;padding:12px;border:none;cursor:pointer">&#10003; ยืนยัน OTP</button>'
+      +'</div>'
+      // Resend
+      +'<div id="bdResendArea" style="margin-top:10px;font-family:Sarabun,sans-serif;font-size:0.75rem;color:var(--text-muted)">'
+      +'<span id="bdResendTimer">ขอรหัสใหม่ได้ใน <strong id="bdResendSec" style="color:var(--gold)">60</strong> วินาที</span>'
+      +'<button id="bdResendBtn" onclick="_resendOtp()" style="display:none;background:none;border:none;color:var(--gold);font-family:Sarabun,sans-serif;font-size:0.75rem;cursor:pointer;text-decoration:underline">ขอรหัสใหม่</button>'
+      +'</div>'
+      +'</div>';
+    // Focus first digit
+    setTimeout(function(){ var d=box.querySelector('.otp-digit'); if(d) d.focus(); },100);
+    // Start 60s resend countdown
+    _otpResendSeconds=60;
+    if(_otpResendTimer) clearInterval(_otpResendTimer);
+    _otpResendTimer=setInterval(function(){
+      _otpResendSeconds--;
+      var sec=document.getElementById('bdResendSec');
+      if(sec) sec.textContent=_otpResendSeconds;
+      if(_otpResendSeconds<=0){
+        clearInterval(_otpResendTimer);
+        var timer=document.getElementById('bdResendTimer'), btn2=document.getElementById('bdResendBtn');
+        if(timer) timer.style.display='none';
+        if(btn2) btn2.style.display='inline';
+      }
+    },1000);
+  }
+}
+
+function _copyOtp(){
+  try{ navigator.clipboard.writeText(_bidOtpCode); showToast('คัดลอก OTP แล้ว','t-buy'); }catch(e){}
+}
+
+function _resendOtp(){
+  // Re-generate OTP and restart
+  _bidOtpCode=String(Math.floor(100000+Math.random()*900000));
+  var display=document.getElementById('bdOtpDisplay');
+  if(display) display.textContent=_bidOtpCode;
+  // Re-send to LINE
+  var token=window._lineNotifyToken||localStorage.getItem('bantae_line_token')||'';
+  if(_pendingBidData&&token){
+    sendLineNotify('\n🔄 OTP ใหม่: '+_bidOtpCode+'\n👤 '+_pendingBidData.name+' | ฿'+_pendingBidData.amount.toLocaleString()).catch(function(){});
+  }
+  // Clear digit boxes
+  document.querySelectorAll('.otp-digit').forEach(function(d){ d.value=''; d.style.borderColor=''; });
+  var first=document.querySelector('.otp-digit'); if(first) first.focus();
+  // Reset timer
+  _otpResendSeconds=60;
+  var timer=document.getElementById('bdResendTimer'), btn2=document.getElementById('bdResendBtn');
+  if(timer){ timer.style.display='inline'; var sec=document.getElementById('bdResendSec'); if(sec) sec.textContent='60'; }
+  if(btn2) btn2.style.display='none';
+  if(_otpResendTimer) clearInterval(_otpResendTimer);
+  _otpResendTimer=setInterval(function(){
+    _otpResendSeconds--;
+    var sec=document.getElementById('bdResendSec'); if(sec) sec.textContent=_otpResendSeconds;
+    if(_otpResendSeconds<=0){ clearInterval(_otpResendTimer); var t=document.getElementById('bdResendTimer'),b=document.getElementById('bdResendBtn'); if(t)t.style.display='none'; if(b)b.style.display='inline'; }
+  },1000);
+  showToast('ส่งรหัสใหม่แล้ว','t-buy');
+}
+
+// OTP digit box helpers
+function _otpDigitInput(el, idx){
+  el.value=el.value.replace(/[^0-9]/g,'');
+  el.style.borderColor=el.value?'var(--gold)':'';
+  if(el.value){
+    var next=document.querySelectorAll('.otp-digit')[idx+1];
+    if(next) next.focus();
+  }
+  // Auto-verify when all 6 filled
+  var digits=document.querySelectorAll('.otp-digit');
+  var code=''; digits.forEach(function(d){ code+=d.value; });
+  if(code.length===6) _verifyBidOTP();
+}
+
+function _otpDigitKey(event, idx){
+  if(event.key==='Backspace'&&!event.target.value){
+    var prev=document.querySelectorAll('.otp-digit')[idx-1];
+    if(prev){ prev.value=''; prev.style.borderColor=''; prev.focus(); }
+  }
+  if(event.key==='Enter') _verifyBidOTP();
+}
+function _verifyBidOTP(aucId,minNext,incr){
+  aucId=aucId||_curBidAucId; minNext=minNext||_curBidMinNext; incr=incr||_curBidIncr;
+  // Read from digit boxes
+  var digits=document.querySelectorAll('.otp-digit');
+  var entered=''; digits.forEach(function(d){ entered+=d.value; });
+  if(!entered) entered=(document.getElementById('bdOtpInput')||{value:''}).value||'';
+  entered=entered.trim();
+  if(entered.length<6){ showToast('กรอก OTP ให้ครบ 6 หลัก','t-sell'); return; }
+  if(entered!==_bidOtpCode){
+    showToast('OTP ไม่ถูกต้อง — ตรวจสอบอีกครั้ง','t-sell');
+    // Shake digit boxes
+    digits.forEach(function(d){ d.style.borderColor='#E53E3E'; });
+    setTimeout(function(){ digits.forEach(function(d){ d.style.borderColor=d.value?'var(--gold)':''; }); }, 1000);
+    return;
+  }
+  // Stop resend timer
+  if(_otpResendTimer) clearInterval(_otpResendTimer);
+  const b=_pendingBidData; if(!b) return;
+  const bids=_getBids(b.aucId); const aucs=_getAuctions(); const auc=aucs.find(function(a){return a.id===b.aucId;})||{startPrice:0,increment:200};
+  const curTop=bids.length?Math.max.apply(null,bids.map(function(x){return x.amount;})): (auc.startPrice||0);
+  if(b.amount<curTop+(auc.increment||200)){showToast('มีคนเสนอสูงกว่า! ขั้นต่ำ ฿'+(curTop+(auc.increment||200)).toLocaleString(),'t-sell'); document.getElementById('bdOtpBox').style.display='none'; document.getElementById('bdBidBtn').style.display='block'; return;}
+  const np=b.name.split(' '); const mn=np[0]+(np[1]?' '+np[1][0]+'***':'');
+  bids.push({amount:b.amount,name:b.name,maskedName:mn,email:b.email,phone:b.phone,time:new Date().toLocaleString('th-TH'),ts:Date.now()});
+  _saveBids(b.aucId,bids); _pendingBidData=null; _bidOtpCode=null;
+  document.getElementById('bdOtpBox').style.display='none'; document.getElementById('bdBidBtn').style.display='block';
+  ['bfName','bfEmail','bfPhone','bfAmt','bdOtpInput'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  showToast('✅ เสนอราคา ฿'+b.amount.toLocaleString()+' สำเร็จ! 🔨','t-buy');
+  const it=ITEMS.find(function(i){return String(i.id)===String(_curBidItemId);}); const a=_getAucForItem(_curBidItemId)||{}; if(it)_renderBidDetail(it,a);
+}
+function _buyNowBid(price){
+  price=price||(_curBidAucId&&(_getAuctions().find(function(a){return a.id===_curBidAucId;})||{}).buyNowPrice)||0;
+  if(!confirm('ยืนยันซื้อทันที ฿'+price.toLocaleString()+'?')) return; showToast('✅ ซื้อทันที — แอดมินจะติดต่อใน 24 ชม.','t-buy'); setTimeout(function(){window.open(MESSENGER,'_blank');},600);}
+function _clearBids(aucId){
+  aucId=aucId||_curBidAucId;if(!isAdmin||!confirm('ล้าง bids?')) return; _saveBids(aucId,[]); showToast('ล้างแล้ว','t-sell'); const it=ITEMS.find(function(i){return String(i.id)===String(_curBidItemId);}); const a=_getAucForItem(_curBidItemId)||{}; if(it)_renderBidDetail(it,a);}
+function _closeAuction(aucId){
+  aucId=aucId||_curBidAucId;if(!isAdmin||!confirm('ปิดการประมูลทันที?')) return; const aucs=_getAuctions(); const idx=aucs.findIndex(function(a){return a.id===aucId;}); if(idx>=0){aucs[idx].endTime=Date.now()-1000;_saveAuctions(aucs);} showToast('ปิดแล้ว','t-gold'); const it=ITEMS.find(function(i){return String(i.id)===String(_curBidItemId);}); const a=_getAucForItem(_curBidItemId)||{}; if(it)_renderBidDetail(it,a);}
+function openCreateAuction(){ const bidItems=ITEMS.filter(function(it){return it.badge==='BID';}); if(!bidItems.length){showToast('ไม่มีพระที่มี badge=BID','t-sell');return;} document.getElementById('aucFormTitle').textContent='+ สร้างการประมูล'; document.getElementById('aucFormId').value=''; document.getElementById('aucFormItemId').innerHTML=bidItems.map(function(it){return '<option value="'+it.id+'">'+it.nameTh+'</option>';}).join(''); ['aucFormStart','aucFormBuyNow','aucFormEndDate','aucFormEndTime'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';}); var ei=document.getElementById('aucFormIncrement'); if(ei) ei.value='200'; var es=document.getElementById('aucFormShipping'); if(es) es.value='ส่ง EMS ทั่วไทย / DHL ต่างประเทศ'; var er=document.getElementById('aucFormRules'); if(er) er.value='ราคาต้องสูงกว่าปัจจุบัน\nผู้ชนะได้รับการติดต่อภายใน 24 ชม.\nชำระเงินภายใน 48 ชม.'; document.getElementById('aucFormOv').classList.add('open'); document.body.style.overflow='hidden';}
+function openEditAuction(aucId){ const aucs=_getAuctions(); const auc=aucs.find(function(a){return a.id===aucId;}); if(!auc) return; const bidItems=ITEMS.filter(function(it){return it.badge==='BID';}); document.getElementById('aucFormTitle').textContent='✏️ แก้ไข'; document.getElementById('aucFormId').value=aucId; document.getElementById('aucFormItemId').innerHTML=bidItems.map(function(it){return '<option value="'+it.id+'"'+(String(it.id)===String(auc.itemId)?' selected':'')+'>'+it.nameTh+'</option>';}).join(''); var es=document.getElementById('aucFormStart'); if(es) es.value=auc.startPrice||''; var ei=document.getElementById('aucFormIncrement'); if(ei) ei.value=auc.increment||200; var eb=document.getElementById('aucFormBuyNow'); if(eb) eb.value=auc.buyNowPrice||''; if(auc.endTime){var d=new Date(auc.endTime); var ed=document.getElementById('aucFormEndDate'); if(ed) ed.value=d.toISOString().split('T')[0]; var et=document.getElementById('aucFormEndTime'); if(et) et.value=d.toTimeString().slice(0,5);} var esh=document.getElementById('aucFormShipping'); if(esh) esh.value=auc.shippingInfo||''; var er=document.getElementById('aucFormRules'); if(er) er.value=(auc.rules||[]).join('\n'); document.getElementById('aucFormOv').classList.add('open'); document.body.style.overflow='hidden';}
+function saveAuctionForm(){ if(!isAdmin) return; var itemId=document.getElementById('aucFormItemId').value; var startPrice=parseInt(document.getElementById('aucFormStart').value)||1000; var increment=parseInt(document.getElementById('aucFormIncrement').value)||200; var buyNow=parseInt(document.getElementById('aucFormBuyNow').value)||null; var ed=document.getElementById('aucFormEndDate').value; var et=document.getElementById('aucFormEndTime').value; var shipping=(document.getElementById('aucFormShipping').value||'').trim(); var rules=(document.getElementById('aucFormRules').value||'').trim().split('\n').map(function(r){return r.trim();}).filter(Boolean); var existingId=document.getElementById('aucFormId').value; var endTimestamp=null; if(ed&&et){endTimestamp=new Date(ed+'T'+et).getTime(); if(isNaN(endTimestamp)){showToast('วันที่ไม่ถูกต้อง','t-sell');return;}} if(!itemId){showToast('กรุณาเลือกพระ','t-sell');return;} var aucs=_getAuctions(); var aucData={id:existingId||('auc_'+itemId+'_'+Date.now()),itemId:itemId,startPrice:startPrice,increment:increment,buyNowPrice:buyNow,endTime:endTimestamp,shippingInfo:shipping,rules:rules,createdAt:Date.now()}; var idx=aucs.findIndex(function(a){return a.id===existingId;}); if(idx>=0)aucs[idx]=aucData; else aucs.push(aucData); _saveAuctions(aucs); closeOv('aucFormOv'); showToast('บันทึกการประมูลแล้ว ✦','t-gold'); openBidPanel();}
+
+// ── Verify / Certificate ──────────────────────────────────────
+function openVerifyPanel(){
+  const el=document.getElementById('verifyOv'); if(!el) return;
+  const ci=document.getElementById('verifyCertInput'); if(ci) ci.value='';
+  const ri=document.getElementById('verifyResult'); if(ri) ri.innerHTML='';
+  el.classList.add('open'); document.body.style.overflow='hidden';
+}
+function checkCertCode(){
+  var input=document.getElementById('verifyCertInput'); if(!input) return;
+  var code=input.value.trim().toUpperCase();
+  var res=document.getElementById('verifyResult'); if(!res) return;
+  if(!code){ res.innerHTML='<div style="color:var(--text-muted);font-family:Sarabun,sans-serif;font-size:0.85rem">กรุณาใส่รหัสใบรับรอง</div>'; return; }
+  var all=[].concat(ITEMS,SOLD);
+  var found=null;
+  for(var i=0;i<all.length;i++){ if(all[i].certCode&&all[i].certCode.toUpperCase()===code){found=all[i];break;} }
+  var h=[];
+  if(found){
+    h.push('<div style="background:rgba(6,199,85,0.08);border:1px solid rgba(6,199,85,0.35);padding:1rem;display:flex;gap:12px;align-items:flex-start">');
+    h.push('<div style="font-size:2rem;flex-shrink:0">&#10003;</div>');
+    h.push('<div style="flex:1">');
+    h.push('<div style="font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:0.09em;color:#06C755;margin-bottom:5px">ใบรับรองถูกต้อง &middot; VALID</div>');
+    h.push('<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">');
+    h.push('<img src="'+getItemImg(found)+'" style="width:52px;height:52px;object-fit:cover;border:1px solid var(--border)"/>');
+    h.push('<div><div style="font-family:Sarabun,sans-serif;font-size:0.95rem;color:var(--text)">'+found.nameTh+'</div>');
+    h.push('<div style="font-family:Cinzel,serif;font-size:0.72rem;color:var(--gold)">'+found.price+'</div></div></div>');
+    if(found.certNote) h.push('<div style="font-family:Sarabun,sans-serif;font-size:0.82rem;color:var(--text-dim);margin-bottom:8px">&#128203; '+found.certNote+'</div>');
+    if(found.certUrl){
+      window._verifyViewUrl = found.certUrl;
+      h.push('<button onclick="if(window._verifyViewUrl)window.open(window._verifyViewUrl,\'_blank\')" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.6rem;font-weight:700;padding:5px 14px;border:none;cursor:pointer">&#128269; ดูใบรับรองจริง</button>');
+    }
+    h.push('</div></div>');
+  } else {
+    h.push('<div style="background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.25);padding:1rem;display:flex;gap:12px;align-items:center">');
+    h.push('<div style="font-size:2rem">&#10008;</div>');
+    h.push('<div><div style="font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:0.09em;color:#ff8080;margin-bottom:4px">ไม่พบ &middot; NOT FOUND</div>');
+    h.push('<div style="font-family:Sarabun,sans-serif;font-size:0.82rem;color:var(--text-dim)">รหัส '+code+' ไม่ตรงกับฐานข้อมูล</div></div></div>');
+  }
+  res.innerHTML=h.join('');
 }
 
 // ============================================================
@@ -3250,6 +4064,11 @@ try{
 // 3. Show immediately — either real cached items OR empty (no fake defaults)
 renderGrid('defaultGrid', ITEMS, 'buy');
 
+// 3.5 Restore language preference
+try{
+  var savedLang=localStorage.getItem('bantae_lang')||'th';
+  if(savedLang!=='th') setTimeout(function(){ setLang(savedLang); },100);
+}catch(e){}
 // 4. Restore cart badge
 updateBadges();
 
@@ -3353,29 +4172,51 @@ loadItemsFromDB();
 </div>
 
 <!-- BID PANEL MODAL -->
-<div class="auth-overlay" id="bidOv" style="z-index:700;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeOv('bidOv')">
-  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:560px;max-height:88vh;overflow-y:auto">
-    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:0.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-family:Cinzel,serif;font-size:0.82rem;letter-spacing:0.09em;color:var(--gold)">🔨 ประมูลพระ · AUCTION / BID</div>
+<!-- BID / AUCTION PANEL -->
+<div class="auth-overlay" id="bidOv" style="z-index:700" onclick="if(event.target===this)closeOv('bidOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:640px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.1em;color:var(--gold)" data-i18n="bid.title">🔨 ประมูลพระ · LIVE AUCTION</div>
       <button class="mico-close" onclick="closeOv('bidOv')">✕</button>
     </div>
-    <div style="padding:1.5rem">
-      <!-- Coming soon notice -->
-      <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);padding:1.5rem;text-align:center;margin-bottom:1.5rem;border-radius:2px">
-        <div style="font-size:2.5rem;margin-bottom:0.75rem">🔨</div>
-        <div style="font-family:Cinzel,serif;font-size:1rem;letter-spacing:0.1em;color:var(--gold);margin-bottom:0.5rem">AUCTION COMING SOON</div>
-        <div style="font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text-dim);line-height:1.7">ระบบประมูลพระกำลังอยู่ในการพัฒนา<br/>เปิดตัวเร็วๆ นี้ — ลงทะเบียนเพื่อรับแจ้งเตือนก่อนใคร</div>
+    <div style="flex:1;overflow-y:auto;padding:1.1rem" id="bidListPane"></div>
+  </div>
+</div>
+<!-- BID DETAIL -->
+<div class="auth-overlay" id="bidDetailOv" style="z-index:710" onclick="if(event.target===this)closeOv('bidDetailOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:640px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="flex-shrink:0;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <button onclick="closeOv('bidDetailOv');openBidPanel()" style="background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.6rem;padding:5px 10px;cursor:pointer" data-i18n="bid.back">← รายการ</button>
+      <div style="font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.08em;color:var(--gold);flex:1;text-align:center" data-i18n="bid.detail">รายละเอียดประมูล</div>
+      <button class="mico-close" onclick="closeOv('bidDetailOv')">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto" id="bidDetailPane"></div>
+  </div>
+</div>
+<!-- ADMIN: Create/Edit Auction -->
+<div class="auth-overlay" id="aucFormOv" style="z-index:720" onclick="if(event.target===this)closeOv('aucFormOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:500px;max-height:90vh;overflow-y:auto">
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:2">
+      <div id="aucFormTitle" style="font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.08em;color:var(--gold)">+ สร้างการประมูล</div>
+      <button class="mico-close" onclick="closeOv('aucFormOv')">✕</button>
+    </div>
+    <div style="padding:1.1rem;display:flex;flex-direction:column;gap:8px">
+      <input type="hidden" id="aucFormId"/>
+      <div class="form-group"><div class="form-label">พระ (badge=BID)</div><select class="form-input" id="aucFormItemId"></select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group"><div class="form-label">ราคาเริ่ม (฿)</div><input type="number" class="form-input" id="aucFormStart" placeholder="1000"/></div>
+        <div class="form-group"><div class="form-label">ขั้นต่ำ/ครั้ง (฿)</div><input type="number" class="form-input" id="aucFormIncrement" placeholder="200"/></div>
       </div>
-      <!-- Bid items list (items with BID badge) -->
-      <div id="bidItemsList"></div>
-      <!-- Register interest form -->
-      <div style="background:var(--dark4);border:1px solid var(--border);padding:1.25rem;border-radius:2px">
-        <div style="font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:0.08em;color:var(--gold);margin-bottom:0.75rem">🔔 แจ้งเตือนเมื่อเปิดประมูล · NOTIFY ME</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <input type="text" id="bidName" class="form-input" placeholder="ชื่อ / Name"/>
-          <input type="text" id="bidContact" class="form-input" placeholder="LINE ID หรือ โทรศัพท์"/>
-          <button onclick="registerBidInterest()" style="background:var(--gold);color:var(--dark);font-family:Cinzel,serif;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;padding:10px;border:none;cursor:pointer" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">ลงทะเบียน · REGISTER INTEREST</button>
-        </div>
+      <div class="form-group"><div class="form-label">ซื้อทันที/BUY NOW (฿)</div><input type="number" class="form-input" id="aucFormBuyNow" placeholder="ไม่บังคับ"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group"><div class="form-label">วันสิ้นสุด</div><input type="date" class="form-input" id="aucFormEndDate"/></div>
+        <div class="form-group"><div class="form-label">เวลาสิ้นสุด</div><input type="time" class="form-input" id="aucFormEndTime"/></div>
+      </div>
+      <div class="form-group"><div class="form-label">ข้อมูลจัดส่ง</div><input type="text" class="form-input" id="aucFormShipping" placeholder="EMS ทั่วไทย / DHL ต่างประเทศ"/></div>
+      <div class="form-group"><div class="form-label">กฎ (แยกบรรทัด)</div><textarea class="form-input" id="aucFormRules" style="min-height:80px"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="closeOv('aucFormOv')" style="flex:1;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'Cinzel',serif;font-size:0.65rem;padding:10px;cursor:pointer">CANCEL</button>
+        <button onclick="saveAuctionForm()" style="flex:2;background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.65rem;font-weight:700;padding:10px;border:none;cursor:pointer">💾 SAVE</button>
       </div>
     </div>
   </div>
@@ -3455,12 +4296,22 @@ loadItemsFromDB();
 
 <!-- VERIFY PANEL -->
 <div class="auth-overlay" id="verifyOv" style="z-index:700" onclick="if(event.target===this)closeOv('verifyOv')">
-  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:580px;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column">
-    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:2;flex-shrink:0">
-      <div style="font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.1em;color:var(--gold)">🏅 ตรวจสอบความแท้ · VERIFY</div>
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:520px;max-height:88vh;overflow-y:auto">
+    <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:2">
+      <div style="font-family:'Cinzel',serif;font-size:0.78rem;letter-spacing:0.1em;color:var(--gold)" data-i18n="verify.title">🏅 ตรวจสอบใบรับรอง · VERIFY</div>
       <button class="mico-close" onclick="closeOv('verifyOv')">✕</button>
     </div>
-    <div style="padding:1.25rem"><div id="verifyList"></div></div>
+    <div style="padding:1.25rem">
+      <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);padding:0.9rem;margin-bottom:1rem;font-family:'Sarabun',sans-serif;font-size:0.83rem;color:var(--text-dim);line-height:1.75">
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.09em;color:var(--gold);margin-bottom:4px" data-i18n="verify.how">⬡ วิธีใช้</div>
+        พิมพ์รหัสใบรับรองที่อยู่บนกระดาษรับรองของท่าน ระบบจะแสดงข้อมูลพระที่ตรงกัน
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:1rem">
+        <input type="text" id="verifyCertInput" class="form-input" style="flex:1;font-size:0.9rem;letter-spacing:0.1em;text-transform:uppercase" placeholder="รหัส เช่น BT-2024-001"/>
+        <button onclick="checkCertCode()" style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.65rem;font-weight:700;padding:0 16px;border:none;cursor:pointer;flex-shrink:0" data-i18n="verify.btn">🔍 ตรวจสอบ</button>
+      </div>
+      <div id="verifyResult"></div>
+    </div>
   </div>
 </div>
 <!-- BUY FORM OVERLAY -->
@@ -3468,7 +4319,7 @@ loadItemsFromDB();
   <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:440px;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column">
     <!-- Header -->
     <div style="position:sticky;top:0;background:var(--dark3);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;z-index:2;flex-shrink:0">
-      <div style="font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--gold)">🛒 สั่งซื้อ · PLACE ORDER</div>
+      <div style="font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.1em;color:var(--gold)" data-i18n="buy.title">🛒 สั่งซื้อ · แจ้งซื้อพระ</div>
       <button class="mico-close" onclick="closeOv('buyFormOv')">✕</button>
     </div>
     <!-- Item info -->
@@ -3486,11 +4337,11 @@ loadItemsFromDB();
       </div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <div>
-          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px">ชื่อ-นามสกุล / NAME *</div>
+          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px" data-i18n="buy.name">ชื่อ-นามสกุล / NAME *</div>
           <input type="text" id="buyFormName" class="form-input" placeholder="สมชาย ใจดี" style="width:100%"/>
         </div>
         <div>
-          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px">เบอร์โทรศัพท์ / PHONE *</div>
+          <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:4px" data-i18n="buy.phone">เบอร์โทรศัพท์ / PHONE *</div>
           <input type="tel" id="buyFormPhone" class="form-input" placeholder="08X-XXX-XXXX" style="width:100%"/>
         </div>
         <div>
@@ -3503,59 +4354,86 @@ loadItemsFromDB();
         </div>
       </div>
       <div id="buyFormStatus" style="font-family:'Sarabun',sans-serif;font-size:0.82rem;margin:10px 0;min-height:20px;text-align:center"></div>
-      <button id="buyFormSubmitBtn" onclick="submitBuyForm()" style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:0.09em;padding:14px;border:none;cursor:pointer;width:100%;transition:background 0.2s;margin-top:4px" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'">
-        📲 ส่งคำสั่งซื้อ · SEND ORDER
+      <!-- LINE Notify send button -->
+      <button id="buyFormSubmitBtn" onclick="submitBuyForm()"
+        style="background:#06C755;color:#fff;font-family:'Cinzel',serif;font-size:0.75rem;font-weight:700;letter-spacing:0.06em;padding:14px;border:none;cursor:pointer;width:100%;transition:background 0.2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:10px"
+        onmouseover="this.style.background='#05a347'" onmouseout="this.style.background='#06C755'">
+        <!-- LINE logo SVG -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        ซื้อผ่านไลน์
       </button>
+      <!-- Messenger fallback button -->
+      <a href="javascript:void(0)" onclick="submitBuyFormMessenger()"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;background:#0084FF;color:#fff;font-family:'Cinzel',serif;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;padding:11px;cursor:pointer;width:100%;text-decoration:none;margin-top:6px;transition:background 0.2s;box-sizing:border-box"
+        onmouseover="this.style.background='#006dd1'" onmouseout="this.style.background='#0084FF'">
+        <!-- Messenger logo SVG -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
+        ส่งผ่าน Messenger
+      </a>
       <div style="font-family:'Sarabun',sans-serif;font-size:0.73rem;color:var(--text-muted);text-align:center;margin-top:8px;line-height:1.6">
         ข้อมูลของท่านจะถูกใช้เพื่อการติดต่อซื้อขายเท่านั้น<br/>
         ชำระเงินหลังจากได้รับการยืนยันจากแอดมินเท่านั้น
       </div>
     </div>
-    <!-- Admin LINE token config (hidden from public, shown to admin) -->
-    <div id="lineTokenAdminBox" style="display:none;border-top:1px solid var(--border);padding:0.85rem;background:var(--dark4)">
-      <div style="font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.09em;color:var(--gold);margin-bottom:5px">⚙️ ADMIN: LINE Notify Token</div>
-      <div style="display:flex;gap:6px">
-        <input type="text" id="lineTokenInput" class="form-input" style="flex:1;font-size:0.75rem" placeholder="ey... (จาก notify-bot.line.me)"/>
-        <button onclick="saveLineToken()" style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.6rem;font-weight:700;padding:6px 10px;border:none;cursor:pointer;flex-shrink:0">SAVE</button>
-      </div>
-      <div id="lineTokenStatus" style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:'Sarabun',sans-serif"></div>
-    </div>
+
   </div>
 </div>
 
+
+<!-- LINE Settings Overlay -->
+<div class="auth-overlay" id="lineSettingsOv" style="z-index:9500;position:fixed;inset:0;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.2s" onclick="if(event.target===this)closeOv('lineSettingsOv')">
+  <div style="background:var(--dark3);border:1px solid var(--border-b);width:100%;max-width:480px">
+    <div style="background:#06C755;padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:'Cinzel',serif;font-size:0.82rem;letter-spacing:0.1em;color:#fff;display:flex;align-items:center;gap:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        LINE Notify — แจ้งเตือนอัตโนมัติ
+      </div>
+      <button onclick="closeOv('lineSettingsOv')" style="background:rgba(0,0,0,0.2);border:none;color:#fff;font-size:1.1rem;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="padding:1.25rem">
+      <!-- How it works -->
+      <div style="background:rgba(6,199,85,0.07);border:1px solid rgba(6,199,85,0.2);padding:0.9rem;margin-bottom:1rem;border-radius:2px">
+        <div style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.08em;color:#06C755;margin-bottom:0.5rem">⚡ วิธีการทำงาน</div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-dim);line-height:1.75">
+          เมื่อลูกค้ากดปุ่ม <strong style="color:var(--gold)">🛒 สั่งซื้อ</strong> — ระบบจะส่งข้อความแจ้งเตือนไปที่ <strong style="color:#06C755">LINE</strong> ของคุณทันที พร้อมชื่อ เบอร์โทร และรายละเอียดพระที่ต้องการซื้อ
+        </div>
+      </div>
+
+      <!-- Step by step -->
+      <div style="margin-bottom:1rem">
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.09em;color:var(--gold);margin-bottom:0.6rem">📋 วิธีรับ Token (ทำครั้งเดียว ~3 นาที)</div>
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-dim);line-height:2">
+          <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><span style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.58rem;padding:1px 6px;flex-shrink:0;margin-top:2px">1</span><span>ไปที่ <a href="https://notify-bot.line.me" target="_blank" style="color:#06C755;font-weight:600">notify-bot.line.me</a> → กด Login ด้วย LINE ปกติ</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><span style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.58rem;padding:1px 6px;flex-shrink:0;margin-top:2px">2</span><span>เลื่อนลง → กด <strong style="color:#06C755">Generate token</strong> → ตั้งชื่อ "Bantae" → เลือก <strong>1-on-1 chat with LINE Notify</strong></span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><span style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.58rem;padding:1px 6px;flex-shrink:0;margin-top:2px">3</span><span>กด <strong style="color:#06C755">Generate</strong> → คัดลอก token ที่ได้ (ขึ้นต้นด้วยตัวอักษรยาวๆ)</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.58rem;padding:1px 6px;flex-shrink:0;margin-top:2px">4</span><span>วาง token ในช่องด้านล่าง → กด SAVE → เสร็จ!</span></div>
+        </div>
+      </div>
+
+      <!-- Token input -->
+      <div style="margin-bottom:0.75rem">
+        <div style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.09em;color:var(--text-muted);margin-bottom:5px">LINE NOTIFY TOKEN</div>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="lineTokenInput"
+            class="form-input"
+            style="flex:1;font-size:0.8rem;letter-spacing:0.03em"
+            placeholder="วาง token ที่นี่..."/>
+          <button onclick="saveLineToken()" style="background:#06C755;color:#fff;font-family:'Cinzel',serif;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;padding:0 16px;border:none;cursor:pointer;flex-shrink:0;transition:background 0.2s" onmouseover="this.style.background='#05a347'" onmouseout="this.style.background='#06C755'">SAVE</button>
+        </div>
+        <div id="lineTokenStatus" style="font-family:'Sarabun',sans-serif;font-size:0.78rem;margin-top:6px;min-height:18px"></div>
+      </div>
+
+      <!-- Test button -->
+      <button onclick="testLineNotify()" style="background:none;border:1px solid rgba(6,199,85,0.4);color:#06C755;font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.07em;padding:9px;cursor:pointer;width:100%;transition:all 0.2s;margin-bottom:0.75rem" onmouseover="this.style.background='rgba(6,199,85,0.08)'" onmouseout="this.style.background='none'">
+        📲 ทดสอบส่ง LINE — TEST NOTIFY
+      </button>
+
+      <div style="font-family:'Sarabun',sans-serif;font-size:0.72rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:0.75rem">
+        💡 Token จะถูกเก็บในเบราว์เซอร์ของคุณ — ถ้าเปลี่ยนเครื่องต้องวางใหม่<br/>
+        🔒 ไม่มีการส่งข้อมูลไปที่ server — ทำงานตรงจากเบราว์เซอร์ถึง LINE
+      </div>
+    </div>
+  </div>
+</div>
 </body>
-</html>async function markAsSold(id){
-  id = Number(id); // normalize to number
-  if(!confirm('ย้ายพระชิ้นนี้ไปยัง "ขายแล้ว"?\nMove this item to Sold?')) return;
-  const it = ITEMS.find(i=>Number(i.id)===id);
-  if(!it){ showToast('ไม่พบรายการ id:'+id+' ('+ITEMS.length+' items)','t-sell'); return; }
-  it.badge = 'SOLD';
-  ITEMS = ITEMS.filter(i=>i.id!==id);
-  SOLD.unshift(it);
-  showToast('กำลังบันทึก...','t-gold');
-  const ok = await saveItemsToDB();
-  if(ok){ renderAll(); showToast('ย้ายไปขายแล้ว ✦','t-gold'); }
-  else { // rollback
-    ITEMS.unshift(it); SOLD.shift();
-    showToast('บันทึกไม่สำเร็จ','t-sell');
-  }
-}
-
-async function restoreItem(id){
-  id = Number(id);
-  if(!confirm('คืนพระกลับมา "กำลังหา"?\nRestore to Available?')) return;
-  const it = SOLD.find(i=>Number(i.id)===id);
-  if(!it){ showToast('ไม่พบรายการ','t-sell'); return; }
-  it.badge = '';
-  SOLD = SOLD.filter(i=>i.id!==id);
-  ITEMS.unshift(it);
-  showToast('กำลังบันทึก...','t-gold');
-  const ok = await saveItemsToDB();
-  if(ok){ renderAll(); showToast('คืนพระกลับแล้ว ✦','t-buy'); }
-  else { // rollback
-    SOLD.unshift(it); ITEMS.shift();
-    showToast('บันทึกไม่สำเร็จ','t-sell');
-  }
-}
-
-
+</html>
