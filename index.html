@@ -1048,16 +1048,17 @@ select option{background:var(--dark4)}
 // CONFIG — change these
 // ============================================================
 const MESSENGER   = 'https://m.me/100068843867509';
-const JB_URL      = 'https://api.jsonbin.io/v3/b/69fb4a1036566621a830dc9b';        // JSONBin endpoint
+// Database now goes through a Netlify Function — the JSONBin master key lives
+// server-side as an env var (JSONBIN_KEY), never exposed in this file.
+const DB_API      = '/.netlify/functions/db';
 // ImgBB — free image hosting with API. Get key at imgbb.com/api → Account → API
 // Takes ~1 min to sign up, then paste your key here
 const IMGBB_KEY          = 'oE9cJNbERtFwYmZMnBAshA8Y';
 const CLOUDINARY_CLOUD  = 'dx0fk9j5b';
 const CLOUDINARY_PRESET = 'bantae_unsigned';
 const LINE_NOTIFY_TOKEN = '';
-const JB_KEY      = '$2a$10$biemqQ9HdFoUoooBQmWBXObKAoI4vYjirl0ynI.boL3FFyWxykOZi';  // JSONBin master key
 const ADMIN_USER  = 'admin';
-const ADMIN_PASS  = 'bantae2026';  // admin login password
+// Admin password is validated server-side (env var ADMIN_PASSWORD) — not stored here.
 const PEN_PASS    = '242456';      // pen edit password
 const PAGE_SIZE   = 100;           // items per page
 
@@ -1561,27 +1562,47 @@ function switchCart(tab){
 // ============================================================
 function openLogin(){ document.getElementById('lusr').value=''; document.getElementById('lpwd').value=''; document.getElementById('loginOv').classList.add('open'); document.body.style.overflow='hidden'; }
 let _loginAttempts=0,_loginLocked=false,_loginLockTimer=null;
-function doLogin(){
+async function doLogin(){
   if(_loginLocked){showToast('ล็อกชั่วคราว กรุณารอ 30 วินาที','t-sell');return;}
   const u=document.getElementById('lusr').value.trim(), p=document.getElementById('lpwd').value.trim();
-  if(u===ADMIN_USER&&p===ADMIN_PASS){
+  if(!u&&!p){ closeOv('loginOv'); return; }
+  if(u!==ADMIN_USER){ _registerLoginFail(); return; }
+  // Validate the password server-side (env var ADMIN_PASSWORD) — never compared in client code.
+  let ok=false;
+  try{
+    const r=await fetch(DB_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})});
+    ok=r.ok;
+  }catch(e){ showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ลองใหม่','t-sell'); return; }
+  if(ok){
     _loginAttempts=0;
     isAdmin=true;
+    window._adminPw=p;
     document.getElementById('adminBar').classList.add('show');
     document.getElementById('loginNavBtn').textContent='⬡ ADMIN';
     document.getElementById('loginNavBtn').classList.add('admin-on');
     document.getElementById('adminAddBtn').classList.add('show');
-    // Save session so admin stays logged in after refresh
-    try{ sessionStorage.setItem('bantae_admin','1'); }catch(e){}
+    // Save session so admin stays logged in after refresh (sessionStorage = this tab only)
+    try{ sessionStorage.setItem('bantae_admin','1'); sessionStorage.setItem('bantae_admin_pw',p); }catch(e){}
     closeOv('loginOv');
     showToast('เข้าสู่ระบบแอดมินแล้ว ✦','t-gold');
     renderAll();
-  } else if(u||p){ showToast('รหัสผ่านไม่ถูกต้อง','t-sell'); }
-  else closeOv('loginOv');
+  } else { _registerLoginFail(); }
+}
+function _registerLoginFail(){
+  _loginAttempts++;
+  if(_loginAttempts>=5){
+    _loginLocked=true;
+    showToast('พยายามเกิน 5 ครั้ง — ล็อก 30 วินาที','t-sell');
+    clearTimeout(_loginLockTimer);
+    _loginLockTimer=setTimeout(()=>{_loginLocked=false;_loginAttempts=0;},30000);
+  } else {
+    showToast('รหัสผ่านไม่ถูกต้อง','t-sell');
+  }
 }
 function logoutAdmin(){
   isAdmin=false; penMode=false;
-  try{ sessionStorage.removeItem('bantae_admin'); }catch(e){}
+  window._adminPw='';
+  try{ sessionStorage.removeItem('bantae_admin'); sessionStorage.removeItem('bantae_admin_pw'); }catch(e){}
   document.getElementById('adminBar').classList.remove('show');
   document.getElementById('loginNavBtn').textContent='LOGIN';
   document.getElementById('loginNavBtn').classList.remove('admin-on');
@@ -2609,9 +2630,7 @@ function scrollToId(id){ const el=document.getElementById(id); if(el)el.scrollIn
 async function loadItemsFromDB() {
   // Load silently in background — page already shows default items
   try {
-    const res = await fetch(JB_URL + '/latest', {
-      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' },
-    });
+    const res = await fetch(DB_API, { method: 'GET' });
     if (res.ok) {
       const data = await res.json();
       ITEMS = (data.items || []).map(normalizeItem);
@@ -2665,11 +2684,16 @@ async function saveItemsToDB() {
       // Still try to save — JSONBin limit is 100KB
     }
 
-    const res = await fetch(JB_URL, {
+    const adminPw = window._adminPw || sessionStorage.getItem('bantae_admin_pw') || '';
+    const res = await fetch(DB_API, {
       method: 'PUT',
-      headers: { 'X-Master-Key': JB_KEY, 'Content-Type': 'application/json' },
+      headers: { 'X-Admin-Password': adminPw, 'Content-Type': 'application/json' },
       body: payload,
     });
+    if (res.status === 401) {
+      showToast('เซสชันแอดมินหมดอายุ — กรุณาเข้าสู่ระบบใหม่', 't-sell');
+      return false;
+    }
     if (!res.ok) {
       const txt = await res.text();
       console.error('JSONBin save error:', res.status, txt);
@@ -4043,6 +4067,7 @@ function trackParcel(){
 try{
   if(sessionStorage.getItem('bantae_admin')==='1'){
     isAdmin=true;
+    window._adminPw=sessionStorage.getItem('bantae_admin_pw')||'';
     document.getElementById('adminBar').classList.add('show');
     document.getElementById('loginNavBtn').textContent='⬡ ADMIN';
     document.getElementById('loginNavBtn').classList.add('admin-on');
