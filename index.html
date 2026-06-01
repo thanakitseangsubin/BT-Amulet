@@ -34,6 +34,8 @@ nav{position:sticky;top:0;z-index:200;background:rgba(13,11,7,0.97);border-botto
 /* Messenger button top-right */
 .nav-messenger{display:flex;align-items:center;gap:5px;background:var(--messenger);color:#fff;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.07em;padding:5px 11px;border:none;cursor:pointer;text-decoration:none;transition:background 0.2s}
 .nav-messenger:hover{background:var(--messenger-dk)}
+.nav-line{display:flex;align-items:center;gap:5px;background:#06C755;color:#fff;font-family:'Cinzel',serif;font-size:0.6rem;font-weight:600;letter-spacing:0.07em;padding:5px 11px;border:none;cursor:pointer;text-decoration:none;transition:background 0.2s}
+.nav-line:hover{background:#05a347}
 /* Cart icon */
 .cart-icon-btn{position:relative;background:none;border:1px solid var(--border);color:var(--text-dim);font-size:1rem;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
 .cart-icon-btn:hover{border-color:var(--gold);color:var(--gold)}
@@ -516,6 +518,11 @@ select option{background:var(--dark4)}
     <!-- removed BID/TRACK from nav -->
     <!-- <button onclick="openBidPanel()" style="background:none;border:1px solid rgba(255,179,71,0.4);color:#FFB347;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(255,179,71,0.15)'" onmouseout="this.style.background='none'">🔨 BID</button>
     <button onclick="openTrackPanel()" style="background:none;border:1px solid rgba(127,255,192,0.3);color:var(--buy);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(127,255,192,0.1)'" onmouseout="this.style.background='none'">📦 TRACK</button>
+    <!-- LINE direct chat button top-right -->
+    <a class="nav-line" href="https://line.me/R/ti/p/@476xhjjf" target="_blank">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+      LINE
+    </a>
     <!-- Messenger direct button top-right -->
     <a class="nav-messenger" href="https://m.me/100068843867509" target="_blank">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
@@ -797,6 +804,14 @@ select option{background:var(--dark4)}
         <div class="contact-card-label">LOCATION / ที่ตั้ง</div>
         <div class="contact-card-val" data-i18n="contact.location">นครราชสีมา →</div>
         <div class="contact-card-sub">Nakhon Ratchasima, Thailand<br/>ส่งไวทั้งในไทยและต่างประเทศ</div>
+      </a>
+      <a class="contact-card contact-card-link" href="https://line.me/R/ti/p/@476xhjjf" target="_blank">
+        <div class="contact-card-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#06C755"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        </div>
+        <div class="contact-card-label">LINE</div>
+        <div class="contact-card-val" style="color:#06C755">เพิ่มเพื่อน · คุยกับเรา →</div>
+        <div class="contact-card-sub">Add friend &amp; chat · ตอบไว</div>
       </a>
       <a class="contact-card contact-card-link" href="https://m.me/100068843867509" target="_blank">
         <div class="contact-card-icon">
