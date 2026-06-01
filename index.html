@@ -1061,6 +1061,7 @@ const ADMIN_USER  = 'admin';
 // Admin password is validated server-side (env var ADMIN_PASSWORD) — not stored here.
 const PEN_PASS    = '242456';      // pen edit password
 const PAGE_SIZE   = 100;           // items per page
+const APP_VERSION = 'v6.0';        // displayed bottom-left
 
 // ============================================================
 // PLACEHOLDER images (used until real photos uploaded)
@@ -1400,16 +1401,12 @@ async function submitBuyForm(){
       return;
     }
   } catch(e) { /* network error — fall through to manual options */ }
-  // Notify failed — fall back to copy + manual contact options
+  // Notify failed — fall back to Messenger contact
   btn.disabled = false;
   try{ navigator.clipboard.writeText(fullMsg); }catch(e){}
 
-  // Build LINE URL with pre-filled message text
-  // line://msg/text/ opens LINE with text ready to share
-  const lineShareUrl = 'https://line.me/R/msg/text/?' + encodeURIComponent(fullMsg);
-
-  statusEl.style.color = '#06C755';
-  statusEl.textContent = '✅ คัดลอกข้อมูลแล้ว — เลือกช่องทางติดต่อ';
+  statusEl.style.color = 'var(--gold)';
+  statusEl.textContent = '📋 คัดลอกข้อมูลแล้ว — กรุณาติดต่อแอดมินทาง Messenger';
 
   const wrap = btn.parentNode;
   btn.style.display = 'none';
@@ -1419,21 +1416,11 @@ async function submitBuyForm(){
     fb.id = 'buyFallbackBtns';
     fb.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:6px';
     // Info box
-    fb.innerHTML = '<div style="background:rgba(6,199,85,0.07);border:1px solid rgba(6,199,85,0.2);padding:10px 12px;font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim);line-height:1.7">'
-      +'<strong style="color:#06C755">✅ คัดลอกข้อมูลแล้ว</strong><br/>'
-      +'กดปุ่มด้านล่างเพื่อส่งข้อความถึงแอดมิน — ข้อมูลจะถูกส่งให้อัตโนมัติ'
+    fb.innerHTML = '<div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);padding:10px 12px;font-family:Sarabun,sans-serif;font-size:0.8rem;color:var(--text-dim);line-height:1.7">'
+      +'<strong style="color:var(--gold)">📋 คัดลอกข้อมูลแล้ว</strong><br/>'
+      +'กดปุ่มด้านล่างเพื่อติดต่อแอดมิน — ข้อมูลถูกคัดลอกพร้อมวางแล้ว'
       +'</div>';
-    // LINE button — opens LINE app with message pre-filled
-    const lineBtn = document.createElement('a');
-    lineBtn.href = lineShareUrl;
-    lineBtn.target = '_blank';
-    lineBtn.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:10px;background:#06C755;color:#fff;font-family:Cinzel,serif;font-size:0.72rem;font-weight:700;padding:13px;text-decoration:none;transition:background 0.2s';
-    lineBtn.onmouseenter = function(){ this.style.background='#05a347'; };
-    lineBtn.onmouseleave = function(){ this.style.background='#06C755'; };
-    lineBtn.onclick = function(){ setTimeout(function(){ closeOv('buyFormOv'); }, 300); };
-    lineBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>'
-      +'ซื้อผ่านไลน์';
-    // Messenger button
+    // Messenger button only — LINE share picker was confusing
     const msgBtn = document.createElement('a');
     msgBtn.href = MESSENGER;
     msgBtn.target = '_blank';
@@ -1442,8 +1429,7 @@ async function submitBuyForm(){
     msgBtn.onmouseleave = function(){ this.style.background='#0084FF'; };
     msgBtn.onclick = function(){ setTimeout(function(){ closeOv('buyFormOv'); }, 300); };
     msgBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>'
-      +'ซื้อผ่าน Messenger';
-    fb.appendChild(lineBtn);
+      +'ติดต่อแอดมิน · MESSENGER';
     fb.appendChild(msgBtn);
     wrap.appendChild(fb);
   }
@@ -4065,6 +4051,79 @@ function trackParcel(){
       </div>
     </div>`;
 }
+
+// ── VERSION BADGE ────────────────────────────────────────────────
+(function(){
+  const badge = document.createElement('div');
+  badge.textContent = APP_VERSION;
+  badge.style.cssText = 'position:fixed;bottom:8px;left:10px;z-index:9999;font-family:"Cinzel",serif;font-size:0.55rem;letter-spacing:0.08em;color:rgba(201,168,76,0.45);pointer-events:none;user-select:none';
+  document.body.appendChild(badge);
+})();
+
+// ── BACK BUTTON — close overlays instead of leaving the page ─────
+// MutationObserver watches all overlay elements; when .open is added,
+// push a history state so pressing Back closes the overlay, not the page.
+(function(){
+  const _OV_IDS = ['itemOverlay','loginOv','aiOv','penLockOv','reportFormOv','reportsOv',
+    'reportDetailOv','bidOv','bidDetailOv','trackOv','trackAdminPanel','verifyOv',
+    'cropOverlay','aucFormOv','lineSettingsOv','buyFormOv','cartPanel'];
+
+  let _popHandled  = false;  // true while popstate is closing an overlay
+  let _historyBack = false;  // true while closeOv/closeCart triggered history.back()
+
+  // Expose flags so closeOv and closeCart can read them
+  window._bantaeOvFlags = { get popHandled(){ return _popHandled; }, get historyBack(){ return _historyBack; } };
+
+  // When an overlay opens, push a history entry
+  const observer = new MutationObserver(function(mutations){
+    for(const m of mutations){
+      if(m.type !== 'attributes' || m.attributeName !== 'class') continue;
+      const hadOpen = (m.oldValue || '').split(' ').includes('open');
+      const hasOpen = m.target.classList.contains('open');
+      if(!hadOpen && hasOpen && !_popHandled){
+        history.pushState({ bantaeOv: m.target.id }, '');
+      }
+    }
+  });
+  _OV_IDS.forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) observer.observe(el, { attributes: true, attributeOldValue: true });
+  });
+
+  // Back button pressed → close topmost open overlay
+  window.addEventListener('popstate', function(){
+    if(_historyBack){ _historyBack = false; return; } // our own history.back() — just sync
+    const top = _OV_IDS.slice().reverse().find(function(id){
+      const el = document.getElementById(id);
+      return el && el.classList.contains('open');
+    });
+    if(top){
+      _popHandled = true;
+      if(top === 'cartPanel'){ closeCart(); } else { closeOv(top); }
+      _popHandled = false;
+    }
+  });
+
+  // Patch closeOv to sync history when overlay is closed via UI (X button etc.)
+  const _origCloseOv = closeOv;
+  closeOv = function(id){
+    _origCloseOv(id);
+    if(!_popHandled && history.state && history.state.bantaeOv){
+      _historyBack = true;
+      history.back();
+    }
+  };
+
+  // Patch closeCart similarly
+  const _origCloseCart = closeCart;
+  closeCart = function(){
+    _origCloseCart();
+    if(!_popHandled && history.state && history.state.bantaeOv){
+      _historyBack = true;
+      history.back();
+    }
+  };
+})();
 
 // ── INIT ────────────────────────────────────────────────────────
 // 1. Restore admin session
