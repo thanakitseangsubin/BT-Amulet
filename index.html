@@ -131,6 +131,15 @@ section,div.sec{padding:2.75rem 1.5rem}
 .filter-bar{display:flex;gap:6px;flex-wrap:wrap}
 .filter-btn{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.07em;padding:4px 11px;cursor:pointer;transition:all 0.2s}
 .filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.06)}
+/* Search bar */
+.search-wrap{position:relative;width:100%;margin-bottom:12px}
+.search-wrap input{width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);font-family:'Sarabun',sans-serif;font-size:0.85rem;padding:9px 38px 9px 36px;outline:none;transition:border-color 0.2s}
+.search-wrap input:focus{border-color:var(--gold)}
+.search-wrap input::placeholder{color:var(--text-muted);font-size:0.8rem}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;padding:0;line-height:1;display:none}
+.search-clear.show{display:block}
+.search-result-note{font-family:'Sarabun',sans-serif;font-size:0.75rem;color:var(--gold);margin-bottom:8px;min-height:1.2em}
 .toolbar-right{display:flex;gap:6px;align-items:center}
 /* Sort dropdown */
 .sort-wrap{position:relative}
@@ -631,6 +640,16 @@ select option{background:var(--dark4)}
         <div class="sec-sub">คลิกเพื่อดูรายละเอียดและราคา</div>
         <div class="sec-line"></div>
       </div>
+      <!-- Search bar -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="itemSearchInput"
+          placeholder="ค้นหาชื่อ, รหัส, วัสดุ, แหล่งที่มา... · Search name, ID, material..."
+          oninput="doSearch(this.value)"
+          onkeydown="if(event.key==='Escape'){clearSearch()}" />
+        <button class="search-clear" id="searchClearBtn" onclick="clearSearch()" title="Clear">✕</button>
+      </div>
+      <div class="search-result-note" id="searchResultNote"></div>
       <!-- Toolbar: filter pills + sort + add -->
       <div class="grid-toolbar">
         <div class="filter-bar" id="buyFilterBar">
@@ -1099,6 +1118,7 @@ let cartTab    = 'buy';
 let curPage    = 1;
 let curCat     = 'all';
 let curSort    = 'default';
+let curSearch  = '';
 let nextId     = 200;
 let curSlot    = 0;       // which image slot is being filled
 let editPhotos = [];      // working array of photo data URLs for add/edit
@@ -1190,11 +1210,46 @@ function renderGrid(gridId, items, mode) {
 // ============================================================
 function getFilteredSorted() {
   let items = curCat==='all' ? [...ITEMS] : ITEMS.filter(i=>i.cat===curCat);
-  if (curSort==='cheap')     items.sort((a,b)=>a.priceVal-b.priceVal);
+  // Apply search filter
+  if(curSearch){
+    const q = curSearch.toLowerCase().trim();
+    items = items.filter(function(i){
+      return [i.id, i.nameTh, i.nameEn, i.cat, i.badge, i.material,
+              i.origin, i.age, i.size, i.condition, i.price, i.desc]
+        .some(function(v){ return v && String(v).toLowerCase().includes(q); });
+    });
+  }
+  if (curSort==='cheap')          items.sort((a,b)=>a.priceVal-b.priceVal);
   else if (curSort==='expensive') items.sort((a,b)=>b.priceVal-a.priceVal);
   else if (curSort==='oldest')    items.sort((a,b)=>a.ageVal-b.ageVal);
   else if (curSort==='newest')    items.sort((a,b)=>b.ageVal-a.ageVal);
   return items;
+}
+function doSearch(val){
+  curSearch = val;
+  curPage = 1;
+  const clearBtn = document.getElementById('searchClearBtn');
+  if(clearBtn) clearBtn.classList.toggle('show', val.length > 0);
+  renderBuyGrid();
+  // Show result count when searching
+  const note = document.getElementById('searchResultNote');
+  if(note){
+    if(val.trim()){
+      const n = getFilteredSorted().length;
+      note.textContent = n > 0 ? `พบ ${n} รายการ · Found ${n} item${n!==1?'s':''}` : 'ไม่พบรายการ · No items found';
+    } else { note.textContent = ''; }
+  }
+}
+function clearSearch(){
+  curSearch = '';
+  const inp = document.getElementById('itemSearchInput');
+  if(inp){ inp.value = ''; inp.focus(); }
+  const clearBtn = document.getElementById('searchClearBtn');
+  if(clearBtn) clearBtn.classList.remove('show');
+  const note = document.getElementById('searchResultNote');
+  if(note) note.textContent = '';
+  curPage = 1;
+  renderBuyGrid();
 }
 
 function renderBuyGrid() {
