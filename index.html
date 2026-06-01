@@ -1383,21 +1383,25 @@ async function submitBuyForm(){
   ].filter(Boolean);
   const msg = '\n' + msgParts.join('\n');
 
-  const token = window._lineNotifyToken || localStorage.getItem('bantae_line_token') || '';
-  if(token){
-    const sent = await sendLineNotify(msg);
-    btn.disabled = false;
-    if(sent){
+  // Send order notification to owner via LINE Messaging API (server-side, no token needed client-side)
+  const fullMsg = msgParts.join('\n');
+  try {
+    const r = await fetch('/.netlify/functions/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: fullMsg }),
+    });
+    if(r.ok){
+      btn.disabled = false;
       statusEl.style.color = '#06C755';
       statusEl.textContent = '✅ ส่ง LINE แจ้งแอดมินแล้ว! รอการติดต่อกลับ';
-      showToast('✅ ส่ง LINE สำเร็จ! แอดมินจะติดต่อกลับ', 't-buy');
+      showToast('✅ แจ้งแอดมินทาง LINE แล้ว! รอการติดต่อกลับ', 't-buy');
       setTimeout(()=> closeOv('buyFormOv'), 2000);
       return;
     }
-  }
-  // No token — copy message and show contact options
+  } catch(e) { /* network error — fall through to manual options */ }
+  // Notify failed — fall back to copy + manual contact options
   btn.disabled = false;
-  const fullMsg = msgParts.join('\n');
   try{ navigator.clipboard.writeText(fullMsg); }catch(e){}
 
   // Build LINE URL with pre-filled message text
