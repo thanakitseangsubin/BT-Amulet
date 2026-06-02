@@ -176,6 +176,7 @@ section,div.sec{padding:2.75rem 1.5rem}
 .a-btn.del:hover{border-color:#E53E3E;color:#E53E3E}.a-btn.sold-btn:hover{border-color:var(--gold);color:var(--gold)}
 .item-body{padding:0.85rem 0.95rem 0.6rem}
 .item-era{font-size:0.65rem;color:var(--text-muted);font-family:'Cinzel',serif;letter-spacing:0.05em;margin-bottom:0.15rem}
+.item-catno{color:var(--gold);font-weight:700}
 .item-name-th{font-family:'Sarabun',sans-serif;font-size:0.88rem;color:var(--text);margin-bottom:0.1rem;line-height:1.3}
 .item-name-en{font-family:'Cinzel',serif;font-size:0.65rem;color:var(--text-dim);letter-spacing:0.03em}
 .item-footer{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.95rem;border-top:1px solid var(--border);gap:5px}
@@ -415,8 +416,8 @@ select option{background:var(--dark4)}
   .modal-body,.sell-grid,.about-grid{grid-template-columns:1fr}
   .form-row,.buy-contact-grid{grid-template-columns:1fr}
 
-  /* Items grid — 2 per row */
-  .items-grid{grid-template-columns:1fr 1fr !important;gap:0.55rem}
+  /* Items grid — 2 per row, full width, balanced */
+  .items-grid{grid-template-columns:1fr 1fr !important;gap:0.5rem;width:100%}
   .item-body{padding:0.6rem 0.65rem 0.4rem}
   .item-footer{padding:0.5rem 0.65rem;gap:3px}
   .item-name-th{font-size:0.78rem}
@@ -446,13 +447,20 @@ select option{background:var(--dark4)}
   .mode-en{font-size:0.62rem}
   .mode-sub{font-size:0.48rem;letter-spacing:0.04em}
 
-  /* Nav */
+  /* Nav — declutter on mobile: icon-only chat buttons, hide TRACK,
+     tighten spacing so the bar never stretches/overflows */
+  nav{padding:0 0.6rem;gap:0.3rem}
   .nav-center{display:none}
-  .nav-right{gap:4px}
-  .nav-messenger{padding:5px 8px;font-size:0.55rem}
-  .nav-btn{padding:5px 8px;font-size:0.58rem}
-  .nav-login-btn{padding:5px 7px;font-size:0.55rem}
+  .nav-track-btn{display:none !important}
+  .nav-right{gap:3px}
+  .nav-label{display:none}              /* hide LINE / MESSAGE text — keep icon */
+  .nav-line,.nav-messenger{padding:6px 8px;gap:0}
+  .nav-btn{padding:5px 6px;font-size:0.55rem;letter-spacing:0}
+  .nav-login-btn{padding:5px 6px;font-size:0.54rem;letter-spacing:0}
   .nav-report-btn{display:none}
+  .cart-icon-btn{width:30px;height:30px;font-size:0.85rem}
+  .nav-logo-th{font-size:0.74rem}
+  .nav-logo-en{font-size:0.48rem;letter-spacing:0.1em}
 
   /* About */
   .about-strip{padding:2.5rem 1rem}
@@ -471,8 +479,10 @@ select option{background:var(--dark4)}
   .cat-name-th{font-size:0.68rem}
   .cat-name-en{font-size:0.58rem}
 
-  /* Section header tighter on mobile */
-  section,div.sec{padding:2rem 0.9rem}
+  /* Section header tighter on mobile — strip side padding from section,
+     give it to .container so every section's content is symmetrically padded */
+  section,div.sec{padding:2rem 0}
+  .container{padding-left:0.75rem;padding-right:0.75rem;box-sizing:border-box;width:100%}
   .section-header{margin-bottom:1.5rem}
 }
 </style>
@@ -517,16 +527,16 @@ select option{background:var(--dark4)}
   <div class="nav-right">
     <!-- removed BID/TRACK from nav -->
     <!-- <button onclick="openBidPanel()" style="background:none;border:1px solid rgba(255,179,71,0.4);color:#FFB347;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(255,179,71,0.15)'" onmouseout="this.style.background='none'">🔨 BID</button>
-    <button onclick="openTrackPanel()" style="background:none;border:1px solid rgba(127,255,192,0.3);color:var(--buy);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(127,255,192,0.1)'" onmouseout="this.style.background='none'">📦 TRACK</button>
+    <button class="nav-track-btn" onclick="openTrackPanel()" style="background:none;border:1px solid rgba(127,255,192,0.3);color:var(--buy);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.06em;padding:5px 9px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.background='rgba(127,255,192,0.1)'" onmouseout="this.style.background='none'">📦 TRACK</button>
     <!-- LINE direct chat button top-right -->
     <a class="nav-line" href="https://line.me/R/ti/p/@476xhjjf" target="_blank">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-      LINE
+      <span class="nav-label">LINE</span>
     </a>
     <!-- Messenger direct button top-right -->
     <a class="nav-messenger" href="https://m.me/100068843867509" target="_blank">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.91 1.395 5.51 3.59 7.255v3.502l3.38-1.854c.904.25 1.862.384 2.85.384 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.44l-2.548-2.715-4.973 2.715 5.47-5.805 2.61 2.715 4.912-2.715-5.471 5.805z"/></svg>
-      MESSAGE
+      <span class="nav-label">MESSAGE</span>
     </a>
     <button class="cart-icon-btn" onclick="openCart()" title="ตะกร้า">
       🛒<span class="badge" id="cartBadge">0</span>
@@ -1203,7 +1213,7 @@ function renderGrid(gridId, items, mode) {
         </div>
       </div>
       <div class="item-body">
-        <div class="item-era">${it.age}</div>
+        <div class="item-era">${displayCatalogNo(it)?`<span class="item-catno">#${displayCatalogNo(it)}</span> · `:''}${it.age}</div>
         <div class="item-name-th">${it.nameTh}</div>
         <div class="item-name-en">${it.nameEn}</div>
       </div>
@@ -2216,13 +2226,14 @@ async function saveItem(){
 
   const editId = parseInt(document.getElementById('aiEditId').value)||0;
   if(editId){
-    // Update existing
+    // Update existing — keep its permanent catalog number
     let idx2 = ITEMS.findIndex(i=>i.id===editId);
-    if(idx2>=0) ITEMS[idx2] = newIt;
-    else { idx2 = SOLD.findIndex(i=>i.id===editId); if(idx2>=0) SOLD[idx2] = newIt; }
+    if(idx2>=0){ newIt.catalogNo = ITEMS[idx2].catalogNo || nextCatalogNo(); ITEMS[idx2] = newIt; }
+    else { idx2 = SOLD.findIndex(i=>i.id===editId); if(idx2>=0){ newIt.catalogNo = SOLD[idx2].catalogNo || nextCatalogNo(); SOLD[idx2] = newIt; } }
   } else {
-    // Add new
+    // Add new — assign the next catalog number
     newIt.id = nextId++;
+    newIt.catalogNo = nextCatalogNo();
     if(badge==='SOLD') SOLD.unshift(newIt); else ITEMS.unshift(newIt);
   }
 
@@ -2695,6 +2706,11 @@ async function loadItemsFromDB() {
       const data = await res.json();
       ITEMS = (data.items || []).map(normalizeItem);
       SOLD  = (data.sold  || []).map(normalizeItem);
+      // Assign permanent catalog numbers to any items missing one.
+      // Persist once (admin only) so numbers become permanent in the DB.
+      if(assignCatalogNumbers() && isAdmin){
+        saveItemsToDB().catch(function(){});
+      }
       // Always update cache so next page load is instant
       try {
         localStorage.setItem('bantae_cache', JSON.stringify({items:ITEMS,sold:SOLD}));
@@ -2880,9 +2896,38 @@ async function processImage(file) {
 // HTML escape to prevent XSS
 function _esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
+// ── Catalog numbering: permanent #1..N, oldest-listed = #1 ───────
+function nextCatalogNo(){
+  let m = 0;
+  ITEMS.concat(SOLD).forEach(function(it){ if(it.catalogNo > m) m = it.catalogNo; });
+  return m + 1;
+}
+// Assign numbers to any items missing one. New items are unshift-ed to the
+// front, so iterating from the end of the array = oldest-listed first = #1.
+function assignCatalogNumbers(){
+  let max = 0;
+  ITEMS.concat(SOLD).forEach(function(it){ if(it.catalogNo > max) max = it.catalogNo; });
+  let changed = false;
+  for(let i = ITEMS.length - 1; i >= 0; i--){
+    if(!ITEMS[i].catalogNo){ ITEMS[i].catalogNo = ++max; changed = true; }
+  }
+  for(let i = SOLD.length - 1; i >= 0; i--){
+    if(!SOLD[i].catalogNo){ SOLD[i].catalogNo = ++max; changed = true; }
+  }
+  return changed;
+}
+// Display value: stored number, or live fallback so customers always see one.
+function displayCatalogNo(it){
+  if(it.catalogNo) return it.catalogNo;
+  const idx = ITEMS.indexOf(it);
+  if(idx >= 0) return ITEMS.length - idx; // oldest-listed (end) = lowest
+  return '';
+}
+
 function normalizeItem(it) {
   return {
     id: Number(it.id) || Math.floor(Math.random()*900000+100000),
+    catalogNo: Number(it.catalogNo) || 0,
     cat: it.cat||'', badge: it.badge||'',
     nameTh: it.nameTh||'', nameEn: it.nameEn||'',
     age: it.age||'', origin: it.origin||'',
