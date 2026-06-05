@@ -1918,7 +1918,11 @@ function renderImgSlots(){
         <button class="rm-img" onclick="event.stopPropagation();removePhoto(${i})" title="Remove">✕</button>
         <button onclick="event.stopPropagation();openCrop(${i})" title="Edit image"
           style="position:absolute;bottom:3px;left:3px;background:rgba(13,11,7,0.88);border:1px solid var(--border-b);color:var(--gold);font-size:0.65rem;padding:2px 6px;cursor:pointer;border-radius:2px;font-family:Cinzel,serif;letter-spacing:0.04em;z-index:2">✏️</button>
-        <div class="crop-hint">drag to reorder</div>
+        ${i===0
+          ? `<div style="position:absolute;top:3px;left:3px;background:var(--gold);color:var(--dark);font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:2px;font-family:Cinzel,serif;letter-spacing:0.04em;z-index:2">★ ปก</div>`
+          : `<button onclick="event.stopPropagation();makeCover(${i})" title="ตั้งเป็นรูปปก / Set as cover"
+              style="position:absolute;bottom:3px;right:3px;background:rgba(13,11,7,0.88);border:1px solid var(--border-b);color:var(--gold);font-size:0.62rem;padding:2px 6px;cursor:pointer;border-radius:2px;font-family:Cinzel,serif;letter-spacing:0.04em;z-index:2">★ ปก</button>`}
+        <div class="crop-hint">drag / ★ = ปก</div>
       </div>`;
     } else if(src === '⏳'){
       return `<div class="img-slot" data-slot="${i}" style="opacity:0.6">
@@ -1977,6 +1981,16 @@ function slotDrop(e, i){
   _dragSlot = -1;
   renderImgSlots();
   showToast('สลับรูปแล้ว ✦','t-gold');
+}
+// Move a photo to position #1 so it becomes the cover/thumbnail.
+// Tap-friendly alternative to drag (drag doesn't work on touchscreens).
+function makeCover(i){
+  i = Number(i);
+  if(i <= 0) return;
+  const pic = editPhotos.splice(i,1)[0];
+  editPhotos.unshift(pic);
+  renderImgSlots(); renderImgUrlInputs();
+  showToast('ตั้งเป็นรูปปกแล้ว ✦','t-gold');
 }
 function pickSlot(i){ curSlot=i; document.getElementById('fileInput').click(); }
 async function handleImgUpload(e){
@@ -2252,6 +2266,42 @@ function deleteItem(id,mode){
   showToast('กำลังลบ...','t-sell');
   saveItemsToDB().then(ok=>{
     if(ok){ renderAll(); showToast('ลบรายการแล้ว ✦','t-sell'); }
+  });
+}
+
+// Move an available item into the SOLD list (keeps its catalog number).
+function markAsSold(id){
+  if(!isAdmin){ showToast('กรุณาเข้าสู่ระบบก่อน','t-sell'); return; }
+  id = Number(id);
+  const idx = ITEMS.findIndex(i=>i.id===id);
+  if(idx < 0){ showToast('ไม่พบรายการ','t-sell'); return; }
+  if(!confirm('ทำเครื่องหมายว่าขายแล้ว? / Mark this amulet as SOLD?')) return;
+  const it = ITEMS[idx];
+  it.badge = 'SOLD';
+  ITEMS.splice(idx,1);
+  SOLD.unshift(it);
+  showToast('กำลังบันทึก...','t-gold');
+  saveItemsToDB().then(ok=>{
+    if(ok){ renderAll(); showToast('ขายแล้ว ✦ ย้ายไปรายการที่ขายแล้ว','t-gold'); }
+    else { it.badge=''; SOLD.shift(); ITEMS.splice(idx,0,it); renderAll(); }
+  });
+}
+
+// Move a sold item back to the available list.
+function restoreItem(id){
+  if(!isAdmin){ showToast('กรุณาเข้าสู่ระบบก่อน','t-sell'); return; }
+  id = Number(id);
+  const idx = SOLD.findIndex(i=>i.id===id);
+  if(idx < 0){ showToast('ไม่พบรายการ','t-sell'); return; }
+  if(!confirm('คืนรายการนี้สู่หน้าขาย? / Restore this amulet to available?')) return;
+  const it = SOLD[idx];
+  if(it.badge === 'SOLD') it.badge = '';
+  SOLD.splice(idx,1);
+  ITEMS.unshift(it);
+  showToast('กำลังบันทึก...','t-gold');
+  saveItemsToDB().then(ok=>{
+    if(ok){ renderAll(); showToast('คืนสู่รายการขายแล้ว ✦','t-gold'); }
+    else { ITEMS.shift(); SOLD.splice(idx,0,it); renderAll(); }
   });
 }
 
