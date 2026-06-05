@@ -77,11 +77,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(13,11,7,0.97);border-botto
 .hero-tagline-en{font-size:0.82rem;font-style:italic;color:var(--text-muted);max-width:440px;margin:0 auto 0.4rem}
 .hero-belief{font-family:'Sarabun',sans-serif;font-size:0.82rem;color:var(--text-muted);margin-bottom:2rem;font-style:italic}
 /* Big mode buttons */
-.mode-split{display:grid;grid-template-columns:1fr 1fr 1fr;max-width:860px;width:100%;margin:0 auto;border:1px solid var(--border-b)}
-.mode-btn{padding:1.5rem 1.25rem;cursor:pointer;border:none;transition:all 0.3s;background:var(--dark3)}
-.mode-btn.buy-btn{border-right:1px solid var(--border)}.mode-btn.sell-btn{border-right:1px solid var(--border)}
+.mode-split{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;max-width:1040px;width:100%;margin:0 auto;border:1px solid var(--border-b)}
+.mode-btn{padding:1.5rem 1.1rem;cursor:pointer;border:none;transition:all 0.3s;background:var(--dark3)}
+.mode-btn.buy-btn{border-right:1px solid var(--border)}.mode-btn.sell-btn{border-right:1px solid var(--border)}.mode-btn.sold-btn{border-right:1px solid var(--border)}
 .mode-btn.active-buy{background:rgba(26,58,42,0.6)}
-.mode-btn.active-sell{background:rgba(58,26,26,0.6)}.mode-btn.active-sold{background:rgba(201,168,76,0.12)}
+.mode-btn.active-sell{background:rgba(58,26,26,0.6)}.mode-btn.active-sold{background:rgba(201,168,76,0.12)}.mode-btn.active-consign{background:rgba(122,90,200,0.16)}
+.mode-btn.consign-btn .mode-th{color:#bda7f0}.mode-btn.consign-btn .mode-sub{color:rgba(189,167,240,0.4)}
 .mode-icon{font-size:1.8rem;margin-bottom:0.4rem;display:block}
 .mode-th{font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:500;margin-bottom:0.1rem}
 .mode-btn.buy-btn .mode-th{color:var(--buy)}
@@ -440,7 +441,10 @@ select option{background:var(--dark4)}
   .admin-add-btn{font-size:0.6rem;padding:5px 10px}
 
   /* Mode buttons */
-  .mode-split{grid-template-columns:1fr 1fr 1fr;max-width:100%}
+  .mode-split{grid-template-columns:1fr 1fr;max-width:100%}
+  .mode-btn.buy-btn,.mode-btn.sell-btn,.mode-btn.sold-btn{border-right:none}
+  .mode-btn.buy-btn,.mode-btn.sell-btn{border-bottom:1px solid var(--border)}
+  .mode-btn.buy-btn,.mode-btn.sold-btn{border-right:1px solid var(--border)}
   .mode-btn{padding:0.9rem 0.4rem}
   .mode-icon{font-size:1.3rem;margin-bottom:0.3rem}
   .mode-th{font-size:0.78rem}
@@ -588,6 +592,12 @@ select option{background:var(--dark4)}
       <div class="mode-en" id="soldModeEn">Previously Sold</div>
       <div class="mode-sub" id="soldModeSub" style="color:rgba(201,168,76,0.45)">SEE SOLD ITEMS</div>
     </div>
+    <div class="mode-btn consign-btn" onclick="setMode('consign')" id="consignModeBtn">
+      <span class="mode-icon">🏛️</span>
+      <div class="mode-th" id="consignModeTh" data-i18n="mode.consign">ร้านฝากขาย</div>
+      <div class="mode-en" id="consignModeEn">Consignment</div>
+      <div class="mode-sub" id="consignModeSub">SELLERS' AMULETS</div>
+    </div>
   </div>
 </section>
 
@@ -628,6 +638,34 @@ select option{background:var(--dark4)}
         <div class="sec-line"></div>
       </div>
       <div class="items-grid" id="soldPanelGrid"></div>
+    </div>
+  </section>
+</div>
+
+<!-- CONSIGNMENT PANEL (ร้านฝากขาย) -->
+<div class="panel" id="consign-panel">
+  <div class="mode-banner" style="background:rgba(122,90,200,0.14);color:#bda7f0;border-color:rgba(122,90,200,0.3)">
+    <span>🏛️ ร้านฝากขาย — CONSIGNMENT</span>
+    <button class="mode-switch" onclick="setMode('buy')">BACK TO BUY ↗</button>
+  </div>
+  <section style="background:var(--dark)">
+    <div class="container">
+      <div class="section-header">
+        <div class="sec-eye">ร้านฝากขาย — CONSIGNMENT</div>
+        <div class="sec-title-th">พระจากผู้ฝากขาย</div>
+        <div class="sec-title-en">Amulets from Verified Sellers</div>
+        <div class="sec-sub">พระเครื่องจากสมาชิกที่ผ่านการตรวจสอบ · Listed by sellers we've verified</div>
+        <div class="sec-line"></div>
+      </div>
+      <!-- Seller call-to-action -->
+      <div id="consignSellerCTA" style="background:var(--dark3);border:1px solid rgba(122,90,200,0.3);padding:1.1rem 1.25rem;margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem">
+        <div style="font-family:'Sarabun',sans-serif;font-size:0.85rem;color:var(--text-dim);max-width:560px">
+          อยากฝากขายพระกับเรา? สมัครเป็นสมาชิกผู้ขาย เมื่อขายได้เราคิดค่าบริการ 10% ของราคาขาย<br/>
+          <span style="font-size:0.78rem;color:var(--text-muted)">Want to sell with us? Apply as a seller — we charge 10% commission on each sale.</span>
+        </div>
+        <button onclick="openConsignApply()" style="background:#7A5AC8;color:#fff;border:none;font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.07em;font-weight:600;padding:9px 18px;cursor:pointer;white-space:nowrap;transition:background 0.2s" onmouseover="this.style.background='#6a4ab8'" onmouseout="this.style.background='#7A5AC8'">📝 สมัครผู้ขาย · BECOME A SELLER</button>
+      </div>
+      <div class="items-grid" id="consignGrid"></div>
     </div>
   </section>
 </div>
@@ -1127,6 +1165,7 @@ const ph = i => PH[i % PH.length];
 // ============================================================
 let ITEMS = [];
 let SOLD  = [];
+let CONSIGN = [];   // ร้านฝากขาย — consignment items submitted by verified sellers
 
 
 // ============================================================
@@ -1154,18 +1193,46 @@ let editPhotos = [];      // working array of photo data URLs for add/edit
 function setMode(m) {
   curMode = m;
   document.getElementById('default-collection').style.display = 'none';
-  document.getElementById('buy-panel').classList.toggle('active', m==='buy');
-  document.getElementById('sell-panel').classList.toggle('active', m==='sell');
+  // Toggle every panel — only the active one shows
+  ['buy','sell','sold','consign'].forEach(p=>{
+    const el = document.getElementById(p+'-panel');
+    if(el) el.classList.toggle('active', m===p);
+  });
   document.getElementById('buyModeBtn').classList.toggle('active-buy', m==='buy');
   document.getElementById('sellModeBtn').classList.toggle('active-sell', m==='sell');
+  const _sb=document.getElementById('soldModeBtn'); if(_sb) _sb.classList.toggle('active-sold', m==='sold');
+  const _cb=document.getElementById('consignModeBtn'); if(_cb) _cb.classList.toggle('active-consign', m==='consign');
   if (m==='buy') {
     curPage = 1; renderBuyGrid();
     renderGrid('soldInBuyGrid', SOLD, 'sell');
     setTimeout(()=>document.getElementById('buy-panel').scrollIntoView({behavior:'smooth'}),80);
+  } else if (m==='sold') {
+    renderGrid('soldPanelGrid', SOLD, 'sell');
+    setTimeout(()=>document.getElementById('sold-panel').scrollIntoView({behavior:'smooth'}),80);
+  } else if (m==='consign') {
+    renderConsignGrid();
+    setTimeout(()=>document.getElementById('consign-panel').scrollIntoView({behavior:'smooth'}),80);
   } else {
     renderGrid('soldGrid', SOLD, 'sell');
     setTimeout(()=>document.getElementById('sell-panel').scrollIntoView({behavior:'smooth'}),80);
   }
+}
+
+// Render the public consignment grid (only approved seller items).
+function renderConsignGrid(){
+  const g = document.getElementById('consignGrid');
+  if(!g) return;
+  const approved = CONSIGN.filter(it => it && it.status === 'approved');
+  if(!approved.length){
+    g.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:Cinzel,serif;font-size:0.72rem;grid-column:1/-1">ยังไม่มีพระฝากขายในขณะนี้ · No consignment items yet</div>';
+    return;
+  }
+  renderGrid('consignGrid', approved, 'buy');
+}
+
+// Placeholder until Phase 2 (seller login) is built — guides sellers for now.
+function openConsignApply(){
+  showToast('ระบบสมัครผู้ขายกำลังจะเปิดเร็วๆ นี้ — ติดต่อทาง LINE ได้เลย','t-gold');
 }
 
 // ============================================================
@@ -2756,6 +2823,7 @@ async function loadItemsFromDB() {
       const data = await res.json();
       ITEMS = (data.items || []).map(normalizeItem);
       SOLD  = (data.sold  || []).map(normalizeItem);
+      CONSIGN = (data.consign || []).map(normalizeItem);
       // Assign permanent catalog numbers to any items missing one.
       // Persist once (admin only) so numbers become permanent in the DB.
       if(assignCatalogNumbers() && isAdmin){
@@ -2800,7 +2868,7 @@ async function saveItemsToDB() {
         photos: (it.photos||[]).filter(p => p && p.startsWith('http')),
       }));
     }
-    const saveData = { items: cleanPhotos(ITEMS), sold: cleanPhotos(SOLD) };
+    const saveData = { items: cleanPhotos(ITEMS), sold: cleanPhotos(SOLD), consign: cleanPhotos(CONSIGN) };
     const payload = JSON.stringify(saveData);
     const sizeKB = Math.round(payload.length / 1024);
     console.log(`Saving ${sizeKB}KB to JSONBin...`);
@@ -2986,6 +3054,9 @@ function normalizeItem(it) {
     priceVal: it.priceVal||0, ageVal: it.ageVal||2500,
     desc: it.desc||'', photos: it.photos||[], imgs: it.imgs||[0,1,2],
     certUrl: it.certUrl||'', certNote: it.certNote||'', certCode: it.certCode||'',
+    // Consignment fields (only used for ร้านฝากขาย items; harmless on normal items)
+    sellerId: it.sellerId||'', sellerName: it.sellerName||'',
+    status: it.status||'', commissionPct: (it.commissionPct!=null?it.commissionPct:10),
   };
 }
 
@@ -3052,6 +3123,7 @@ const _TRANSLATIONS = {
     'mode.buy': 'กำลังหา',
     'mode.sell': 'ต้องการขาย',
     'mode.sold': 'ขายแล้ว',
+    'mode.consign': 'ร้านฝากขาย',
     'coll.title': 'พระเครื่องทั้งหมด',
     'coll.sub': 'คลิกที่พระเพื่อดูรายละเอียดและราคา · Click any amulet for details and to buy',
     'board.title': 'กระดานสนทนา — COMMUNITY BOARD',
@@ -3109,6 +3181,7 @@ const _TRANSLATIONS = {
     'mode.buy': 'Browse',
     'mode.sell': 'Sell',
     'mode.sold': 'Sold',
+    'mode.consign': 'Consignment',
     'coll.title': 'All Amulets',
     'coll.sub': 'Click any amulet for details and pricing',
     'board.title': 'Community Board',
@@ -3166,6 +3239,7 @@ const _TRANSLATIONS = {
     'mode.buy': '浏览',
     'mode.sell': '出售',
     'mode.sold': '已售',
+    'mode.consign': '寄卖',
     'coll.title': '全部佛牌',
     'coll.sub': '点击佛牌查看详情及价格',
     'board.title': '讨论区',
@@ -3341,6 +3415,7 @@ function renderAll() {
   if (curMode === 'buy')  { renderBuyGrid(); }
   if (curMode === 'sell') { /* sell panel has no grid now */ }
   if (curMode === 'sold') { renderGrid('soldPanelGrid', SOLD, 'sell'); }
+  if (curMode === 'consign') { renderConsignGrid(); }
 }
 
 // Keep localStorage functions as aliases (cart still uses these)
